@@ -11,7 +11,7 @@ import SwiftUI
 struct PhotoLabelApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(workSpace: [], showPlistEditor1: [], showPlistEditor2: [], showCategorySelector1: [], showCategorySelector2: [])
         }
     }
 }

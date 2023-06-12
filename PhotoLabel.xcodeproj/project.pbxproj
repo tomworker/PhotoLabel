@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		989697182A35FE3800EE3599 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 989697172A35FE3800EE3599 /* ZIPFoundation */; };
+		9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697192A35FEB700EE3599 /* CategorySelectorView.swift */; };
+		9896971C2A35FEFB00EE3599 /* finalReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896971B2A35FEFB00EE3599 /* finalReportView.swift */; };
+		9896971E2A35FF2300EE3599 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896971D2A35FF2300EE3599 /* ImageView.swift */; };
+		989697202A35FF5000EE3599 /* ImageStockerTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */; };
+		989697222A35FF7200EE3599 /* EachTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697212A35FF7200EE3599 /* EachTabView.swift */; };
+		989697242A35FF9800EE3599 /* plistCreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697232A35FF9800EE3599 /* plistCreatorView.swift */; };
+		989697262A35FFB500EE3599 /* plistEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697252A35FFB500EE3599 /* plistEditorView.swift */; };
+		989697282A35FFDB00EE3599 /* plistCreatorSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697272A35FFDB00EE3599 /* plistCreatorSubView.swift */; };
+		9896972A2A36000200EE3599 /* plistEditorSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697292A36000200EE3599 /* plistEditorSubView.swift */; };
+		9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896972B2A36002E00EE3599 /* ImagePickerView.swift */; };
 		98C753762A35F14400648C02 /* PhotoLabelApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C753752A35F14400648C02 /* PhotoLabelApp.swift */; };
 		98C753782A35F14400648C02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C753772A35F14400648C02 /* ContentView.swift */; };
 		98C7537A2A35F14500648C02 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C753792A35F14500648C02 /* Assets.xcassets */; };
@@ -14,6 +25,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		989697152A35FC6000EE3599 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		989697192A35FEB700EE3599 /* CategorySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectorView.swift; sourceTree = "<group>"; };
+		9896971B2A35FEFB00EE3599 /* finalReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = finalReportView.swift; sourceTree = "<group>"; };
+		9896971D2A35FF2300EE3599 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStockerTabView.swift; sourceTree = "<group>"; };
+		989697212A35FF7200EE3599 /* EachTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EachTabView.swift; sourceTree = "<group>"; };
+		989697232A35FF9800EE3599 /* plistCreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = plistCreatorView.swift; sourceTree = "<group>"; };
+		989697252A35FFB500EE3599 /* plistEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = plistEditorView.swift; sourceTree = "<group>"; };
+		989697272A35FFDB00EE3599 /* plistCreatorSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = plistCreatorSubView.swift; sourceTree = "<group>"; };
+		989697292A36000200EE3599 /* plistEditorSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = plistEditorSubView.swift; sourceTree = "<group>"; };
+		9896972B2A36002E00EE3599 /* ImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
 		98C753722A35F14400648C02 /* PhotoLabel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoLabel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98C753752A35F14400648C02 /* PhotoLabelApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelApp.swift; sourceTree = "<group>"; };
 		98C753772A35F14400648C02 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -26,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				989697182A35FE3800EE3599 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -51,8 +74,19 @@
 		98C753742A35F14400648C02 /* PhotoLabel */ = {
 			isa = PBXGroup;
 			children = (
+				989697152A35FC6000EE3599 /* Info.plist */,
 				98C753752A35F14400648C02 /* PhotoLabelApp.swift */,
 				98C753772A35F14400648C02 /* ContentView.swift */,
+				989697192A35FEB700EE3599 /* CategorySelectorView.swift */,
+				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
+				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
+				989697212A35FF7200EE3599 /* EachTabView.swift */,
+				9896971D2A35FF2300EE3599 /* ImageView.swift */,
+				9896971B2A35FEFB00EE3599 /* finalReportView.swift */,
+				989697232A35FF9800EE3599 /* plistCreatorView.swift */,
+				989697252A35FFB500EE3599 /* plistEditorView.swift */,
+				989697272A35FFDB00EE3599 /* plistCreatorSubView.swift */,
+				989697292A36000200EE3599 /* plistEditorSubView.swift */,
 				98C753792A35F14500648C02 /* Assets.xcassets */,
 				98C7537B2A35F14500648C02 /* Preview Content */,
 			);
@@ -83,6 +117,9 @@
 			dependencies = (
 			);
 			name = PhotoLabel;
+			packageProductDependencies = (
+				989697172A35FE3800EE3599 /* ZIPFoundation */,
+			);
 			productName = PhotoLabel;
 			productReference = 98C753722A35F14400648C02 /* PhotoLabel.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +148,9 @@
 				Base,
 			);
 			mainGroup = 98C753692A35F14400648C02;
+			packageReferences = (
+				989697162A35FE3800EE3599 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			productRefGroup = 98C753732A35F14400648C02 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -137,6 +177,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				989697242A35FF9800EE3599 /* plistCreatorView.swift in Sources */,
+				989697202A35FF5000EE3599 /* ImageStockerTabView.swift in Sources */,
+				9896971E2A35FF2300EE3599 /* ImageView.swift in Sources */,
+				989697282A35FFDB00EE3599 /* plistCreatorSubView.swift in Sources */,
+				9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */,
+				989697222A35FF7200EE3599 /* EachTabView.swift in Sources */,
+				9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */,
+				989697262A35FFB500EE3599 /* plistEditorView.swift in Sources */,
+				9896971C2A35FEFB00EE3599 /* finalReportView.swift in Sources */,
+				9896972A2A36000200EE3599 /* plistEditorSubView.swift in Sources */,
 				98C753782A35F14400648C02 /* ContentView.swift in Sources */,
 				98C753762A35F14400648C02 /* PhotoLabelApp.swift in Sources */,
 			);
@@ -270,6 +320,9 @@
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoLabel/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used to take photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -299,6 +352,9 @@
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PhotoLabel/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used to take photos";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -339,6 +395,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		989697162A35FE3800EE3599 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.16;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		989697172A35FE3800EE3599 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 989697162A35FE3800EE3599 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 98C7536A2A35F14400648C02 /* Project object */;
 }
