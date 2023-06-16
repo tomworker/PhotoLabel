@@ -1,5 +1,4 @@
 # What is PhotoLabel?
-
 PhotoLabel is an open source iOS app.
 This app allows you
 to label photos with detailed information without editing the photo's metadata. 
