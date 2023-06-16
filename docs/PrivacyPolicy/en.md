@@ -1,11 +1,10 @@
 ## Privacy Policy
-This app allows you
+This app does not disclose/provide personally identifiable information to any third party.
 
-to label photos with detailed information without editing the photo's metadata. 
-to generate a linked button for each detailed information automatically on the screen if the details are pre-registered.
-to categorize the photo taken by dragging and dropping it on each button. 
-to view all the categorized photos together with detailed information labels by pressing the final report button.
+## Access Analytics
+This app does not have capabilities/functions to collect/use personal information yet.
 
- 
+## Disclaimer
+We provide as much support as possible for issues and inconveniences in use, but the developer shall not be liable for any damages caused by the user through this app.
 
  
