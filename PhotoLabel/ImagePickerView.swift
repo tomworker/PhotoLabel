@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ImagePickerView: UIViewControllerRepresentable {
     let sheetId: Int
+    let sourceType: UIImagePickerController.SourceType
     @Binding var showImagePicker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
@@ -60,7 +61,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
     }
     func makeUIViewController(context: Context) -> some UIViewController {
         let myImagePickerController = UIImagePickerController()
-        myImagePickerController.sourceType = .camera
+        myImagePickerController.sourceType = sourceType
         myImagePickerController.delegate = context.coordinator
         return myImagePickerController
     }

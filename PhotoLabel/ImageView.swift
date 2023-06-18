@@ -54,8 +54,8 @@ struct ImageView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .frame(width: 30, height: 30)
-                            .background(Color.orange)
-                            .foregroundColor(Color.white)
+                            .background(.orange)
+                            .foregroundColor(.white)
                             .cornerRadius(10)
                             .padding()
                     }
@@ -65,11 +65,3 @@ struct ImageView: View {
         }
     }
 }
-
-/*
- struct ImageView_Previews: PreviewProvider {
- static var previews: some View {
- ImageView(uiImage: UIImage(systemName: "apple.logo")!)
- }
- }
- */

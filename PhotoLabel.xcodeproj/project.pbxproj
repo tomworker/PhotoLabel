@@ -78,9 +78,9 @@
 				98C753752A35F14400648C02 /* PhotoLabelApp.swift */,
 				98C753772A35F14400648C02 /* ContentView.swift */,
 				989697192A35FEB700EE3599 /* CategorySelectorView.swift */,
-				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
 				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
 				989697212A35FF7200EE3599 /* EachTabView.swift */,
+				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
 				9896971D2A35FF2300EE3599 /* ImageView.swift */,
 				9896971B2A35FEFB00EE3599 /* finalReportView.swift */,
 				989697232A35FF9800EE3599 /* plistCreatorView.swift */,
@@ -321,8 +321,11 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PhotoLabel/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used to take photos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"PhotoLabel\" uses camera to take photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\"PhotoLabel\" accesses photo library to import photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,7 +335,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -353,8 +356,11 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PhotoLabel/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Camera is used to take photos";
+				INFOPLIST_KEY_NSCameraUsageDescription = "\"PhotoLabel\" uses camera to take photos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\"PhotoLabel\" accesses photo library to import photos.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -364,7 +370,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

@@ -33,7 +33,7 @@ struct plistEditorView: View {
                     Text(".plist")
                         .multilineTextAlignment(.leading)
                         .frame(width: 40)
-                        .foregroundColor(Color.black)
+                        .foregroundColor(.black)
                 }
             }
             Button {
@@ -50,7 +50,7 @@ struct plistEditorView: View {
                 Text("Save & exit")
                     .frame(width: 100, height: 30)
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .foregroundColor(Color.white)
+                    .foregroundColor(.white)
                     .cornerRadius(10)
             }
             .alert(isPresented: $isRename) {
@@ -74,8 +74,8 @@ struct plistEditorView: View {
             } label: {
                 Image(systemName: "xmark")
                     .frame(width: 30, height: 30)
-                    .background(Color.orange)
-                    .foregroundColor(Color.white)
+                    .background(.orange)
+                    .foregroundColor(.white)
                     .cornerRadius(10)
             }
             Spacer()
@@ -155,4 +155,3 @@ struct plistEditorView: View {
         }
     }
 }
-

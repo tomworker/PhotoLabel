@@ -11,6 +11,7 @@ import ZIPFoundation
 struct ContentView: View {
     @State var mainCategoryIds: [MainCategoryId] = []
     @State var workSpace: [ImageFile] = []
+    @State var duplicateSpace: [DuplicateImageFile] = []
     @State private var fileUrl: URL?
     @State var showPlistCreator = false
     @State var showPlistEditor1: [Bool]
@@ -28,9 +29,9 @@ struct ContentView: View {
     @State var plistName = ""
     @State var targetRenameFile = ""
     @State var afterRenameFile = ""
+    
     var body: some View {
         Button {
-            
         } label: {
             VStack(spacing: 0) {
                 HStack {
@@ -41,12 +42,12 @@ struct ContentView: View {
                             .cornerRadius(20)
                         Image(systemName: "camera").font(.system(size: 50))
                             .frame(width: 100, height: 79)
-                            .foregroundColor(Color.white)
-                            .background(Color.clear)
+                            .foregroundColor(.white)
+                            .background(.clear)
                             .cornerRadius(10)
                         Text("Label")
                             .baselineOffset(-59)
-                            .foregroundColor(Color.white)
+                            .foregroundColor(.white)
                             .font(.system(size: 25))
                             .fontWeight(.bold)
                     }
@@ -58,56 +59,56 @@ struct ContentView: View {
                                 Image(systemName: "doc").font(.system(size:50))
                                     .baselineOffset(0)
                                     .frame(width: 50, height: 50)
-                                    .foregroundColor(Color.indigo)
-                                    .background(Color.clear)
+                                    .foregroundColor(.indigo)
+                                    .background(.clear)
                                 Text(".plist")
                                     .frame(width: 50, height: 50)
                                     .baselineOffset(-10)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                             }
                             Image(systemName: "arrow.right").font(.system(size:20))
                                 .baselineOffset(0)
                                 .frame(width: 5, height: 50)
-                                .foregroundColor(Color.indigo)
-                                .background(Color.clear)
+                                .foregroundColor(.indigo)
+                                .background(.clear)
                                 .fontWeight(.bold)
                             ZStack(alignment: .top) {
                                 Image(systemName: "doc").font(.system(size:50))
                                     .baselineOffset(0)
                                     .frame(width: 50, height: 50)
-                                    .foregroundColor(Color.indigo)
-                                    .background(Color.clear)
+                                    .foregroundColor(.indigo)
+                                    .background(.clear)
                                 Text("&img")
                                     .frame(width: 50, height: 50)
                                     .baselineOffset(-5)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                                 Text(".plist")
                                     .frame(width: 50, height: 50)
                                     .baselineOffset(-25)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                             }
                             Image(systemName: "plus").font(.system(size:20))
                                 .baselineOffset(0)
                                 .frame(width: 5, height: 50)
-                                .foregroundColor(Color.indigo)
-                                .background(Color.clear)
+                                .foregroundColor(.indigo)
+                                .background(.clear)
                                 .fontWeight(.bold)
                             ZStack(alignment: .top) {
                                 Image(systemName: "doc").font(.system(size:50))
                                     .baselineOffset(0)
                                     .frame(width: 50, height: 50)
-                                    .foregroundColor(Color.indigo)
-                                    .background(Color.clear)
+                                    .foregroundColor(.indigo)
+                                    .background(.clear)
                                 Text("ZIP")
                                     .frame(width: 50, height: 50)
                                     .baselineOffset(-10)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                             }
@@ -117,31 +118,31 @@ struct ContentView: View {
                                 Text("Photo")
                                     .frame(width: 50, height: 10)
                                     .baselineOffset(10)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                                 Text("Labels")
                                     .frame(width: 50, height: 10)
                                     .baselineOffset(-10)
-                                    .foregroundColor(Color.indigo)
+                                    .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
                             }
                             Rectangle()
                                 .frame(width: 5, height: 10)
-                                .foregroundColor(Color.clear)
+                                .foregroundColor(.clear)
                             Image(systemName: "link").font(.system(size:15))
                                 .baselineOffset(0)
                                 .frame(width: 50, height: 10)
-                                .foregroundColor(Color.indigo)
-                                .background(Color.clear)
+                                .foregroundColor(.indigo)
+                                .background(.clear)
                             Rectangle()
                                 .frame(width: 5, height: 10)
-                                .foregroundColor(Color.clear)
+                                .foregroundColor(.clear)
                             Text("Photos")
                                 .frame(width: 50, height: 10)
                                 .baselineOffset(0)
-                                .foregroundColor(Color.indigo)
+                                .foregroundColor(.indigo)
                                 .font(.system(size: 10))
                                 .fontWeight(.bold)
                         }
@@ -155,8 +156,8 @@ struct ContentView: View {
             } label: {
                 Image(systemName: "gearshape")
                     .frame(width: 70, height: 30)
-                    .background(Color.indigo)
-                    .foregroundColor(Color.white)
+                    .background(.indigo)
+                    .foregroundColor(.white)
                     .cornerRadius(10)
                     .padding(.leading)
             }
@@ -167,7 +168,7 @@ struct ContentView: View {
                 Text("New Photo Labels")
                     .frame(width: 180, height: 30)
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .foregroundColor(Color.white)
+                    .foregroundColor(.white)
                     .cornerRadius(10)
                     .padding(.trailing)
             }
@@ -185,8 +186,8 @@ struct ContentView: View {
             } label: {
                 Image(systemName: "arrow.clockwise")
                     .frame(width: 30, height: 30)
-                    .background(Color.indigo)
-                    .foregroundColor(Color.white)
+                    .background(.indigo)
+                    .foregroundColor(.white)
                     .cornerRadius(10)
                     .padding(.trailing)
             }
@@ -226,7 +227,7 @@ struct ContentView: View {
                             }
                             .fullScreenCover(isPresented: $showCategorySelector1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                CategorySelectorView(showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
+                                CategorySelectorView(showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
                             }
                             .fullScreenCover(isPresented: $showPlistEditor1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
@@ -263,7 +264,7 @@ struct ContentView: View {
                                 }
                                 .fullScreenCover(isPresented: $showCategorySelector2[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    CategorySelectorView(showCategorySelector: $showCategorySelector2[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
+                                    CategorySelectorView(showCategorySelector: $showCategorySelector2[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
                                 }
                                 .fullScreenCover(isPresented: $showPlistEditor2[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
@@ -343,6 +344,7 @@ struct ContentView: View {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
             if tempImageFiles.count > 0 {
                 workSpace = []
+                duplicateSpace = []
                 for i in 0...tempImageFiles.count - 1 {
                     if tempImageFiles[i].first == "@" {
                         workSpace.append(ImageFile(imageFile: tempImageFiles[i]))
@@ -352,9 +354,19 @@ struct ContentView: View {
         } catch {
             print("Temp image files have failed to be obtained:\(error)")
         }
-
+        let initialMainCategorys = CategoryManager.load(fileUrl: fileUrl)
+        for i in 0..<initialMainCategorys.count {
+            var mainCategoryName = initialMainCategorys[i].mainCategory
+            for j in 0..<initialMainCategorys[i].items.count {
+                var subCategoryName = initialMainCategorys[i].items[j].subCategory
+                for k in 0..<initialMainCategorys[i].items[j].images.count {
+                    duplicateSpace.append(DuplicateImageFile(imageFile: ImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile), mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
+                }
+            }
+        }
     }
 }
+
 struct ImageFile: Decodable, Encodable, Equatable {
     let imageFile: String
 }
@@ -383,6 +395,15 @@ struct MainCategoryId: Identifiable {
     let mainCategory: String
     var items: [SubCategoryId]
 }
+struct DuplicateImageFile: Equatable {
+    let imageFile: ImageFile
+    let mainCategoryName: String
+    let subCategoryName: String
+}
+struct DuplicateImageFileId: Identifiable{
+    var id: Int
+    let duplicateImageFile: DuplicateImageFile
+}
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -406,6 +427,15 @@ class CategoryManager {
             print(error)
             return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])])]
         }
+    }
+    static func convertIdentifiable(duplicateImageFiles: [DuplicateImageFile]) -> [DuplicateImageFileId] {
+        var duplicateImageFileIds: [DuplicateImageFileId] = []
+        if duplicateImageFiles.count > 0 {
+            for i in 0...duplicateImageFiles.count - 1 {
+                duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
+            }
+        }
+        return duplicateImageFileIds
     }
     static func convertIdentifiable(imageFiles: [ImageFile]) -> [ImageFileId] {
         var imageFileIds: [ImageFileId] = []
@@ -481,6 +511,35 @@ class CategoryManager {
         }
         workSpace = workSpace2
     }
+    static func reorderItems(image: DuplicateImageFileId, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
+        let moveToIndex = image.id
+        let targetIndex = Int(indexs.first!)!
+        let lastIndex = duplicateSpace.count - 1
+        var duplicateSpace2: [DuplicateImageFile] = []
+        if moveToIndex <= targetIndex {
+            if moveToIndex != 0 {
+                duplicateSpace2 += duplicateSpace[0...moveToIndex - 1]
+            }
+            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+            if moveToIndex != targetIndex {
+                duplicateSpace2 += duplicateSpace[moveToIndex...targetIndex - 1]
+            }
+            if targetIndex != lastIndex {
+                duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
+            }
+        }
+        if moveToIndex > targetIndex {
+            if targetIndex != 0 {
+                duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
+            }
+            if moveToIndex != targetIndex + 1 {
+                duplicateSpace2 += duplicateSpace[targetIndex + 1...moveToIndex - 1]
+            }
+            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+            duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
+        }
+        duplicateSpace = duplicateSpace2
+    }
     static func moveItemFromLastToFirst(image: ImageFileId, workSpace: inout [ImageFile]) {
         let targetIndex = image.id
         let lastIndex = workSpace.count - 1
@@ -492,6 +551,19 @@ class CategoryManager {
                 workSpace2 += workSpace[targetIndex + 1...lastIndex]
             }
             workSpace = workSpace2
+        }
+    }
+    static func moveItemFromLastToFirst(image: DuplicateImageFileId, duplicateSpace: inout [DuplicateImageFile]) {
+        let targetIndex = image.id
+        let lastIndex = duplicateSpace.count - 1
+        var duplicateSpace2: [DuplicateImageFile] = []
+        if targetIndex > 0 {
+            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+            duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
+            if targetIndex != lastIndex {
+                duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
+            }
+            duplicateSpace = duplicateSpace2
         }
     }
 }
@@ -528,6 +600,11 @@ class ZipManager {
         //mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.append(ImageFile(imageFile: plistImageFile))
         workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
         print("Added to plist:\(plistImageFile)")
+        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+    }
+    static func moveImagesFromDuplicateSpaceToPlist(imageFile: String, mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int) {
+        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: 0)
+        print("Added to plist:\(imageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }
     static func savePlistAndZip(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
@@ -657,11 +734,3 @@ class ZipManager {
         }
     }
 }
-
-/*
- struct ContentView_Previews: PreviewProvider {
- static var previews: some View {
- ContentView(workSpace: [], showCategorySelector1: [], showCategorySelector2: [])
- }
- }
- */
