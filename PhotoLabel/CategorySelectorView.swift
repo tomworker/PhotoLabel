@@ -98,6 +98,7 @@ struct CategorySelectorView: View {
                         Button {
                             showSubCategory = true
                             targetMainCategoryIndex = mainCategoryId.id
+                            targetSubCategoryIndex[1] = -1
                         } label: {
                             Text(mainCategoryId.mainCategory)
                                 .frame(width: 120, height: 50)
