@@ -126,7 +126,7 @@ struct CategorySelectorView: View {
                                     .padding(.leading)
                             }
                             .sheet(isPresented: $showImagePicker) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, fileUrl: fileUrl)
+                                ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Button {
                                 showPhotoLibrary = true
@@ -138,7 +138,7 @@ struct CategorySelectorView: View {
                                     .cornerRadius(10)
                             }
                             .sheet(isPresented: $showPhotoLibrary) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, fileUrl: fileUrl)
+                                ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Spacer()
                             Button {

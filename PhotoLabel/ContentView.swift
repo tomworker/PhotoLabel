@@ -562,13 +562,14 @@ class ZipManager {
         ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(workSpaceImageFile))
         workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
     }
-    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile]) {
+    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile], duplicateSpace: inout [DuplicateImageFile]) {
         let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
         let workSpaceImageFile = "@\(targetImageFile)"
         let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
+        duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
         workSpace.append(ImageFile(imageFile: workSpaceImageFile))
         print("Removed from plist:\(targetImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
@@ -583,7 +584,6 @@ class ZipManager {
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
-        //mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.append(ImageFile(imageFile: plistImageFile))
         workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
         print("Added to plist:\(plistImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1

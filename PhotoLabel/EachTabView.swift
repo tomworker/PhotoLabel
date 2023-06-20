@@ -53,7 +53,7 @@ struct EachTabView: View {
                                         .padding(.leading)
                                 }
                                 .sheet(isPresented: $showImagePicker2) {
-                                    ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, fileUrl: fileUrl)
+                                    ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Button {
                                     showPhotoLibrary2.toggle()
@@ -65,7 +65,7 @@ struct EachTabView: View {
                                         .cornerRadius(10)
                                 }
                                 .sheet(isPresented: $showPhotoLibrary2) {
-                                    ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, fileUrl: fileUrl)
+                                    ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Spacer()
                                 Button {
@@ -75,17 +75,17 @@ struct EachTabView: View {
                                         .background(moveToWorkSpace ? .orange : subCategoryIndex % 2 == 0 ? .brown.opacity(0.8) : .indigo.opacity(0.8))
                                         .foregroundColor(.white)
                                         .dropDestination(for: String.self) { indexs, location in
-                                                let arr: [String] = indexs.first!.components(separatedBy: ":")
-                                                var indexs1: [String] = []
-                                                indexs1.append(arr[0])
-                                                var indexs2: [String] = []
-                                                indexs2.append(arr[1])
-                                                var indexs3: [String] = []
-                                                indexs3.append(arr[2])
+                                            let arr: [String] = indexs.first!.components(separatedBy: ":")
+                                            var indexs1: [String] = []
+                                            indexs1.append(arr[0])
+                                            var indexs2: [String] = []
+                                            indexs2.append(arr[1])
+                                            var indexs3: [String] = []
+                                            indexs3.append(arr[2])
                                             if indexs3.first! != "2" {
                                                 if URL(string: indexs2[0])!.lastPathComponent.first == "@" {
                                                 } else {
-                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
+                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
                                                     if workSpace.count >= 2 {
                                                         CategoryManager.moveItemFromLastToFirst(image: ImageFileId(id: workSpace.count - 1, imageFile: ImageFile(imageFile: indexs1.first!)), workSpace: &workSpace)
                                                     }
@@ -216,6 +216,9 @@ struct EachTabView: View {
                                                         }
                                                     }
                                                 } else if indexs3.first! == "1" {
+                                                    var duplicateSpaceImageFileName = URL(string: indexs2[0])!.lastPathComponent
+                                                    duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
+                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: 0)
                                                     ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 } else if indexs3.first! == "0" {
@@ -332,7 +335,7 @@ struct EachTabView: View {
                                                 if indexs3.first! == "1" {
                                                     CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, workSpace: &workSpace)
                                                 } else if indexs3.first! == "0"  {
-                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
+                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
                                                     if workSpace.count >= 2 {
                                                         CategoryManager.moveItemFromLastToFirst(image: ImageFileId(id: workSpace.count - 1, imageFile: ImageFile(imageFile: indexs1.first!)), workSpace: &workSpace)
                                                     }
