@@ -12,8 +12,9 @@ struct finalReportView: View {
     @Binding var mainCategoryIds: [MainCategoryId]
     @State var targetImageFile = ""
     @State var showImageView = false
+    var columns1 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 2)
+    var columns2 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 5)
 
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
     var body: some View {
         ScrollView {
             VStack {
@@ -48,12 +49,14 @@ struct finalReportView: View {
                         }
                         Spacer()
                     }
-                    LazyVGrid(columns: columns) {
+                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                         ForEach(CategoryManager.convertIdentifiable(imageFiles: subCategoryId.images)) { imageFileId in
                             if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                 Image(uiImage: uiimage)
                                     .resizable()
-                                    .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                    //.frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                     .cornerRadius(10)
                                     //Recovery code for onTapGesture problem
                                     .onChange(of: showImageView) { newValue in }
