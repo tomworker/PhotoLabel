@@ -147,7 +147,7 @@ struct ContentView: View {
                                 .fontWeight(.bold)
                         }
                     }
-                    Spacer()
+                    .padding(.trailing)
                 }
             }
         }
@@ -155,7 +155,7 @@ struct ContentView: View {
             Button {
             } label: {
                 Image(systemName: "gearshape")
-                    .frame(width: 70, height: 30)
+                    .frame(width: 50, height: 30)
                     .background(.indigo)
                     .foregroundColor(.white)
                     .cornerRadius(10)
@@ -170,7 +170,7 @@ struct ContentView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
-                    .padding(.trailing)
+                    //.padding(.trailing)
             }
             .onChange(of: showPlistCreator || isChangeFlag) { newValue in
                 showPlistList()

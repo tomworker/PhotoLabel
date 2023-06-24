@@ -26,8 +26,8 @@ struct EachTabView: View {
     @State var showImageView = false
     @State var isDuplicateMode = false
     let sheetId = 2
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
-    let subColumns2 = Array(repeating: GridItem(.fixed(185), spacing: 5), count: 2)
+    var columns1 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 2)
+    var columns2 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 5)
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
@@ -71,7 +71,7 @@ struct EachTabView: View {
                                 Button {
                                 } label: {
                                     Text("To Workspace")
-                                        .frame(width: 170, height: 30)
+                                        .frame(maxWidth: .infinity, minHeight: 30)
                                         .background(moveToWorkSpace ? .orange : subCategoryIndex % 2 == 0 ? .brown.opacity(0.8) : .indigo.opacity(0.8))
                                         .foregroundColor(.white)
                                         .dropDestination(for: String.self) { indexs, location in
@@ -123,10 +123,11 @@ struct EachTabView: View {
                             }
                             Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)
                             if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages == 0 {
-                                LazyVGrid(columns: subColumns2) {
+                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                                     ZStack{
                                         Text("Take photo\n        or\nMove here")
-                                            .frame(width: 180, height: 135)
+                                            .aspectRatio(4 / 3, contentMode: .fit)
+                                            .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - 40) / 5 : (UIScreen.main.bounds.width - 10 ) / 2, height: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - 40) / 5 * 3 / 4: (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                             .foregroundColor(.white)
                                             .background(.gray.opacity((0.3)))
                                             .cornerRadius(10)
@@ -172,12 +173,13 @@ struct EachTabView: View {
                                         .foregroundColor(.clear)
                                 }
                             }
-                            LazyVGrid(columns: subColumns2) {
+                            LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                                 ForEach(CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)) { imageFileId in
                                     if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                         Image(uiImage: uiimage)
                                             .resizable()
-                                            .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                            .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                            .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                             .cornerRadius(10)
                                             .border(.indigo, width: isTargeted1 && imageFileId.id == isTargetedIndex1 ? 3 : .zero)
                                             .onTapGesture(count: 2) {
@@ -255,13 +257,14 @@ struct EachTabView: View {
                                 .foregroundColor(.white)
                         }
                         if isDuplicateMode {
-                            LazyVGrid(columns: columns, spacing: 5) {
+                            LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
                                 ForEach(CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)) { duplicateImageFileId in
                                     if let uiimage = UIImage(contentsOfFile: duplicateImageFileId.duplicateImageFile.imageFile.imageFile) {
                                         ZStack {
                                             Image(uiImage: uiimage)
                                                 .resizable()
-                                                .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                                .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                                 .cornerRadius(10)
                                                 .border(.indigo, width: isTargeted2 && duplicateImageFileId.id == isTargetedIndex2 ? 3 : .zero)
                                             VStack {
@@ -306,12 +309,13 @@ struct EachTabView: View {
                                 }
                             }
                         } else {
-                            LazyVGrid(columns: columns, spacing: 5) {
+                            LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
                                 ForEach(CategoryManager.convertIdentifiable(imageFiles: workSpace)) { imageFileId in
                                     if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                         Image(uiImage: uiimage)
                                             .resizable()
-                                            .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                            .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                            .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                             .cornerRadius(10)
                                             .border(.indigo, width: isTargeted2 && imageFileId.id == isTargetedIndex2 ? 3 : .zero)
                                             .onTapGesture(count: 2) {
