@@ -147,7 +147,7 @@ struct ContentView: View {
                                 .fontWeight(.bold)
                         }
                     }
-                    Spacer()
+                    .padding(.trailing)
                 }
             }
         }
@@ -155,7 +155,7 @@ struct ContentView: View {
             Button {
             } label: {
                 Image(systemName: "gearshape")
-                    .frame(width: 70, height: 30)
+                    .frame(width: 50, height: 30)
                     .background(.indigo)
                     .foregroundColor(.white)
                     .cornerRadius(10)
@@ -170,7 +170,7 @@ struct ContentView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
-                    .padding(.trailing)
+                    //.padding(.trailing)
             }
             .onChange(of: showPlistCreator || isChangeFlag) { newValue in
                 showPlistList()
@@ -342,13 +342,11 @@ struct ContentView: View {
         let tempImageFiles: [String]
         do {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
-            if tempImageFiles.count > 0 {
-                workSpace = []
-                duplicateSpace = []
-                for i in 0...tempImageFiles.count - 1 {
-                    if tempImageFiles[i].first == "@" {
-                        workSpace.append(ImageFile(imageFile: tempImageFiles[i]))
-                    }
+            workSpace = []
+            duplicateSpace = []
+            for i in 0..<tempImageFiles.count {
+                if tempImageFiles[i].first == "@" {
+                    workSpace.append(ImageFile(imageFile: tempImageFiles[i]))
                 }
             }
         } catch {
@@ -430,55 +428,43 @@ class CategoryManager {
     }
     static func convertIdentifiable(duplicateImageFiles: [DuplicateImageFile]) -> [DuplicateImageFileId] {
         var duplicateImageFileIds: [DuplicateImageFileId] = []
-        if duplicateImageFiles.count > 0 {
-            for i in 0...duplicateImageFiles.count - 1 {
-                duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
-            }
+        for i in 0..<duplicateImageFiles.count {
+            duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
         }
         return duplicateImageFileIds
     }
     static func convertIdentifiable(imageFiles: [ImageFile]) -> [ImageFileId] {
         var imageFileIds: [ImageFileId] = []
-        if imageFiles.count > 0 {
-            for i in 0...imageFiles.count - 1 {
-                imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
-            }
+        for i in 0..<imageFiles.count {
+            imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
         }
         return imageFileIds
     }
     static func convertIdentifiable(subCategorys: [SubCategory]) -> [SubCategoryId] {
         var subCategoryIds: [SubCategoryId] = []
-        if subCategorys.count > 0 {
-            for i in 0...subCategorys.count - 1 {
-                subCategoryIds.append(SubCategoryId(id: i, subCategory: subCategorys[i].subCategory, countStoredImages: subCategorys[i].countStoredImages, images: subCategorys[i].images, isTargeted: false))
-            }
+        for i in 0..<subCategorys.count {
+            subCategoryIds.append(SubCategoryId(id: i, subCategory: subCategorys[i].subCategory, countStoredImages: subCategorys[i].countStoredImages, images: subCategorys[i].images, isTargeted: false))
         }
         return subCategoryIds
     }
     static func convertIdentifiable(mainCategorys: [MainCategory]) -> [MainCategoryId] {
         var mainCategoryIds: [MainCategoryId] = []
-        if mainCategorys.count > 0 {
-            for i in 0...mainCategorys.count - 1 {
-                mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items)))
-            }
+        for i in 0..<mainCategorys.count {
+            mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items)))
         }
         return mainCategoryIds
     }
     static func convertNoIdentifiable(subCategoryIds: [SubCategoryId]) -> [SubCategory] {
         var subCategorys: [SubCategory] = []
-        if subCategoryIds.count > 0 {
-            for i in 0...subCategoryIds.count - 1 {
-                subCategorys.append(SubCategory(subCategory: subCategoryIds[i].subCategory, countStoredImages: subCategoryIds[i].countStoredImages, images: subCategoryIds[i].images))
-            }
+        for i in 0..<subCategoryIds.count {
+            subCategorys.append(SubCategory(subCategory: subCategoryIds[i].subCategory, countStoredImages: subCategoryIds[i].countStoredImages, images: subCategoryIds[i].images))
         }
         return subCategorys
     }
     static func convertNoIdentifiable(mainCategoryIds: [MainCategoryId]) -> [MainCategory] {
         var mainCategorys: [MainCategory] = []
-        if mainCategoryIds.count > 0 {
-            for i in 0...mainCategoryIds.count - 1 {
-                mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items)))
-            }
+        for i in 0..<mainCategoryIds.count {
+            mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items)))
         }
         return mainCategorys
     }
@@ -576,13 +562,14 @@ class ZipManager {
         ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(workSpaceImageFile))
         workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
     }
-    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile]) {
+    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile], duplicateSpace: inout [DuplicateImageFile]) {
         let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
         let workSpaceImageFile = "@\(targetImageFile)"
         let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
+        duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
         workSpace.append(ImageFile(imageFile: workSpaceImageFile))
         print("Removed from plist:\(targetImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
@@ -597,7 +584,6 @@ class ZipManager {
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
-        //mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.append(ImageFile(imageFile: plistImageFile))
         workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
         print("Added to plist:\(plistImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1

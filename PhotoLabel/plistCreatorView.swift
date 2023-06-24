@@ -36,10 +36,10 @@ struct plistCreatorView: View {
                     plistName = plistName.replacingOccurrences(of: " ", with: "_")
                     let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
                     var tempSubCategorys: [SubCategory] = []
-                    for i in 0...mainCategory.count - 1 {
+                    for i in 0..<mainCategory.count {
                         if mainCategory[i] != "" {
                             tempSubCategorys = []
-                            for j in 0...subCategoryStrings[i].count - 1 {
+                            for j in 0..<subCategoryStrings[i].count {
                                 if subCategoryStrings[i][j] != "" {
                                     tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: 0, images: []))
                                 }

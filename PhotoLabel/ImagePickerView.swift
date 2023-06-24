@@ -15,6 +15,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
     @Binding var workSpace: [ImageFile]
+    @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
@@ -32,6 +33,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
                 let workSpaceJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
                 let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                 let plistJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
+                let duplicateSpaceImageFileName = plistImageFileName
                 do {
                     switch parent.sheetId {
                     case 1:
@@ -40,6 +42,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
                         ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                     case 2:
                         try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
+                        parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: 0)
                         parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: 0)
                         parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].countStoredImages += 1
                         ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)

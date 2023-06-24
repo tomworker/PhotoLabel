@@ -26,11 +26,14 @@ struct CategorySelectorView: View {
     @State var targetImageFile = ""
     @State var showImageView = false
     @State var isDuplicateMode = false
-    var columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
-    var mainColumns1 = Array(repeating: GridItem(.fixed(120), spacing: 5), count: 3)
+    var columns1 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 2)
+    var columns2 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 5)
+    var mainColumns1 = Array(repeating: GridItem(.adaptive(minimum: 100), spacing: 5), count: 3)
+    var mainColumns2 = Array(repeating: GridItem(.adaptive(minimum: 100), spacing: 5), count: 6)
     var subColumns1 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 1)
     var subColumns2 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 2)
     var subColumns4 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 4)
+    var subColumns5 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 20) / 5), spacing: 5), count: 5)
     var subColumns8 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 8)
     @State var isTargeted = false
     @State var isTargetedIndex = -1
@@ -93,16 +96,19 @@ struct CategorySelectorView: View {
                     Image(systemName: "hand.point.right")
                     Text("Select Category")
                 }
-                LazyVGrid(columns: mainColumns1, spacing: 5) {
-                    ForEach(mainCategoryIds) { mainCategoryId in
-                        Button {
-                            showSubCategory = true
-                            targetMainCategoryIndex = mainCategoryId.id
-                        } label: {
-                            Text(mainCategoryId.mainCategory)
-                                .frame(width: 120, height: 50)
-                                .background(mainCategoryId.id == targetMainCategoryIndex ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .foregroundColor(.white)
+                VStack {
+                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? mainColumns2 : mainColumns1, spacing: 5) {
+                        ForEach(mainCategoryIds) { mainCategoryId in
+                            Button {
+                                showSubCategory = true
+                                targetMainCategoryIndex = mainCategoryId.id
+                                targetSubCategoryIndex[1] = -1
+                            } label: {
+                                Text(mainCategoryId.mainCategory)
+                                    .frame(maxWidth: .infinity, minHeight: 50)
+                                    .background(mainCategoryId.id == targetMainCategoryIndex ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    .foregroundColor(.white)
+                            }
                         }
                     }
                 }
@@ -125,7 +131,7 @@ struct CategorySelectorView: View {
                                     .padding(.leading)
                             }
                             .sheet(isPresented: $showImagePicker) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, fileUrl: fileUrl)
+                                ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Button {
                                 showPhotoLibrary = true
@@ -137,7 +143,7 @@ struct CategorySelectorView: View {
                                     .cornerRadius(10)
                             }
                             .sheet(isPresented: $showPhotoLibrary) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, fileUrl: fileUrl)
+                                ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Spacer()
                             Button {
@@ -150,7 +156,7 @@ struct CategorySelectorView: View {
                                         .frame(width: 40, height: 30, alignment: .leading)
                                         .foregroundColor(.white)
                                 }
-                                .frame(width: 170, height: 30)
+                                .frame(maxWidth: .infinity, minHeight: 30)
                                 .foregroundColor(moveToTrashBox ? .black : .blue.opacity(0))
                                 .background(moveToTrashBox ? LinearGradient(gradient: Gradient(colors: [.orange]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.gray]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .dropDestination(for: String.self) { indexs, location in
@@ -191,7 +197,7 @@ struct CategorySelectorView: View {
                         .frame(width: 370)
                         ScrollView(.horizontal) {
                             HStack(alignment: .top) {
-                                LazyVGrid(columns: mainCategoryIds[targetMainCategoryIndex].items.count <= 10 ? subColumns2 : mainCategoryIds[targetMainCategoryIndex].items.count <= 20 ? subColumns4 : subColumns8, spacing: 5) {
+                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? subColumns5 : mainCategoryIds[targetMainCategoryIndex].items.count <= 10 ? subColumns2 : mainCategoryIds[targetMainCategoryIndex].items.count <= 20 ? subColumns4 : subColumns8, spacing: 5) {
                                     ForEach(mainCategoryIds[targetMainCategoryIndex].items) { subCategoryId in
                                         Button {
                                             showImageStocker = true
@@ -270,13 +276,14 @@ struct CategorySelectorView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                 if isDuplicateMode {
-                    LazyVGrid(columns: columns, spacing: 5) {                        
+                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
                         ForEach(CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)) { duplicateImageFileId in
                             if let uiimage = UIImage(contentsOfFile: duplicateImageFileId.duplicateImageFile.imageFile.imageFile) {
                                 ZStack {
                                     Image(uiImage: uiimage)
                                         .resizable()
-                                        .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                        .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                        .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                         .cornerRadius(10)
                                         .border(.indigo, width: isTargeted && duplicateImageFileId.id == isTargetedIndex ? 3 : .zero)
                                     VStack {
@@ -321,12 +328,13 @@ struct CategorySelectorView: View {
                         }
                     }
                 } else {
-                    LazyVGrid(columns: columns, spacing: 5) {
+                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
                         ForEach(CategoryManager.convertIdentifiable(imageFiles: workSpace)) { imageFileId in
                             if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                 Image(uiImage: uiimage)
                                     .resizable()
-                                    .frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
+                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                     .cornerRadius(10)
                                     .border(.indigo, width: isTargeted && imageFileId.id == isTargetedIndex ? 3 : .zero)
                                     .onTapGesture(count: 2) {
