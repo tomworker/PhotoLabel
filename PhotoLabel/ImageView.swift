@@ -12,8 +12,8 @@ struct ImageView: View {
     let imageFile: String
     @State var lastValue: CGFloat = 1.0
     @State var scale: CGFloat = 1.0
-    @State var location = CGPoint(x: 185, y: 310)
-    @State var endLocation = CGPoint(x: 185, y: 310)
+    @State var location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
+    @State var endLocation = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
     
     var body: some View {
         ZStack {
