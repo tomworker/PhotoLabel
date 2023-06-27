@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct plistCreatorView: View {
+struct PlistCreatorView: View {
     @State var mainCategory: [String] = Array(repeating: "", count: 15)
     @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: 32), count: 15)
     @State var plistName: String = ""
@@ -80,7 +80,7 @@ struct plistCreatorView: View {
             List {
                 Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
                     ForEach(0..<15) { item in
-                        NavigationLink(destination: plistCreatorSubView(subCategoryStrings: $subCategoryStrings[item])) {
+                        NavigationLink(destination: PlistCreatorSubView(subCategoryStrings: $subCategoryStrings[item])) {
                             Text(mainCategory[item])
                         }
                     }

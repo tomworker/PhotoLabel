@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct plistEditorView: View {
+struct PlistEditorView: View {
     @Binding var showPlistEditor: Bool
     @State var plistName: String
     @State var initialPlistName = ""
@@ -103,7 +103,7 @@ struct plistEditorView: View {
             List {
                 Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
                     ForEach(0..<15) { item in
-                        NavigationLink(destination: plistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item])) {
+                        NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item])) {
                             Text(mainCategoryStrings[item])
                         }
                     }
