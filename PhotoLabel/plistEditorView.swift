@@ -23,18 +23,23 @@ struct plistEditorView: View {
     var body: some View {
         HStack {
             Spacer()
-            Button {
-            } label : {
-                HStack {
-                    TextField("Ex) Topics_2023", text: $plistName)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 160, height: 30)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Text(".plist")
-                        .multilineTextAlignment(.leading)
-                        .frame(width: 40)
-                        .foregroundColor(.black)
-                }
+            HStack {
+                TextField("Ex) Topics_2023", text: $plistName)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: .infinity, minHeight: 30)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Text(".plist")
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 40)
+            }
+            .alert(isPresented: $isRename) {
+                Alert(title: Text("Rename?"), message: Text(""),
+                      primaryButton: .default(Text("OK"), action: {
+                    savePlist(isRename: true)
+                }),
+                      secondaryButton: .cancel(Text("Cancel"), action:{
+                    plistName = initialPlistName
+                }))
             }
             Button {
                 if plistName == initialPlistName {
@@ -53,32 +58,21 @@ struct plistEditorView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            .alert(isPresented: $isRename) {
-                Alert(title: Text("Rename?"), message: Text(""),
-                      primaryButton: .default(Text("OK"), action: {
-                    savePlist(isRename: true)
-                }),
-                      secondaryButton: .cancel(Text("Cancel"), action:{
-                    plistName = initialPlistName
+            .alert(isPresented: $isPlistNameError) {
+                Alert(title: Text("Canceled"), message: Text("It needs \"&img.plist\"."),
+                    dismissButton: .default(Text("OK"), action: {
                 }))
             }
-            Spacer()
-                .alert(isPresented: $isPlistNameError) {
-                    Alert(title: Text("Canceled"), message: Text("It needs \"&img.plist\"."),
-                dismissButton: .default(Text("OK"), action: {
-                }))
-                }
             Button {
                 showPlistEditor = false
-                
             } label: {
                 Image(systemName: "xmark")
                     .frame(width: 30, height: 30)
                     .background(.orange)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .padding(.trailing)
             }
-            Spacer()
         }
         .onAppear {
             initialPlistName = plistName

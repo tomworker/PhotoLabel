@@ -21,7 +21,7 @@ struct plistCreatorView: View {
             HStack {
                 TextField("Ex) Topics_2023", text: $plistName)
                     .multilineTextAlignment(.trailing)
-                    .frame(width: 150, height: 30)
+                    .frame(maxWidth: .infinity, minHeight: 30)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                 Text(".plist")
                     .multilineTextAlignment(.leading)
