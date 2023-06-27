@@ -70,7 +70,7 @@ struct CategorySelectorView: View {
                             .padding(.trailing)
                         }
                         .fullScreenCover(isPresented: $showFinalReport) {
-                            finalReportView(showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds)
+                            FinalReportView(showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds)
                         }
                     }
                 }
