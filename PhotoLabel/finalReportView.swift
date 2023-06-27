@@ -54,7 +54,6 @@ struct finalReportView: View {
                             if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                 Image(uiImage: uiimage)
                                     .resizable()
-                                    //.frame(width: uiimage.size.width >= uiimage.size.height ? 180 : 135, height: uiimage.size.width >= uiimage.size.height ? 135 : 180)
                                     .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                     .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 40 ) / 5 : (UIScreen.main.bounds.width - 40 ) / 5 * 3 / 4 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - 10 ) / 2 : (UIScreen.main.bounds.width - 10 ) / 2 * 3 / 4)
                                     .cornerRadius(10)

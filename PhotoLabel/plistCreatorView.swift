@@ -18,18 +18,14 @@ struct plistCreatorView: View {
     var body: some View {
         HStack {
             Spacer()
-            Button {
-            } label : {
-                HStack {
-                    TextField("Ex) Topics_2023", text: $plistName)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 160, height: 30)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    Text(".plist")
-                        .multilineTextAlignment(.leading)
-                        .frame(width: 40)
-                        .foregroundColor(.black)
-                }
+            HStack {
+                TextField("Ex) Topics_2023", text: $plistName)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: .infinity, minHeight: 30)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Text(".plist")
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 40)
             }
             Button {
                 if plistName != "" {
@@ -57,7 +53,6 @@ struct plistCreatorView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            Spacer()
             Button {
                 showPlistCreator = false
             } label: {
@@ -66,8 +61,8 @@ struct plistCreatorView: View {
                     .background(.orange)
                     .foregroundColor(.white)
                     .cornerRadius(10)
+                    .padding(.trailing)
             }
-            Spacer()
         }
         List {
             Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {

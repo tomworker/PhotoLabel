@@ -26,15 +26,14 @@ struct CategorySelectorView: View {
     @State var targetImageFile = ""
     @State var showImageView = false
     @State var isDuplicateMode = false
+    @State var isMainScrollViewEnabled = false
+    @State var isSubScrollViewEnabled = false
     var columns1 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 2)
     var columns2 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 5)
-    var mainColumns1 = Array(repeating: GridItem(.adaptive(minimum: 100), spacing: 5), count: 3)
-    var mainColumns2 = Array(repeating: GridItem(.adaptive(minimum: 100), spacing: 5), count: 6)
-    var subColumns1 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 1)
-    var subColumns2 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 2)
-    var subColumns4 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 4)
-    var subColumns5 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 20) / 5), spacing: 5), count: 5)
-    var subColumns8 = Array(repeating: GridItem(.fixed(160), spacing: 5), count: 8)
+    @State var mainScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 10) / 3), spacing: 5), count: 3)
+    @State var mainScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 25) / 6), spacing: 5), count: 6)
+    @State var subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 5) / 2), spacing: 5), count: 2)
+    @State var subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 15) / 4), spacing: 5), count: 4)
     @State var isTargeted = false
     @State var isTargetedIndex = -1
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -92,27 +91,68 @@ struct CategorySelectorView: View {
                             .foregroundColor(.white)
                     }
                 }
-                HStack {
-                    Image(systemName: "hand.point.right")
-                    Text("Select Category")
+                .onAppear {
+                    if UIDevice.current.userInterfaceIdiom == .pad {
+                        if mainCategoryIds.count >= 19 {
+                            isMainScrollViewEnabled = true
+                            mainScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 25) * 2 / 11), spacing: 5), count: mainCategoryIds.count % 3 == 0 ? mainCategoryIds.count / 3 : (mainCategoryIds.count - (mainCategoryIds.count % 3)) / 3 + 1)
+                        }
+                    } else {
+                        if mainCategoryIds.count >= 10 {
+                            isMainScrollViewEnabled = true
+                            mainScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 10) * 2 / 5), spacing: 5), count: mainCategoryIds.count % 3 == 0 ? mainCategoryIds.count / 3 : (mainCategoryIds.count - (mainCategoryIds.count % 3)) / 3 + 1)
+                        }
+                    }
+                }
+                ZStack {
+                    HStack {
+                        Image(systemName: "hand.point.right")
+                        Text("Select Category")
+                    }
+                    if isMainScrollViewEnabled {
+                        HStack {
+                            Spacer()
+                            Text("scroll")
+                            Text(">")
+                        }
+                    }
                 }
                 VStack {
-                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? mainColumns2 : mainColumns1, spacing: 5) {
-                        ForEach(mainCategoryIds) { mainCategoryId in
-                            Button {
-                                showSubCategory = true
-                                targetMainCategoryIndex = mainCategoryId.id
-                                targetSubCategoryIndex[1] = -1
-                            } label: {
-                                Text(mainCategoryId.mainCategory)
-                                    .frame(maxWidth: .infinity, minHeight: 50)
-                                    .background(mainCategoryId.id == targetMainCategoryIndex ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .foregroundColor(.white)
+                    ScrollView(.horizontal) {
+                        LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? mainScrollColumns2 : mainScrollColumns1, spacing: 5) {
+                            ForEach(mainCategoryIds) { mainCategoryId in
+                                Button {
+                                    showSubCategory = true
+                                    targetMainCategoryIndex = mainCategoryId.id
+                                    targetSubCategoryIndex[1] = -1
+                                    if UIDevice.current.userInterfaceIdiom == .pad {
+                                        if mainCategoryIds[targetMainCategoryIndex].items.count >= 13 {
+                                            isSubScrollViewEnabled = true
+                                            subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 15) * 2 / 7), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % 3 == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / 3 : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % 3)) / 3 + 1)
+                                        } else {
+                                            isSubScrollViewEnabled = false
+                                            subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 15) / 4), spacing: 5), count: 4)
+                                        }
+                                    } else {
+                                        if mainCategoryIds[targetMainCategoryIndex].items.count >= 7 {
+                                            isSubScrollViewEnabled = true
+                                            subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 5) * 2 / 5), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % 3 == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / 3 : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % 3)) / 3 + 1)
+                                        } else {
+                                            isSubScrollViewEnabled = false
+                                            subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - 5) / 2), spacing: 5), count: 2)
+                                        }
+                                    }
+                                } label: {
+                                    Text(mainCategoryId.mainCategory)
+                                        .frame(maxWidth: .infinity, minHeight: 50)
+                                        .background(mainCategoryId.id == targetMainCategoryIndex ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                        .foregroundColor(.white)
+                                }
                             }
                         }
                     }
                 }
-                VStack(alignment: .leading, spacing: 5) {
+                VStack(spacing: 5) {
                     if showSubCategory {
                         HStack {
                             Button {
@@ -190,14 +230,22 @@ struct CategorySelectorView: View {
                                     .padding(.trailing)
                             }
                         }
-                        HStack {
-                            Image(systemName: "hand.point.right")
-                            Text("Select Details")
+                        ZStack {
+                            HStack {
+                                Image(systemName: "hand.point.right")
+                                Text("Select Details")
+                            }
+                            if isSubScrollViewEnabled {
+                                HStack {
+                                    Spacer()
+                                    Text("scroll")
+                                    Text(">")
+                                }
+                            }
                         }
-                        .frame(width: 370)
                         ScrollView(.horizontal) {
                             HStack(alignment: .top) {
-                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? subColumns5 : mainCategoryIds[targetMainCategoryIndex].items.count <= 10 ? subColumns2 : mainCategoryIds[targetMainCategoryIndex].items.count <= 20 ? subColumns4 : subColumns8, spacing: 5) {
+                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? subScrollColumns2 : subScrollColumns1, spacing: 5) {
                                     ForEach(mainCategoryIds[targetMainCategoryIndex].items) { subCategoryId in
                                         Button {
                                             showImageStocker = true
@@ -250,10 +298,6 @@ struct CategorySelectorView: View {
                                         }
                                     }
                                 }
-                                Rectangle()
-                                    .frame(width: 45, height: 50)
-                                    .foregroundColor(.clear)
-                                Spacer()
                             }
                         }
                     }
