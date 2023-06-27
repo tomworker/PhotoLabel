@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct plistCreatorSubView: View {
+struct PlistCreatorSubView: View {
     @Binding var subCategoryStrings: [String]
     @State var subCategoryStrings2: [String] = Array(repeating: "", count: 32)
 

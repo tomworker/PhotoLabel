@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct finalReportView: View {
+struct FinalReportView: View {
     @Binding var showFinalReport: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @State var targetImageFile = ""

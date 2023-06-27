@@ -179,7 +179,7 @@ struct ContentView: View {
                 showPlistList()
             }
             .fullScreenCover(isPresented: $showPlistCreator) {
-                plistCreatorView(showPlistCreator: $showPlistCreator)
+                PlistCreatorView(showPlistCreator: $showPlistCreator)
             }
             Button {
                 showPlistList()
@@ -231,7 +231,7 @@ struct ContentView: View {
                             }
                             .fullScreenCover(isPresented: $showPlistEditor1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                plistEditorView(showPlistEditor: $showPlistEditor1[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                PlistEditorView(showPlistEditor: $showPlistEditor1[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
                             }
                         }
                     }
@@ -268,7 +268,7 @@ struct ContentView: View {
                                 }
                                 .fullScreenCover(isPresented: $showPlistEditor2[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    plistEditorView(showPlistEditor: $showPlistEditor2[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                    PlistEditorView(showPlistEditor: $showPlistEditor2[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
                                 }
                             }
                         }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct plistEditorSubView: View {
+struct PlistEditorSubView: View {
     @Binding var subCategoryStrings: [String]
     @State var subCategoryStrings2: [String] = Array(repeating: "", count: 32)
     @Binding var countStoredImages: [Int]
