@@ -12,7 +12,6 @@ struct PlistCreatorView: View {
     @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: 32), count: 15)
     @State var plistName: String = ""
     @Binding var showPlistCreator: Bool
-    @State var showPlistCreatorSub: [Bool] = Array(repeating: false, count: 32)
     @State var mainCategorys: [MainCategory] = []
 
     var body: some View {
