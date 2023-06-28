@@ -125,7 +125,9 @@ struct PlistEditorView: View {
                     if subCategoryStrings[i][j] != "" {
                         tempImageFiles = []
                         for k in 0..<imageFiles[i][j].count {
-                            tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
+                            if imageFiles[i][j][k] != "" {
+                                tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
+                            }
                         }
                         tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
                     }
