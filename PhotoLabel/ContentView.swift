@@ -405,6 +405,9 @@ struct DuplicateImageFileId: Identifiable{
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    static let maxNumberOfMainCategory = 99
+    static let maxNumberOfSubCategory = 99
+    static let maxNumberOfImageFile = 99
     static func write(fileUrl: URL, mainCategorys: [MainCategory]) {
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .xml
