@@ -409,6 +409,10 @@ class ConfigManager {
     static var iPadMainColumnNumber = 6
     static var iPadSubColumnNumber = 4
     static var iPadImageColumnNumber = 5
+    static var mainRowNumber = 3
+    static var subRowNumber = 3
+    static var iPadMainRowNumber = 3
+    static var iPadSubRowNumber = 3
 }
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
