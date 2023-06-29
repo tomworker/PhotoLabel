@@ -12,8 +12,8 @@ struct FinalReportView: View {
     @Binding var mainCategoryIds: [MainCategoryId]
     @State var targetImageFile = ""
     @State var showImageView = false
-    var columns1 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 2)
-    var columns2 = Array(repeating: GridItem(.adaptive(minimum: 150), spacing: 5), count: 5)
+    var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
+    var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
 
     var body: some View {
         ScrollView {

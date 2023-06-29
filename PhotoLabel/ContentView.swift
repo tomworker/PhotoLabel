@@ -402,6 +402,14 @@ struct DuplicateImageFileId: Identifiable{
     var id: Int
     let duplicateImageFile: DuplicateImageFile
 }
+class ConfigManager {
+    static var mainColumnNumber = 3
+    static var subColumnNumber = 2
+    static var imageColumnNumber = 2
+    static var iPadMainColumnNumber = 6
+    static var iPadSubColumnNumber = 4
+    static var iPadImageColumnNumber = 5
+}
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
