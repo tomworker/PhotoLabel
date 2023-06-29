@@ -48,10 +48,14 @@ struct PlistEditorView: View {
                 if plistName == initialPlistName {
                     savePlist(isRename: false)
                 } else {
-                    if String(plistName.suffix(4)) == "&img" && plistName.count >= 5 {
-                        isRename = true
+                    if initialPlistName.range(of: "&img") == nil {
+                        savePlist(isRename: false)
                     } else {
-                        isPlistNameError = true
+                        if String(plistName.suffix(4)) == "&img" && plistName.count >= 5 {
+                            isRename = true
+                        } else {
+                            isPlistNameError = true
+                        }
                     }
                 }
             } label : {
