@@ -9,12 +9,12 @@ import SwiftUI
 
 struct PlistCreatorSubView: View {
     @Binding var subCategoryStrings: [String]
-    @State var subCategoryStrings2: [String] = Array(repeating: "", count: CategoryManager.maxNumberOfSubCategory)
+    @State var subCategoryStrings2: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
 
     var body: some View {
         List {
             Section(header: Text("Input Photo Label ") + Text("Details").font(.title)) {
-                ForEach(0..<CategoryManager.maxNumberOfSubCategory, id: \.self) { item in
+                ForEach(0..<ConfigManager.maxNumberOfSubCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
                             .frame(width: 25)
@@ -30,7 +30,7 @@ struct PlistCreatorSubView: View {
         }
         .listStyle(.grouped)
         .onAppear {
-            for i in 0..<CategoryManager.maxNumberOfSubCategory {
+            for i in 0..<ConfigManager.maxNumberOfSubCategory {
                 if subCategoryStrings[i] != "" {
                     subCategoryStrings2[i] = subCategoryStrings[i]
                 }
