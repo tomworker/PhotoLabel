@@ -9,14 +9,14 @@ import SwiftUI
 
 struct PlistEditorSubView: View {
     @Binding var subCategoryStrings: [String]
-    @State var subCategoryStrings2: [String] = Array(repeating: "", count: CategoryManager.maxNumberOfSubCategory)
+    @State var subCategoryStrings2: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
     @Binding var countStoredImages: [Int]
-    @State var countStoredImagesString: [String] = Array(repeating: "", count: CategoryManager.maxNumberOfSubCategory)
+    @State var countStoredImagesString: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
 
     var body: some View {
         List {
             Section(header: Text("Input Photo Label ") + Text("Details").font(.title)) {
-                ForEach(0..<CategoryManager.maxNumberOfSubCategory, id: \.self) { item in
+                ForEach(0..<ConfigManager.maxNumberOfSubCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
                             .frame(width: 25)

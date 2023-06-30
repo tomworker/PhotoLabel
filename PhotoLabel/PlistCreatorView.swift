@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct PlistCreatorView: View {
-    @State var mainCategory: [String] = Array(repeating: "", count: CategoryManager.maxNumberOfMainCategory)
-    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: CategoryManager.maxNumberOfSubCategory), count: CategoryManager.maxNumberOfMainCategory)
+    @State var mainCategory: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
+    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var plistName: String = ""
     @Binding var showPlistCreator: Bool
     @State var mainCategorys: [MainCategory] = []
@@ -65,7 +65,7 @@ struct PlistCreatorView: View {
         }
         List {
             Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                ForEach(0..<CategoryManager.maxNumberOfMainCategory, id: \.self) { item in
+                ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
                             .frame(width: 25)
@@ -78,7 +78,7 @@ struct PlistCreatorView: View {
         NavigationView {
             List {
                 Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                    ForEach(0..<CategoryManager.maxNumberOfMainCategory, id: \.self) { item in
+                    ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
                         NavigationLink(destination: PlistCreatorSubView(subCategoryStrings: $subCategoryStrings[item])) {
                             Text(mainCategory[item])
                         }

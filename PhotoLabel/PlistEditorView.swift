@@ -12,10 +12,10 @@ struct PlistEditorView: View {
     @State var plistName: String
     @State var initialPlistName = ""
     @State var mainCategoryIds: [MainCategoryId]
-    @State var mainCategoryStrings: [String] = Array(repeating: "", count: CategoryManager.maxNumberOfMainCategory)
-    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: CategoryManager.maxNumberOfSubCategory), count: CategoryManager.maxNumberOfMainCategory)
-    @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: CategoryManager.maxNumberOfSubCategory), count: CategoryManager.maxNumberOfMainCategory)
-    @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: CategoryManager.maxNumberOfImageFile), count: CategoryManager.maxNumberOfSubCategory), count: CategoryManager.maxNumberOfMainCategory)
+    @State var mainCategoryStrings: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
+    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
+    @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
+    @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var mainCategorys: [MainCategory] = []
     @State var isRename = false
     @State var isPlistNameError = false
@@ -85,7 +85,7 @@ struct PlistEditorView: View {
             VStack{
             }
             .alert(isPresented: $isMaxNumberMainError) {
-                Alert(title: Text("Canceled"), message: Text("Category max number exceeded the limit of \(CategoryManager.maxNumberOfMainCategory)."),
+                Alert(title: Text("Canceled"), message: Text("Category max number exceeded the limit of \(ConfigManager.maxNumberOfMainCategory)."),
                       dismissButton: .default(Text("OK"), action: {
                     showPlistEditor = false
                 }))
@@ -93,7 +93,7 @@ struct PlistEditorView: View {
             VStack{
             }
             .alert(isPresented: $isMaxNumberSubError) {
-                Alert(title: Text("Canceled"), message: Text("Details max number exceeded the limit of \(CategoryManager.maxNumberOfSubCategory)."),
+                Alert(title: Text("Canceled"), message: Text("Details max number exceeded the limit of \(ConfigManager.maxNumberOfSubCategory)."),
                       dismissButton: .default(Text("OK"), action: {
                     showPlistEditor = false
                 }))
@@ -101,7 +101,7 @@ struct PlistEditorView: View {
             VStack{
             }
             .alert(isPresented: $isMaxNumberImageError) {
-                Alert(title: Text("Canceled"), message: Text("Image file max number exceeded the limit of \(CategoryManager.maxNumberOfImageFile)."),
+                Alert(title: Text("Canceled"), message: Text("Image file max number exceeded the limit of \(ConfigManager.maxNumberOfImageFile)."),
                       dismissButton: .default(Text("OK"), action: {
                     showPlistEditor = false
                 }))
@@ -111,20 +111,20 @@ struct PlistEditorView: View {
             initialPlistName = plistName
             mainCategorys = CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds)
             for i in 0..<mainCategorys.count {
-                if mainCategorys.count > CategoryManager.maxNumberOfMainCategory {
+                if mainCategorys.count > ConfigManager.maxNumberOfMainCategory {
                     isMaxNumberMainError = true
                     break
                 }
                 mainCategoryStrings[i] = mainCategorys[i].mainCategory
                 for j in 0..<mainCategorys[i].items.count {
-                    if mainCategorys[i].items.count > CategoryManager.maxNumberOfSubCategory {
+                    if mainCategorys[i].items.count > ConfigManager.maxNumberOfSubCategory {
                         isMaxNumberSubError = true
                         break
                     }
                     subCategoryStrings[i][j] = mainCategorys[i].items[j].subCategory
                     countStoredImages[i][j] = mainCategorys[i].items[j].countStoredImages
                     for k in 0..<mainCategorys[i].items[j].countStoredImages{
-                        if mainCategorys[i].items[j].countStoredImages > CategoryManager.maxNumberOfImageFile {
+                        if mainCategorys[i].items[j].countStoredImages > ConfigManager.maxNumberOfImageFile {
                             isMaxNumberImageError = true
                             break
                         }
@@ -135,7 +135,7 @@ struct PlistEditorView: View {
         }
         List {
             Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                ForEach(0..<CategoryManager.maxNumberOfMainCategory, id: \.self) { item in
+                ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
                             .frame(width: 25)
@@ -147,7 +147,7 @@ struct PlistEditorView: View {
         NavigationView {
             List {
                 Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                    ForEach(0..<CategoryManager.maxNumberOfMainCategory, id: \.self) { item in
+                    ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
                         NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item])) {
                             Text(mainCategoryStrings[item])
                         }
