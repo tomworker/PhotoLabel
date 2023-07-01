@@ -17,7 +17,7 @@ struct PlistCreatorSubView: View {
                 ForEach(0..<ConfigManager.maxNumberOfSubCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
-                            .frame(width: 25)
+                            .frame(width: 35)
                         TextField("Details", text: $subCategoryStrings2[item])
                             .frame(maxWidth: .infinity)
                             .keyboardType(.default)
