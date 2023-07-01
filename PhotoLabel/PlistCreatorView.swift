@@ -68,7 +68,7 @@ struct PlistCreatorView: View {
                 ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
-                            .frame(width: 25)
+                            .frame(width: 35)
                         TextField("Category", text: $mainCategory[item])
                             .frame(maxWidth: .infinity)
                     }

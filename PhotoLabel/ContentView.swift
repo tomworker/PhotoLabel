@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var showDocumentPicker = false
     @State var showCategorySelector1: [Bool]
     @State var showCategorySelector2: [Bool]
+    @State var showConfig = false
     @State var isCancelLoad = false
     @State var cancelLoadMessage = ""
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -153,6 +154,7 @@ struct ContentView: View {
         }
         HStack {
             Button {
+                showConfig = true
             } label: {
                 Image(systemName: "gearshape")
                     .frame(width: 50, height: 30)
@@ -160,6 +162,9 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
                     .padding(.leading)
+            }
+            .fullScreenCover(isPresented: $showConfig) {
+                ConfigView(showConfig: $showConfig)
             }
             Spacer()
             Button {
@@ -176,6 +181,23 @@ struct ContentView: View {
                 showPlistList()
             }
             .onAppear {
+                let jsonUrl = documentDirectoryUrl.appendingPathComponent("config.json")
+                if FileManager.default.fileExists(atPath: jsonUrl.path) {
+                    let config = JsonManager.load(fileUrl: jsonUrl)
+                    ConfigManager.iPadMainColumnNumber = config.iPadMaxColCatBtn
+                    ConfigManager.iPadSubColumnNumber = config.iPadMaxColDetBtn
+                    ConfigManager.iPadImageColumnNumber = config.iPadMaxColPhoto
+                    ConfigManager.mainColumnNumber = config.maxColCatBtn
+                    ConfigManager.subColumnNumber = config.maxColDetBtn
+                    ConfigManager.imageColumnNumber = config.maxColPhoto
+                    ConfigManager.iPadMainRowNumber = config.iPadMaxRowCatBtn
+                    ConfigManager.iPadSubRowNumber = config.iPadMaxRowDetBtn
+                    ConfigManager.mainRowNumber = config.maxRowCatBtn
+                    ConfigManager.subRowNumber = config.maxRowDetBtn
+                    ConfigManager.maxNumberOfMainCategory = config.maxEntCat
+                    ConfigManager.maxNumberOfSubCategory = config.maxEntDet
+                    ConfigManager.maxNumberOfImageFile = config.maxEntPhoto
+                }
                 showPlistList()
             }
             .fullScreenCover(isPresented: $showPlistCreator) {
@@ -354,9 +376,9 @@ struct ContentView: View {
         }
         let initialMainCategorys = CategoryManager.load(fileUrl: fileUrl)
         for i in 0..<initialMainCategorys.count {
-            var mainCategoryName = initialMainCategorys[i].mainCategory
+            let mainCategoryName = initialMainCategorys[i].mainCategory
             for j in 0..<initialMainCategorys[i].items.count {
-                var subCategoryName = initialMainCategorys[i].items[j].subCategory
+                let subCategoryName = initialMainCategorys[i].items[j].subCategory
                 for k in 0..<initialMainCategorys[i].items[j].images.count {
                     duplicateSpace.append(DuplicateImageFile(imageFile: ImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile), mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
                 }
@@ -403,19 +425,32 @@ struct DuplicateImageFileId: Identifiable{
     let duplicateImageFile: DuplicateImageFile
 }
 class ConfigManager {
-    static var mainColumnNumber = 3
-    static var subColumnNumber = 2
-    static var imageColumnNumber = 2
     static var iPadMainColumnNumber = 6
     static var iPadSubColumnNumber = 4
     static var iPadImageColumnNumber = 5
+    static var mainColumnNumber = 3
+    static var subColumnNumber = 2
+    static var imageColumnNumber = 2
+    static var iPadMainRowNumber = 5
+    static var iPadSubRowNumber = 5
     static var mainRowNumber = 3
     static var subRowNumber = 3
-    static var iPadMainRowNumber = 3
-    static var iPadSubRowNumber = 3
     static var maxNumberOfMainCategory = 99
     static var maxNumberOfSubCategory = 99
     static var maxNumberOfImageFile = 99
+    static let initialIPadMainColumnNumber = 6
+    static let initialIPadSubColumnNumber = 4
+    static let initialIPadImageColumnNumber = 5
+    static let initialMainColumnNumber = 3
+    static let initialSubColumnNumber = 2
+    static let initialImageColumnNumber = 2
+    static let initialIPadMainRowNumber = 5
+    static let initialIPadSubRowNumber = 5
+    static let initialMainRowNumber = 3
+    static let initialSubRowNumber = 3
+    static let initialMaxNumberOfMainCategory = 99
+    static let initialMaxNumberOfSubCategory = 99
+    static let initialMaxNumberOfImageFile = 99
 }
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -646,8 +681,8 @@ class ZipManager {
         ZipManager.remove(fileUrl: targetUrl)
     }
     static func renameZip(atZipUrl: URL, toZipUrl: URL) {
-        var atDirUrl = atZipUrl.deletingPathExtension()
-        var toDirUrl = toZipUrl.deletingPathExtension()
+        let atDirUrl = atZipUrl.deletingPathExtension()
+        let toDirUrl = toZipUrl.deletingPathExtension()
         ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
         ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
         ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
