@@ -10,7 +10,7 @@ import ZIPFoundation
 
 struct ContentView: View {
     @State var mainCategoryIds: [MainCategoryId] = []
-    @State var workSpace: [ImageFile] = []
+    @State var workSpace: [WorkSpaceImageFile] = []
     @State var duplicateSpace: [DuplicateImageFile] = []
     @State private var fileUrl: URL?
     @State var showPlistCreator = false
@@ -368,7 +368,7 @@ struct ContentView: View {
             duplicateSpace = []
             for i in 0..<tempImageFiles.count {
                 if tempImageFiles[i].first == "@" {
-                    workSpace.append(ImageFile(imageFile: tempImageFiles[i]))
+                    workSpace.append(WorkSpaceImageFile(imageFile: tempImageFiles[i], subDirectory: ""))
                 }
             }
         } catch {
@@ -414,6 +414,14 @@ struct MainCategoryId: Identifiable {
     var id: Int
     let mainCategory: String
     var items: [SubCategoryId]
+}
+struct WorkSpaceImageFile: Equatable {
+    let imageFile: String
+    let subDirectory: String
+}
+struct WorkSpaceImageFileId: Identifiable {
+    let id: Int
+    let workSpaceImageFile: WorkSpaceImageFile
 }
 struct DuplicateImageFile: Equatable {
     let imageFile: ImageFile
@@ -476,6 +484,13 @@ class CategoryManager {
             return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])])]
         }
     }
+    static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
+        var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
+        for i in 0..<workSpaceImageFiles.count {
+            workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+        }
+        return workSpaceImageFileIds
+    }
     static func convertIdentifiable(duplicateImageFiles: [DuplicateImageFile]) -> [DuplicateImageFileId] {
         var duplicateImageFileIds: [DuplicateImageFileId] = []
         for i in 0..<duplicateImageFiles.count {
@@ -518,11 +533,40 @@ class CategoryManager {
         }
         return mainCategorys
     }
-    static func reorderItems(image: ImageFileId, indexs: [String], workSpace: inout [ImageFile]) {
+    static func reorderItems(image: ImageFileId, indexs: [String], imageSpace: inout [ImageFile]) {
+        let moveToIndex = image.id
+        let targetIndex = Int(indexs.first!)!
+        let lastIndex = imageSpace.count - 1
+        var imageSpace2: [ImageFile] = []
+        if moveToIndex <= targetIndex {
+            if moveToIndex != 0 {
+                imageSpace2 += imageSpace[0...moveToIndex - 1]
+            }
+            imageSpace2 += imageSpace[targetIndex...targetIndex]
+            if moveToIndex != targetIndex {
+                imageSpace2 += imageSpace[moveToIndex...targetIndex - 1]
+            }
+            if targetIndex != lastIndex {
+                imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
+            }
+        }
+        if moveToIndex > targetIndex {
+            if targetIndex != 0 {
+                imageSpace2 += imageSpace[0...targetIndex - 1]
+            }
+            if moveToIndex != targetIndex + 1 {
+                imageSpace2 += imageSpace[targetIndex + 1...moveToIndex - 1]
+            }
+            imageSpace2 += imageSpace[targetIndex...targetIndex]
+            imageSpace2 += imageSpace[moveToIndex...lastIndex]
+        }
+        imageSpace = imageSpace2
+    }
+    static func reorderItems(image: WorkSpaceImageFileId, indexs: [String], workSpace: inout [WorkSpaceImageFile]) {
         let moveToIndex = image.id
         let targetIndex = Int(indexs.first!)!
         let lastIndex = workSpace.count - 1
-        var workSpace2: [ImageFile] = []
+        var workSpace2: [WorkSpaceImageFile] = []
         if moveToIndex <= targetIndex {
             if moveToIndex != 0 {
                 workSpace2 += workSpace[0...moveToIndex - 1]
@@ -576,10 +620,23 @@ class CategoryManager {
         }
         duplicateSpace = duplicateSpace2
     }
-    static func moveItemFromLastToFirst(image: ImageFileId, workSpace: inout [ImageFile]) {
+    static func moveItemFromLastToFirst(image: ImageFileId, imageSpace: inout [ImageFile]) {
+        let targetIndex = image.id
+        let lastIndex = imageSpace.count - 1
+        var imageSpace2: [ImageFile] = []
+        if targetIndex > 0 {
+            imageSpace2 += imageSpace[targetIndex...targetIndex]
+            imageSpace2 += imageSpace[0...targetIndex - 1]
+            if targetIndex != lastIndex {
+                imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
+            }
+            imageSpace = imageSpace2
+        }
+    }
+    static func moveItemFromLastToFirst(image: WorkSpaceImageFileId, workSpace: inout [WorkSpaceImageFile]) {
         let targetIndex = image.id
         let lastIndex = workSpace.count - 1
-        var workSpace2: [ImageFile] = []
+        var workSpace2: [WorkSpaceImageFile] = []
         if targetIndex > 0 {
             workSpace2 += workSpace[targetIndex...targetIndex]
             workSpace2 += workSpace[0...targetIndex - 1]
@@ -607,12 +664,12 @@ class ZipManager {
     static let fileManager = FileManager.default
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    static func moveImagesFromWorkSpaceToTrashBox(images: [String], workSpace: inout [ImageFile]) {
+    static func moveImagesFromWorkSpaceToTrashBox(images: [String], workSpace: inout [WorkSpaceImageFile]) {
         let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
         ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(workSpaceImageFile))
-        workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
+        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
     }
-    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile], duplicateSpace: inout [DuplicateImageFile]) {
+    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile], duplicateSpace: inout [DuplicateImageFile]) {
         let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
         let workSpaceImageFile = "@\(targetImageFile)"
         let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
@@ -620,11 +677,11 @@ class ZipManager {
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
         duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
-        workSpace.append(ImageFile(imageFile: workSpaceImageFile))
+        workSpace.append(WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: ""))
         print("Removed from plist:\(targetImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
     }
-    static func moveImagesFromWorkSpaceToPlist(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [ImageFile]) {
+    static func moveImagesFromWorkSpaceToPlist(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile]) {
         let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
         var plistImageFile = workSpaceImageFile
         if let range = workSpaceImageFile.range(of: "@") {
@@ -634,7 +691,7 @@ class ZipManager {
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
-        workSpace.removeAll(where: {$0 == ImageFile(imageFile: workSpaceImageFile)})
+        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
         print("Added to plist:\(plistImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }

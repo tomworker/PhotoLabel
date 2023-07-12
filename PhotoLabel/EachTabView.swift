@@ -10,7 +10,7 @@ import SwiftUI
 struct EachTabView: View {
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
-    @Binding var workSpace: [ImageFile]
+    @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
@@ -87,7 +87,7 @@ struct EachTabView: View {
                                                 } else {
                                                     ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
                                                     if workSpace.count >= 2 {
-                                                        CategoryManager.moveItemFromLastToFirst(image: ImageFileId(id: workSpace.count - 1, imageFile: ImageFile(imageFile: indexs1.first!)), workSpace: &workSpace)
+                                                        CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
                                                     }
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
@@ -182,7 +182,7 @@ struct EachTabView: View {
                                             .cornerRadius(10)
                                             .border(.indigo, width: isTargeted1 && imageFileId.id == isTargetedIndex1 ? 3 : .zero)
                                             .onTapGesture(count: 2) {
-                                                CategoryManager.moveItemFromLastToFirst(image: imageFileId, workSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
+                                                CategoryManager.moveItemFromLastToFirst(image: imageFileId, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
                                                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
                                             .onTapGesture(count: 1) {
@@ -223,7 +223,7 @@ struct EachTabView: View {
                                                     ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 } else if indexs3.first! == "0" {
-                                                    CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, workSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
+                                                    CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
                                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
                                                 return true
@@ -310,23 +310,23 @@ struct EachTabView: View {
                             }
                         } else {
                             LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
-                                ForEach(CategoryManager.convertIdentifiable(imageFiles: workSpace)) { imageFileId in
-                                    if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
+                                ForEach(CategoryManager.convertIdentifiable(workSpaceImageFiles: workSpace)) { workSpaceImageFileId in
+                                    if let uiimage = UIImage(contentsOfFile: workSpaceImageFileId.workSpaceImageFile.imageFile) {
                                         Image(uiImage: uiimage)
                                             .resizable()
                                             .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                             .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                             //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                             .cornerRadius(10)
-                                            .border(.indigo, width: isTargeted2 && imageFileId.id == isTargetedIndex2 ? 3 : .zero)
+                                            .border(.indigo, width: isTargeted2 && workSpaceImageFileId.id == isTargetedIndex2 ? 3 : .zero)
                                             .onTapGesture(count: 2) {
-                                                CategoryManager.moveItemFromLastToFirst(image: imageFileId, workSpace: &workSpace)
+                                                CategoryManager.moveItemFromLastToFirst(image: workSpaceImageFileId, workSpace: &workSpace)
                                             }
                                             .onTapGesture(count: 1) {
                                                 showImageView = true
-                                                self.targetImageFile = imageFileId.imageFile.imageFile
+                                                self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
                                             }
-                                            .draggable(String(imageFileId.id) + ":" + imageFileId.imageFile.imageFile + ":1") {
+                                            .draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
                                                 Image(uiImage: uiimage).border(.secondary)
                                             }
                                             .dropDestination(for: String.self) { indexs, location in
@@ -338,18 +338,18 @@ struct EachTabView: View {
                                                 var indexs3: [String] = []
                                                 indexs3.append(arr[2])
                                                 if indexs3.first! == "1" {
-                                                    CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, workSpace: &workSpace)
+                                                    CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
                                                 } else if indexs3.first! == "0"  {
                                                     ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
                                                     if workSpace.count >= 2 {
-                                                        CategoryManager.moveItemFromLastToFirst(image: ImageFileId(id: workSpace.count - 1, imageFile: ImageFile(imageFile: indexs1.first!)), workSpace: &workSpace)
+                                                        CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
                                                     }
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
                                                 return true
                                             } isTargeted: { isTargeted in
                                                 self.isTargeted2 = isTargeted
-                                                self.isTargetedIndex2 = imageFileId.id
+                                                self.isTargetedIndex2 = workSpaceImageFileId.id
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
                                                 ImageView(showImageView: $showImageView, imageFile: targetImageFile)

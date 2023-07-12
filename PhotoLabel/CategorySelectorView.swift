@@ -10,7 +10,7 @@ import SwiftUI
 struct CategorySelectorView: View {
     @Binding var showCategorySelector: Bool
     @State var mainCategoryIds: [MainCategoryId]
-    @Binding var workSpace: [ImageFile]
+    @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     @State var fileUrl: URL
     @State var plistCategoryName: String
@@ -373,22 +373,22 @@ struct CategorySelectorView: View {
                     }
                 } else {
                     LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
-                        ForEach(CategoryManager.convertIdentifiable(imageFiles: workSpace)) { imageFileId in
-                            if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
+                        ForEach(CategoryManager.convertIdentifiable(workSpaceImageFiles: workSpace)) { workSpaceImageFileId in
+                            if let uiimage = UIImage(contentsOfFile: workSpaceImageFileId.workSpaceImageFile.imageFile) {
                                 Image(uiImage: uiimage)
                                     .resizable()
                                     .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                     .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                     .cornerRadius(10)
-                                    .border(.indigo, width: isTargeted && imageFileId.id == isTargetedIndex ? 3 : .zero)
+                                    .border(.indigo, width: isTargeted && workSpaceImageFileId.id == isTargetedIndex ? 3 : .zero)
                                     .onTapGesture(count: 2) {
-                                        CategoryManager.moveItemFromLastToFirst(image: imageFileId, workSpace: &workSpace)
+                                        CategoryManager.moveItemFromLastToFirst(image: workSpaceImageFileId, workSpace: &workSpace)
                                     }
                                     .onTapGesture(count: 1) {
                                         showImageView = true
-                                        self.targetImageFile = imageFileId.imageFile.imageFile
+                                        self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
                                     }
-                                    .draggable(String(imageFileId.id) + ":" + imageFileId.imageFile.imageFile + ":1") {
+                                    .draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
                                         Image(uiImage: uiimage).border(.secondary)
                                     }
                                     .dropDestination(for: String.self) { indexs, location in
@@ -400,12 +400,12 @@ struct CategorySelectorView: View {
                                         var indexs3: [String] = []
                                         indexs3.append(arr[2])
                                         if indexs3.first! == "1" {
-                                            CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, workSpace: &workSpace)
+                                            CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
                                         }
                                         return true
                                     } isTargeted: { isTargeted in
                                         self.isTargeted = isTargeted
-                                        self.isTargetedIndex = imageFileId.id
+                                        self.isTargetedIndex = workSpaceImageFileId.id
                                     }
                                     .fullScreenCover(isPresented: $showImageView) {
                                         ImageView(showImageView: $showImageView, imageFile: targetImageFile)
