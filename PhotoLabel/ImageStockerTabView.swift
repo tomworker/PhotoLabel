@@ -10,7 +10,7 @@ import SwiftUI
 struct ImageStockerTabView: View {
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
-    @Binding var workSpace: [ImageFile]
+    @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String

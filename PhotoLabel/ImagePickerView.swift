@@ -14,7 +14,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
-    @Binding var workSpace: [ImageFile]
+    @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -38,7 +38,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     switch parent.sheetId {
                     case 1:
                         try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
-                        parent.workSpace.insert(ImageFile(imageFile: workSpaceImageFileName), at: 0)
+                        parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: 0)
                         ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                     case 2:
                         try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
