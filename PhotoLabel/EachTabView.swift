@@ -312,48 +312,55 @@ struct EachTabView: View {
                             LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
                                 ForEach(CategoryManager.convertIdentifiable(workSpaceImageFiles: workSpace)) { workSpaceImageFileId in
                                     if let uiimage = UIImage(contentsOfFile: workSpaceImageFileId.workSpaceImageFile.imageFile) {
-                                        Image(uiImage: uiimage)
-                                            .resizable()
-                                            .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                            .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                        ZStack {
+                                            Image(uiImage: uiimage)
+                                                .resizable()
+                                                .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                             //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                            .cornerRadius(10)
-                                            .border(.indigo, width: isTargeted2 && workSpaceImageFileId.id == isTargetedIndex2 ? 3 : .zero)
-                                            .onTapGesture(count: 2) {
-                                                CategoryManager.moveItemFromLastToFirst(image: workSpaceImageFileId, workSpace: &workSpace)
+                                                .cornerRadius(10)
+                                                .border(.indigo, width: isTargeted2 && workSpaceImageFileId.id == isTargetedIndex2 ? 3 : .zero)
+                                            VStack {
+                                                Text(workSpaceImageFileId.workSpaceImageFile.subDirectory)
+                                                    .foregroundColor(.white.opacity(0.5))
+                                                    .background(.black.opacity(0.5))
                                             }
-                                            .onTapGesture(count: 1) {
-                                                showImageView = true
-                                                self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
-                                            }
-                                            .draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
-                                                Image(uiImage: uiimage).border(.secondary)
-                                            }
-                                            .dropDestination(for: String.self) { indexs, location in
-                                                let arr: [String] = indexs.first!.components(separatedBy: ":")
-                                                var indexs1: [String] = []
-                                                indexs1.append(arr[0])
-                                                var indexs2: [String] = []
-                                                indexs2.append(arr[1])
-                                                var indexs3: [String] = []
-                                                indexs3.append(arr[2])
-                                                if indexs3.first! == "1" {
-                                                    CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
-                                                } else if indexs3.first! == "0"  {
-                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
-                                                    if workSpace.count >= 2 {
-                                                        CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
-                                                    }
-                                                    ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        }
+                                        .onTapGesture(count: 2) {
+                                            CategoryManager.moveItemFromLastToFirst(image: workSpaceImageFileId, workSpace: &workSpace)
+                                        }
+                                        .onTapGesture(count: 1) {
+                                            showImageView = true
+                                            self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
+                                        }
+                                        .draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
+                                            Image(uiImage: uiimage).border(.secondary)
+                                        }
+                                        .dropDestination(for: String.self) { indexs, location in
+                                            let arr: [String] = indexs.first!.components(separatedBy: ":")
+                                            var indexs1: [String] = []
+                                            indexs1.append(arr[0])
+                                            var indexs2: [String] = []
+                                            indexs2.append(arr[1])
+                                            var indexs3: [String] = []
+                                            indexs3.append(arr[2])
+                                            if indexs3.first! == "1" {
+                                                CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
+                                            } else if indexs3.first! == "0"  {
+                                                ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
+                                                if workSpace.count >= 2 {
+                                                    CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
                                                 }
-                                                return true
-                                            } isTargeted: { isTargeted in
-                                                self.isTargeted2 = isTargeted
-                                                self.isTargetedIndex2 = workSpaceImageFileId.id
+                                                ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
-                                            .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(showImageView: $showImageView, imageFile: targetImageFile)
-                                            }
+                                            return true
+                                        } isTargeted: { isTargeted in
+                                            self.isTargeted2 = isTargeted
+                                            self.isTargetedIndex2 = workSpaceImageFileId.id
+                                        }
+                                        .fullScreenCover(isPresented: $showImageView) {
+                                            ImageView(showImageView: $showImageView, imageFile: targetImageFile)
+                                        }
                                     }
                                 }
                             }
