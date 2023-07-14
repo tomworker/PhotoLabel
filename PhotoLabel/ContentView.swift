@@ -362,13 +362,30 @@ struct ContentView: View {
             }
         }
         let tempImageFiles: [String]
+        var tempImageFile: String
         do {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
             workSpace = []
             duplicateSpace = []
             for i in 0..<tempImageFiles.count {
-                if tempImageFiles[i].first == "@" {
-                    workSpace.append(WorkSpaceImageFile(imageFile: tempImageFiles[i], subDirectory: ""))
+                var isDir: ObjCBool = false
+                tempImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).path
+                if ZipManager.fileManager.fileExists(atPath: tempImageFile, isDirectory: &isDir) {
+                    if isDir.boolValue {
+                        let subDirImageFiles: [String]
+                        do {
+                            subDirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempImageFile)
+                            for j in 0..<subDirImageFiles.count {
+                                if subDirImageFiles[j].first == "@" {
+                                    workSpace.append(WorkSpaceImageFile(imageFile: subDirImageFiles[j], subDirectory: tempImageFiles[i]))
+                                }
+                            }
+                        }
+                    } else {
+                        if tempImageFiles[i].first == "@" {
+                            workSpace.append(WorkSpaceImageFile(imageFile: tempImageFiles[i], subDirectory: ""))
+                        }
+                    }
                 }
             }
         } catch {
@@ -487,7 +504,11 @@ class CategoryManager {
     static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
         var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
         for i in 0..<workSpaceImageFiles.count {
-            workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+            if workSpaceImageFiles[i].subDirectory != "" {
+                workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].subDirectory + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+            } else {
+                workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+            }
         }
         return workSpaceImageFileIds
     }
@@ -683,11 +704,17 @@ class ZipManager {
     }
     static func moveImagesFromWorkSpaceToPlist(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile]) {
         let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
+        let subDirectory = workSpace[Int(images.first!)!].subDirectory
         var plistImageFile = workSpaceImageFile
         if let range = workSpaceImageFile.range(of: "@") {
             plistImageFile.replaceSubrange(range, with: "")
         }
-        let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
+        let beforeRenameUrl: URL
+        if subDirectory == "" {
+            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
+        } else {
+            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(subDirectory + "/" + workSpaceImageFile)
+        }
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
