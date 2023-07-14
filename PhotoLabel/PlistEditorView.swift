@@ -18,6 +18,7 @@ struct PlistEditorView: View {
     @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var mainCategorys: [MainCategory] = []
     @State var isRename = false
+    @State var isCopy = false
     @State var isPlistNameError = false
     @State var isMaxNumberMainError = false
     @State var isMaxNumberSubError = false
@@ -35,21 +36,23 @@ struct PlistEditorView: View {
                     .multilineTextAlignment(.leading)
                     .frame(width: 40)
             }
-            .alert(isPresented: $isRename) {
-                Alert(title: Text("Rename?"), message: Text(""),
-                      primaryButton: .default(Text("OK"), action: {
-                    savePlist(isRename: true)
-                }),
-                      secondaryButton: .cancel(Text("Cancel"), action:{
+            .confirmationDialog("Save as another plist or Rename?", isPresented: $isRename, titleVisibility: .visible) {
+                Button("Save as another plist") {
+                    savePlist(isRename: true, isCopy: true)
+                }
+                Button("Rename") {
+                    savePlist(isRename: true, isCopy: false)
+                }
+                Button("Cancel", role: .cancel) {
                     plistName = initialPlistName
-                }))
+                }
             }
             Button {
                 if plistName == initialPlistName {
-                    savePlist(isRename: false)
+                    savePlist(isRename: false, isCopy: false)
                 } else {
                     if initialPlistName.range(of: "&img") == nil {
-                        savePlist(isRename: false)
+                        savePlist(isRename: false, isCopy: false)
                     } else {
                         if String(plistName.suffix(4)) == "&img" && plistName.count >= 5 {
                             isRename = true
@@ -157,7 +160,7 @@ struct PlistEditorView: View {
             .listStyle(.grouped)
         }
     }
-    private func savePlist(isRename: Bool) {
+    private func savePlist(isRename: Bool, isCopy: Bool) {
         plistName = plistName.replacingOccurrences(of: " ", with: "_")
         let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
         var tempSubCategorys: [SubCategory] = []
@@ -189,10 +192,14 @@ struct PlistEditorView: View {
             var toZipName = plistName
             toZipName = toZipName.replacingOccurrences(of: "&img", with: "") + ".zip"
             let toZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(toZipName)
-            ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
-            let oldPlistName = initialPlistName + ".plist"
-            let oldPlistUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(oldPlistName)
-            ZipManager.remove(fileUrl: oldPlistUrl)
+            if isCopy {
+                ZipManager.copyZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+            } else {
+                ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                let oldPlistName = initialPlistName + ".plist"
+                let oldPlistUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(oldPlistName)
+                ZipManager.remove(fileUrl: oldPlistUrl)
+            }
         }
     }
 }

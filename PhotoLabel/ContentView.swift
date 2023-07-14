@@ -764,6 +764,17 @@ class ZipManager {
         ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
         ZipManager.remove(fileUrl: targetUrl)
     }
+    static func copyZip(atZipUrl: URL, toZipUrl: URL) {
+        let atDirUrl = atZipUrl.deletingPathExtension()
+        let toDirUrl = toZipUrl.deletingPathExtension()
+        ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
+        ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
+        ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
+        if fileManager.fileExists(atPath: toZipUrl.path) {
+            ZipManager.remove(fileUrl: atDirUrl)
+            ZipManager.remove(fileUrl: toDirUrl)
+        }
+    }
     static func renameZip(atZipUrl: URL, toZipUrl: URL) {
         let atDirUrl = atZipUrl.deletingPathExtension()
         let toDirUrl = toZipUrl.deletingPathExtension()
