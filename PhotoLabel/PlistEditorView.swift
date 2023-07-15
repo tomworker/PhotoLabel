@@ -23,6 +23,7 @@ struct PlistEditorView: View {
     @State var isMaxNumberMainError = false
     @State var isMaxNumberSubError = false
     @State var isMaxNumberImageError = false
+    @State var selectedIndex: [Int] = [-1, -1]
 
     var body: some View {
         HStack {
@@ -62,8 +63,8 @@ struct PlistEditorView: View {
                     }
                 }
             } label : {
-                Text("Save & exit")
-                    .frame(width: 100, height: 30)
+                Text("Save")
+                    .frame(width: 50, height: 30)
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
@@ -136,28 +137,113 @@ struct PlistEditorView: View {
                 }
             }
         }
-        List {
-            Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
-                    HStack {
-                        Text(String(item + 1))
-                            .frame(width: 25)
-                        TextField("Category", text: $mainCategoryStrings[item])
+        VStack {
+            if selectedIndex[0] != -1 && selectedIndex[1] != -1 {
+                Spacer(minLength: 8)
+                HStack {
+                    Button {
+                        changePlacePlist()
+                    } label: {
+                        Text("Change places")
+                            .frame(width: 150, height: 30)
+                            .background(.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.leading)
                     }
+                    Spacer()
                 }
             }
-        }
-        NavigationView {
             List {
-                Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
+                Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
                     ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
-                        NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item])) {
-                            Text(mainCategoryStrings[item])
+                        HStack {
+                            VStack {
+                                Image(systemName: selectedIndex[0] == item || selectedIndex[1] == item ? "checkmark.circle.fill" : "circle")
+                                    .frame(width: 25)
+                                    .foregroundColor(selectedIndex[0] != -1 && selectedIndex[1] != -1 ? selectedIndex[0] == item || selectedIndex[1] == item ? .blue : .gray : .blue)
+                            }
+                            .onTapGesture {
+                                if selectedIndex[0] == item {
+                                    if selectedIndex[1] == -1 {
+                                        selectedIndex[0] = -1
+                                    } else {
+                                        selectedIndex[0] = selectedIndex[1]
+                                        selectedIndex[1] = -1
+                                    }
+                                } else if selectedIndex[1] == item {
+                                    selectedIndex[1] = -1
+                                } else {
+                                    if selectedIndex[0] == -1 {
+                                        selectedIndex[0] = item
+                                    } else {
+                                        if selectedIndex[1] == -1 {
+                                            selectedIndex[1] = item
+                                        }
+                                    }
+                                }
+                                
+                            }
+                            Text(String(item + 1))
+                                .frame(width: 25)
+                            TextField("Category", text: $mainCategoryStrings[item])
                         }
                     }
                 }
             }
-            .listStyle(.grouped)
+            NavigationView {
+                List {
+                    Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
+                        ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
+                            NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item], imageFiles: $imageFiles[item])) {
+                                Text(mainCategoryStrings[item])
+                            }
+                        }
+                    }
+                }
+                .listStyle(.grouped)
+            }
+            
+        }
+    }
+    private func changePlacePlist() {
+        var place1 = selectedIndex[0]
+        var place2 = selectedIndex[1]
+        if place1 > place2 {
+            place1 = selectedIndex[1]
+            place2 = selectedIndex[0]
+        }
+        var tempMainCategoryString = ""
+        var tempSubCategoryStrings: [String] = []
+        var tempCountStoredImages: [Int] = []
+        var tempImageFiles: [[String]] = []
+        for i in 0..<mainCategoryStrings.count {
+            if i == place1 {
+                tempMainCategoryString = mainCategoryStrings[place1]
+                for j in 0..<subCategoryStrings[place1].count {
+                    tempSubCategoryStrings.append(subCategoryStrings[place1][j])
+                    tempCountStoredImages.append(countStoredImages[place1][j])
+                    tempImageFiles.append([])
+                    for k in 0..<imageFiles[place1][j].count {
+                        tempImageFiles[j].append(imageFiles[place1][j][k])
+                    }
+                }
+            }
+            if i == place2 {
+                mainCategoryStrings[place1] = mainCategoryStrings[place2]
+                mainCategoryStrings[place2] = tempMainCategoryString
+                tempMainCategoryString = ""
+                for j in 0..<subCategoryStrings[place2].count {
+                    subCategoryStrings[place1][j] = subCategoryStrings[place2][j]
+                    subCategoryStrings[place2][j] = tempSubCategoryStrings[j]
+                    countStoredImages[place1][j] = countStoredImages[place2][j]
+                    countStoredImages[place2][j] = tempCountStoredImages[j]
+                    for k in 0..<imageFiles[place2][j].count {
+                        imageFiles[place1][j][k] = imageFiles[place2][j][k]
+                        imageFiles[place2][j][k] = tempImageFiles[j][k]
+                    }
+                }
+            }
         }
     }
     private func savePlist(isRename: Bool, isCopy: Bool) {
