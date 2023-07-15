@@ -144,7 +144,7 @@ struct PlistEditorView: View {
                     Button {
                         changePlacePlist()
                     } label: {
-                        Text("Change places")
+                        Text("Change Places")
                             .frame(width: 150, height: 30)
                             .background(.blue)
                             .foregroundColor(.white)
