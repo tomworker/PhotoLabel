@@ -319,7 +319,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"PhotoLabel/Preview Content\"";
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
@@ -328,8 +328,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "\"PhotoLabel\" uses camera to take photos.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\"PhotoLabel\" accesses photo library to import photos.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Our app uses camera to take photos for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Our app accesses photo library for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -354,7 +354,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"PhotoLabel/Preview Content\"";
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
@@ -363,8 +363,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "\"PhotoLabel\" uses camera to take photos.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\"PhotoLabel\" accesses photo library to import photos.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Our app uses camera to take photos for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Our app accesses photo library for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
