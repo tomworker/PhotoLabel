@@ -60,10 +60,9 @@ struct CategorySelectorView: View {
                             showFinalReport = true
                         } label: {
                             HStack {
-                                Text("Final Report ")
-                                Image(systemName: "apple.logo")
+                                Text("Final Report")
                             }
-                            .frame(width: 150, height: 30)
+                            .frame(width: 130, height: 30)
                             .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                             .foregroundColor(.white)
                             .cornerRadius(10)
