@@ -319,7 +319,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PhotoLabel/Preview Content\"";
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
@@ -328,8 +328,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Our app uses camera to take photos for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Our app accesses photo library for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "本アプリは新たに撮影した写真を各カテゴリビューに保存するためカメラにアクセスします。一旦保存されると本アプリ内でのみ写真にカテゴリ名がリンクされます。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "本アプリは既存の写真を各カテゴリビューに保存するためフォトライブラリーにアクセスします。一旦保存されると本アプリ内でのみ写真にカテゴリ名がリンクされます。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -339,7 +339,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -354,7 +354,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"PhotoLabel/Preview Content\"";
 				DEVELOPMENT_TEAM = 8BDHMGU8AU;
 				ENABLE_PREVIEWS = YES;
@@ -363,8 +363,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Photo Label";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.photography";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Our app uses camera to take photos for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Our app accesses photo library for storing them in each category view. Once stored, the photos are linked to the category name in our app only.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "本アプリは新たに撮影した写真を各カテゴリビューに保存するためカメラにアクセスします。一旦保存されると本アプリ内でのみ写真にカテゴリ名がリンクされます。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "本アプリは既存の写真を各カテゴリビューに保存するためフォトライブラリーにアクセスします。一旦保存されると本アプリ内でのみ写真にカテゴリ名がリンクされます。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -374,7 +374,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
