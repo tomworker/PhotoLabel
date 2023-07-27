@@ -10,7 +10,9 @@ import SwiftUI
 struct FinalReportView: View {
     @Binding var showFinalReport: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
-    @State var targetImageFile = ""
+    @State var targetMainCategoryIndex = -1
+    @State var targetSubCategoryIndex = -1
+    @State var targetImageFileIndex = -1
     @State var showImageView = false
     var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
     var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
@@ -62,10 +64,12 @@ struct FinalReportView: View {
                                     //Above code goes well for some reason.
                                     .onTapGesture(count: 1) {
                                         showImageView = true
-                                        self.targetImageFile = imageFileId.imageFile.imageFile
+                                        self.targetMainCategoryIndex = mainCategoryId.id
+                                        self.targetSubCategoryIndex = subCategoryId.id
+                                        self.targetImageFileIndex = imageFileId.id
                                     }
                                     .fullScreenCover(isPresented: $showImageView) {
-                                        ImageView(showImageView: $showImageView, imageFile: targetImageFile)
+                                        ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images))
                                     }
                             }
                         }

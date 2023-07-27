@@ -23,6 +23,7 @@ struct EachTabView: View {
     @State var isTargeted2 = false
     @State var isTargetedIndex2 = -1
     @State var targetImageFile = ""
+    @State var targetImageFileIndex = -1
     @State var showImageView = false
     @State var isDuplicateMode = false
     let sheetId = 2
@@ -187,7 +188,7 @@ struct EachTabView: View {
                                             }
                                             .onTapGesture(count: 1) {
                                                 showImageView = true
-                                                self.targetImageFile = imageFileId.imageFile.imageFile
+                                                self.targetImageFileIndex = imageFileId.id
                                             }
                                             .draggable(String(imageFileId.id) + ":" + imageFileId.imageFile.imageFile + ":0") {
                                                 Image(uiImage: uiimage).border(.secondary)
@@ -232,7 +233,7 @@ struct EachTabView: View {
                                                 self.isTargetedIndex1 = imageFileId.id
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(showImageView: $showImageView, imageFile: targetImageFile)
+                                                ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images))
                                             }
                                     }
                                 }
