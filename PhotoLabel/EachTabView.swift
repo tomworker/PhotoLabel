@@ -65,7 +65,7 @@ struct EachTabView: View {
                                         .cornerRadius(10)
                                 }
                                 .sheet(isPresented: $showPhotoLibrary2) {
-                                    ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                    PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Spacer()
                                 Button {
