@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9830C6DB2A4EC844004971E5 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9830C6DA2A4EC844004971E5 /* ConfigView.swift */; };
+		9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */; };
 		989697182A35FE3800EE3599 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 989697172A35FE3800EE3599 /* ZIPFoundation */; };
 		9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697192A35FEB700EE3599 /* CategorySelectorView.swift */; };
 		9896971C2A35FEFB00EE3599 /* FinalReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896971B2A35FEFB00EE3599 /* FinalReportView.swift */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		9830C6DA2A4EC844004971E5 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
+		9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryImagePickerView.swift; sourceTree = "<group>"; };
 		989697152A35FC6000EE3599 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		989697192A35FEB700EE3599 /* CategorySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectorView.swift; sourceTree = "<group>"; };
 		9896971B2A35FEFB00EE3599 /* FinalReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinalReportView.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
 				989697212A35FF7200EE3599 /* EachTabView.swift */,
 				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
+				9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */,
 				9896971D2A35FF2300EE3599 /* ImageView.swift */,
 				9896971B2A35FEFB00EE3599 /* FinalReportView.swift */,
 				989697232A35FF9800EE3599 /* PlistCreatorView.swift */,
@@ -183,6 +186,7 @@
 				989697242A35FF9800EE3599 /* PlistCreatorView.swift in Sources */,
 				989697202A35FF5000EE3599 /* ImageStockerTabView.swift in Sources */,
 				9896971E2A35FF2300EE3599 /* ImageView.swift in Sources */,
+				9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */,
 				989697282A35FFDB00EE3599 /* PlistCreatorSubView.swift in Sources */,
 				9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */,
 				989697222A35FF7200EE3599 /* EachTabView.swift in Sources */,

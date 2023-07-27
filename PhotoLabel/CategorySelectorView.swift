@@ -182,7 +182,7 @@ struct CategorySelectorView: View {
                                     .cornerRadius(10)
                             }
                             .sheet(isPresented: $showPhotoLibrary) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .photoLibrary, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Spacer()
                             Button {
