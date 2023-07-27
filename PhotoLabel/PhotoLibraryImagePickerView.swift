@@ -79,11 +79,18 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration()
         configuration.filter = .images
-        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages >= ConfigManager.maxNumberOfImageFile {
-            configuration.selectionLimit = 0
-            presentationMode.wrappedValue.dismiss()
-        } else {
-            configuration.selectionLimit = ConfigManager.maxNumberOfImageFile - mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages
+        switch sheetId {
+        case 1:
+            configuration.selectionLimit = ConfigManager.maxNumberOfImageFile
+        case 2:
+            if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages >= ConfigManager.maxNumberOfImageFile {
+                configuration.selectionLimit = 0
+                presentationMode.wrappedValue.dismiss()
+            } else {
+                configuration.selectionLimit = ConfigManager.maxNumberOfImageFile - mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages
+            }
+        default:
+            print("SheetId has failed to be found:\(sheetId)")
         }
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = context.coordinator

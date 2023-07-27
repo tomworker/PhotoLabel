@@ -25,6 +25,7 @@ struct EachTabView: View {
     @State var targetImageFile = ""
     @State var targetImageFileIndex = -1
     @State var showImageView = false
+    @State var showImageView2 = false
     @State var isDuplicateMode = false
     let sheetId = 2
     var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
@@ -187,7 +188,7 @@ struct EachTabView: View {
                                                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
                                             .onTapGesture(count: 1) {
-                                                showImageView = true
+                                                showImageView2 = true
                                                 self.targetImageFileIndex = imageFileId.id
                                             }
                                             .draggable(String(imageFileId.id) + ":" + imageFileId.imageFile.imageFile + ":0") {
@@ -232,8 +233,8 @@ struct EachTabView: View {
                                                 self.isTargeted1 = isTargeted
                                                 self.isTargetedIndex1 = imageFileId.id
                                             }
-                                            .fullScreenCover(isPresented: $showImageView) {
-                                                ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images))
+                                            .fullScreenCover(isPresented: $showImageView2) {
+                                                ImageTabView(showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images))
                                             }
                                     }
                                 }
