@@ -153,6 +153,21 @@ struct PlistEditorView: View {
                     }
                     Spacer()
                 }
+            } else if (selectedIndex[0] != -1 && selectedIndex[1] == -1) || (selectedIndex[0] == -1 && selectedIndex[1] != -1) {
+                Spacer(minLength: 8)
+                HStack {
+                    Button {
+                        insertBlankPlist()
+                    } label: {
+                        Text("Insert Blank")
+                            .frame(width: 150, height: 30)
+                            .background(.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.leading)
+                    }
+                    Spacer()
+                }
             }
             List {
                 Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
@@ -204,6 +219,18 @@ struct PlistEditorView: View {
                 .listStyle(.grouped)
             }
             
+        }
+    }
+    private func insertBlankPlist() {
+        var place1 = selectedIndex[0]
+        if place1 == -1 {
+            place1 = selectedIndex[1]
+        }
+        if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+            mainCategoryStrings.insert("", at: place1)
+            subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
+            countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
+            imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
         }
     }
     private func changePlacePlist() {
