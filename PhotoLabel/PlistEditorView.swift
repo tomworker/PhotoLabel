@@ -13,6 +13,7 @@ struct PlistEditorView: View {
     @State var initialPlistName = ""
     @State var mainCategoryIds: [MainCategoryId]
     @State var mainCategoryStrings: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
+    @State var subFolderModes: [Int] = Array(repeating: 0, count: ConfigManager.maxNumberOfMainCategory)
     @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
@@ -120,6 +121,7 @@ struct PlistEditorView: View {
                     break
                 }
                 mainCategoryStrings[i] = mainCategorys[i].mainCategory
+                subFolderModes[i] = mainCategorys[i].subFolderMode
                 for j in 0..<mainCategorys[i].items.count {
                     if mainCategorys[i].items.count > ConfigManager.maxNumberOfSubCategory {
                         isMaxNumberSubError = true
@@ -160,11 +162,23 @@ struct PlistEditorView: View {
                         insertBlankPlist()
                     } label: {
                         Text("Insert Blank")
-                            .frame(width: 150, height: 30)
+                            .frame(width: 130, height: 30)
                             .background(.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                             .padding(.leading)
+                    }
+                    Button {
+                        subFolderMode()
+                    } label: {
+                        if selectedIndex[0] != -1 {
+                            Text(subFolderModes[selectedIndex[0]] == 1 ? "SubFolder Mode OFF" : "SubFolder Mode ON")
+                                .frame(width: 200, height: 30)
+                                .background(.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.leading)
+                        }
                     }
                     Spacer()
                 }
@@ -199,6 +213,8 @@ struct PlistEditorView: View {
                                 }
                                 
                             }
+                            Text(subFolderModes[item] == 1 ? "S" : "")
+                                .frame(width: 10)
                             Text(String(item + 1))
                                 .frame(width: 25)
                             TextField("Category", text: $mainCategoryStrings[item])
@@ -221,6 +237,17 @@ struct PlistEditorView: View {
             
         }
     }
+    private func subFolderMode() {
+        var place1 = selectedIndex[0]
+        if place1 == -1 {
+            place1 = selectedIndex[1]
+        }
+        if subFolderModes[place1] == 1 {
+            subFolderModes[place1] = 0
+        } else {
+            subFolderModes[place1] = 1
+        }
+    }
     private func insertBlankPlist() {
         var place1 = selectedIndex[0]
         if place1 == -1 {
@@ -228,6 +255,7 @@ struct PlistEditorView: View {
         }
         if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
             mainCategoryStrings.insert("", at: place1)
+            subFolderModes.insert(0, at: place1)
             subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
             countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
             imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
@@ -241,12 +269,14 @@ struct PlistEditorView: View {
             place2 = selectedIndex[0]
         }
         var tempMainCategoryString = ""
+        var tempSubFolderModes = 0
         var tempSubCategoryStrings: [String] = []
         var tempCountStoredImages: [Int] = []
         var tempImageFiles: [[String]] = []
         for i in 0..<mainCategoryStrings.count {
             if i == place1 {
                 tempMainCategoryString = mainCategoryStrings[place1]
+                tempSubFolderModes = subFolderModes[place1]
                 for j in 0..<subCategoryStrings[place1].count {
                     tempSubCategoryStrings.append(subCategoryStrings[place1][j])
                     tempCountStoredImages.append(countStoredImages[place1][j])
@@ -260,6 +290,9 @@ struct PlistEditorView: View {
                 mainCategoryStrings[place1] = mainCategoryStrings[place2]
                 mainCategoryStrings[place2] = tempMainCategoryString
                 tempMainCategoryString = ""
+                subFolderModes[place1] = subFolderModes[place2]
+                subFolderModes[place2] = tempSubFolderModes
+                tempSubFolderModes = 0
                 for j in 0..<subCategoryStrings[place2].count {
                     subCategoryStrings[place1][j] = subCategoryStrings[place2][j]
                     subCategoryStrings[place2][j] = tempSubCategoryStrings[j]
@@ -274,7 +307,13 @@ struct PlistEditorView: View {
         }
     }
     private func savePlist(isRename: Bool, isCopy: Bool) {
-        plistName = plistName.replacingOccurrences(of: " ", with: "_")
+        plistName = ZipManager.replaceString(targetString: plistName)
+        if plistName == "&img" {
+            plistName = "_&img"
+        }
+        if isRename == true && plistName == initialPlistName {
+            return
+        }
         let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
         var tempSubCategorys: [SubCategory] = []
         var tempImageFiles: [ImageFile] = []
@@ -293,7 +332,7 @@ struct PlistEditorView: View {
                         tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
                     }
                 }
-                mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i], items: tempSubCategorys))
+                mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i], items: tempSubCategorys, subFolderMode: subFolderModes[i]))
             }
         }
         CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)

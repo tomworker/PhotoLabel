@@ -265,16 +265,20 @@ struct CategorySelectorView: View {
                                                     var indexs3: [String] = []
                                                     indexs3.append(arr[2])
                                                     if indexs3.first! == "2" {
-                                                        if let originalImage = UIImage(contentsOfFile: indexs2.first!) {
+                                                        if let originalImage = UIImage(contentsOfFile: duplicateSpace[Int(indexs1.first!)!].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].subCategoryName)).appendingPathComponent(indexs2.first!).path : tempDirectoryUrl.appendingPathComponent(indexs2.first!).path) {
                                                             let dateFormatter = DateFormatter()
                                                             dateFormatter.dateFormat = "yyyyMMddHHmmss"
                                                             let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
                                                             let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                                                            let duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
+                                                            var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
+                                                            if mainCategoryIds[targetMainCategoryIndex].subFolderMode == 1 {
+                                                                duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory)).appendingPathComponent(duplicateSpaceImageFileName)
+                                                                ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory)))
+                                                            }
                                                             do {
                                                                 try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
-                                                                ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: URL(string: indexs2.first!)!.lastPathComponent, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id)
+                                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
+                                                                ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id)
                                                                 ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                             } catch {
                                                                 print("Writing Jpg file failed with error:\(error)")
@@ -283,7 +287,7 @@ struct CategorySelectorView: View {
                                                     } else if indexs3.first! == "1" {
                                                         var duplicateSpaceImageFileName = URL(string: indexs2.first!)!.lastPathComponent
                                                         duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
+                                                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
                                                         ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, workSpace: &workSpace)
                                                         ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                     }
@@ -320,32 +324,36 @@ struct CategorySelectorView: View {
                     .foregroundColor(.white)
                 if isDuplicateMode {
                     LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
-                        ForEach(CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)) { duplicateImageFileId in
-                            if let uiimage = UIImage(contentsOfFile: duplicateImageFileId.duplicateImageFile.imageFile.imageFile) {
+                        ForEach(duplicateSpace.indices, id: \.self) { index in
+                            if let uiimage = UIImage(contentsOfFile: duplicateSpace[index].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].subCategoryName)).appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path) {
                                 ZStack {
                                     Image(uiImage: uiimage)
                                         .resizable()
                                         .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                         .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                         .cornerRadius(10)
-                                        .border(.indigo, width: isTargeted && duplicateImageFileId.id == isTargetedIndex ? 3 : .zero)
+                                        .border(.indigo, width: isTargeted && index == isTargetedIndex ? 3 : .zero)
                                     VStack {
-                                        Text(duplicateImageFileId.duplicateImageFile.mainCategoryName)
+                                        Text(duplicateSpace[index].mainCategoryName)
                                             .foregroundColor(.white.opacity(0.5))
                                             .background(.black.opacity(0.5))
-                                        Text(duplicateImageFileId.duplicateImageFile.subCategoryName)
+                                        Text(duplicateSpace[index].subCategoryName)
                                             .foregroundColor(.white.opacity(0.5))
                                             .background(.black.opacity(0.5))
                                     }
                                 }
                                 .onTapGesture(count: 2) {
-                                    CategoryManager.moveItemFromLastToFirst(image: duplicateImageFileId, duplicateSpace: &duplicateSpace)
+                                    CategoryManager.moveItemFromLastToFirst(image: CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)[index], duplicateSpace: &duplicateSpace)
                                 }
                                 .onTapGesture(count: 1) {
                                     showImageView = true
-                                    self.targetImageFile = duplicateImageFileId.duplicateImageFile.imageFile.imageFile
+                                    if duplicateSpace[index].subFolderMode == 1 {
+                                        self.targetImageFile = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].subCategoryName)).appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path
+                                    } else {
+                                        self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path
+                                    }
                                 }
-                                .draggable(String(duplicateImageFileId.id) + ":" + duplicateImageFileId.duplicateImageFile.imageFile.imageFile + ":2") {
+                                .draggable(String(index) + ":" + duplicateSpace[index].imageFile.imageFile + ":2") {
                                     Image(uiImage: uiimage).border(.secondary)
                                 }
                                 .dropDestination(for: String.self) { indexs, location in
@@ -357,12 +365,12 @@ struct CategorySelectorView: View {
                                     var indexs3: [String] = []
                                     indexs3.append(arr[2])
                                     if indexs3.first! == "2" {
-                                        CategoryManager.reorderItems(image: duplicateImageFileId, indexs: indexs1, duplicateSpace: &duplicateSpace)
+                                        CategoryManager.reorderItems(image: CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)[index], indexs: indexs1, duplicateSpace: &duplicateSpace)
                                     }
                                     return true
                                 } isTargeted: { isTargeted in
                                     self.isTargeted = isTargeted
-                                    self.isTargetedIndex = duplicateImageFileId.id
+                                    self.isTargetedIndex = index
                                 }
                                 .fullScreenCover(isPresented: $showImageView) {
                                     ImageView(showImageView: $showImageView, imageFile: targetImageFile)

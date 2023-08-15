@@ -49,7 +49,7 @@ struct FinalReportView: View {
                         Spacer()
                     }
                     LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
-                        ForEach(CategoryManager.convertIdentifiable(imageFiles: subCategoryId.images)) { imageFileId in
+                        ForEach(CategoryManager.convertIdentifiable(imageFiles: subCategoryId.images, subFolderMode: mainCategoryId.subFolderMode, mainCategoryName: mainCategoryId.mainCategory, subCategoryName: subCategoryId.subCategory)) { imageFileId in
                             if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                 Image(uiImage: uiimage)
                                     .resizable()
@@ -66,7 +66,7 @@ struct FinalReportView: View {
                                         self.targetImageFileIndex = imageFileId.id
                                     }
                                     .fullScreenCover(isPresented: $showImageView) {
-                                        ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images))
+                                        ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
                                     }
                             }
                         }
