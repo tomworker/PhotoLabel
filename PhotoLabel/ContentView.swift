@@ -433,8 +433,8 @@ struct ContentView: View {
                                             print("Subx2Folder image files have failed to be obtained:\(error)")
                                         }
                                     } else {
-                                        if subDirImageFiles[j].first == "@" {
-                                            workSpace.append(WorkSpaceImageFile(imageFile: subDirImageFiles[j], subDirectory: tempImageFiles[i]))
+                                        if subDirImageFiles[j - j2].first == "@" {
+                                            workSpace.append(WorkSpaceImageFile(imageFile: subDirImageFiles[j - j2], subDirectory: tempImageFiles[i]))
                                         }
                                     }
                                 }

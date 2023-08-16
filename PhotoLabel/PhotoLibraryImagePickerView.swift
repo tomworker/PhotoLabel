@@ -77,16 +77,6 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                     }
                 }
             }
-            /*
-            switch self.parent.sheetId {
-            case 1:
-                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
-            case 2:
-                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
-            default:
-                print("SheetId have failed to be found:\(self.parent.sheetId)")
-            }
-             */
         }
     }
     func makeCoordinator() -> Coordinator {
