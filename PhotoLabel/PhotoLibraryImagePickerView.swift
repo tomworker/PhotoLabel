@@ -42,7 +42,7 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                         let workSpaceImageFileName = "@\(dateFormatter.string(from: Date()))\(String(i)).jpg"
                         let workSpaceJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
                         let plistImageFileName = "\(dateFormatter.string(from: Date()))\(String(i)).jpg"
-                        let plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
+                        var plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                         let duplicateSpaceImageFileName = plistImageFileName
                         do {
                             switch self.parent.sheetId {
@@ -50,8 +50,12 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                                 try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
                                 self.parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: 0)
                             case 2:
+                                if self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode == 1 {
+                                    ZipManager.create(directoryUrl: self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)))
+                                    plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
+                                }
                                 try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                                self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: 0)
+                                self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: 0)
                                 self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: 0)
                                 self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].countStoredImages += 1
                             default:
@@ -60,16 +64,18 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                         } catch {
                             print("Writing Jpg file failed with error:\(error)")
                         }
+                        if i == results.count - 1 {
+                            switch self.parent.sheetId {
+                            case 1:
+                                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
+                            case 2:
+                                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
+                            default:
+                                print("SheetId have failed to be found:\(self.parent.sheetId)")
+                            }
+                        }
                     }
                 }
-            }
-            switch self.parent.sheetId {
-            case 1:
-                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
-            case 2:
-                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
-            default:
-                print("SheetId have failed to be found:\(self.parent.sheetId)")
             }
         }
     }

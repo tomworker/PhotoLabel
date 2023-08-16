@@ -361,7 +361,9 @@ struct ContentView: View {
                 ZipManager.create(directoryUrl: tempDirectoryUrl)
             }
         }
-        let tempImageFiles: [String]
+        var tempImageFiles: [String]
+        var initialTempImageFileUrl: URL
+        var tempImageFileUrl: URL
         var tempImageFile: String
         do {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
@@ -372,14 +374,73 @@ struct ContentView: View {
                 tempImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).path
                 if ZipManager.fileManager.fileExists(atPath: tempImageFile, isDirectory: &isDir) {
                     if isDir.boolValue {
-                        let subDirImageFiles: [String]
+                        initialTempImageFileUrl = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i])
+                        tempImageFiles[i] = ZipManager.replaceString(targetString: tempImageFiles[i])
+                        tempImageFileUrl = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i])
+                        tempImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).path
+                        if initialTempImageFileUrl != tempImageFileUrl {
+                            ZipManager.rename(atFileUrl: initialTempImageFileUrl, toFileUrl: tempImageFileUrl)
+                        }
+                        var subDirImageFiles: [String]
+                        var subDirImageFile: String
                         do {
                             subDirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempImageFile)
+                            if subDirImageFiles.count == 0 {
+                                ZipManager.remove(directoryUrl: tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]))
+                            }
+                            var j2 = 0
                             for j in 0..<subDirImageFiles.count {
-                                if subDirImageFiles[j].first == "@" {
-                                    workSpace.append(WorkSpaceImageFile(imageFile: subDirImageFiles[j], subDirectory: tempImageFiles[i]))
+                                var isDir2: ObjCBool = false
+                                subDirImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).appendingPathComponent(subDirImageFiles[j - j2]).path
+                                if ZipManager.fileManager.fileExists(atPath: subDirImageFile, isDirectory: &isDir2) {
+                                    if isDir2.boolValue {
+                                        var subx2DirImageFiles: [String]
+                                        var subx2DirImageFile: String
+                                        do {
+                                            subx2DirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: subDirImageFile)
+                                            if subx2DirImageFiles.count == 0 {
+                                                ZipManager.remove(directoryUrl: tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).appendingPathComponent(subDirImageFiles[j - j2]))
+                                                j2 = j2 + 1
+                                                subDirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempImageFile)
+                                                if subDirImageFiles.count == 0 {
+                                                    ZipManager.remove(directoryUrl: tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]))
+                                                }
+                                            }
+                                            var k2 = 0
+                                            for k in 0..<subx2DirImageFiles.count {
+                                                var isDir3: ObjCBool = false
+                                                subx2DirImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).appendingPathComponent(subDirImageFiles[j - j2]).appendingPathComponent(subx2DirImageFiles[k - k2]).path
+                                                if ZipManager.fileManager.fileExists(atPath: subx2DirImageFile, isDirectory: &isDir3) {
+                                                    if isDir3.boolValue {
+                                                    } else {
+                                                        let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).appendingPathComponent(subDirImageFiles[j - j2]).appendingPathComponent(subx2DirImageFiles[k - k2])
+                                                        let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(subx2DirImageFiles[k - k2])
+                                                        ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
+                                                        k2 = k2 + 1
+                                                        subx2DirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: subDirImageFile)
+                                                        if subx2DirImageFiles.count == 0 {
+                                                            ZipManager.remove(directoryUrl: tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).appendingPathComponent(subDirImageFiles[j - j2]))
+                                                            j2 = j2 + 1
+                                                            subDirImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempImageFile)
+                                                            if subDirImageFiles.count == 0 {
+                                                                ZipManager.remove(directoryUrl: tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]))
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } catch {
+                                            print("Subx2Folder image files have failed to be obtained:\(error)")
+                                        }
+                                    } else {
+                                        if subDirImageFiles[j - j2].first == "@" {
+                                            workSpace.append(WorkSpaceImageFile(imageFile: subDirImageFiles[j - j2], subDirectory: tempImageFiles[i]))
+                                        }
+                                    }
                                 }
                             }
+                        } catch {
+                            print("SubFolder image files have failed to be obtained:\(error)")
                         }
                     } else {
                         if tempImageFiles[i].first == "@" {
@@ -397,13 +458,18 @@ struct ContentView: View {
             for j in 0..<initialMainCategorys[i].items.count {
                 let subCategoryName = initialMainCategorys[i].items[j].subCategory
                 for k in 0..<initialMainCategorys[i].items[j].images.count {
-                    duplicateSpace.append(DuplicateImageFile(imageFile: ImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile), mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
+                    if initialMainCategorys[i].subFolderMode == 1 {
+                        ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)))
+                        let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(initialMainCategorys[i].items[j].images[k].imageFile)
+                        let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).appendingPathComponent(initialMainCategorys[i].items[j].images[k].imageFile)
+                        ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
+                    }
+                    duplicateSpace.append(DuplicateImageFile(imageFile: ImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile), subFolderMode: initialMainCategorys[i].subFolderMode, mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
                 }
             }
         }
     }
 }
-
 struct ImageFile: Decodable, Encodable, Equatable {
     let imageFile: String
 }
@@ -413,6 +479,11 @@ struct SubCategory: Decodable, Encodable {
     var images: [ImageFile]
 }
 struct MainCategory: Decodable, Encodable {
+    let mainCategory: String
+    let items: [SubCategory]
+    let subFolderMode: Int
+}
+struct OldMainCategory: Decodable, Encodable {
     let mainCategory: String
     let items: [SubCategory]
 }
@@ -431,6 +502,7 @@ struct MainCategoryId: Identifiable {
     var id: Int
     let mainCategory: String
     var items: [SubCategoryId]
+    let subFolderMode: Int
 }
 struct WorkSpaceImageFile: Equatable {
     let imageFile: String
@@ -442,6 +514,7 @@ struct WorkSpaceImageFileId: Identifiable {
 }
 struct DuplicateImageFile: Equatable {
     let imageFile: ImageFile
+    let subFolderMode: Int
     let mainCategoryName: String
     let subCategoryName: String
 }
@@ -498,7 +571,18 @@ class CategoryManager {
             return mainCategorys
         } catch {
             print(error)
-            return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])])]
+            do {
+                let data = try Data.init(contentsOf: fileUrl)
+                let oldMainCategorys = try decoder.decode([OldMainCategory].self, from: data)
+                var mainCategorys: [MainCategory] = []
+                for i in 0..<oldMainCategorys.count {
+                    mainCategorys.append(MainCategory(mainCategory: oldMainCategorys[i].mainCategory, items: oldMainCategorys[i].items, subFolderMode: 0))
+                }
+                return mainCategorys
+            } catch {
+                print(error)
+                return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])], subFolderMode: 0)]
+            }
         }
     }
     static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
@@ -515,14 +599,18 @@ class CategoryManager {
     static func convertIdentifiable(duplicateImageFiles: [DuplicateImageFile]) -> [DuplicateImageFileId] {
         var duplicateImageFileIds: [DuplicateImageFileId] = []
         for i in 0..<duplicateImageFiles.count {
-            duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
+            duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), subFolderMode: duplicateImageFiles[i].subFolderMode, mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
         }
         return duplicateImageFileIds
     }
-    static func convertIdentifiable(imageFiles: [ImageFile]) -> [ImageFileId] {
+    static func convertIdentifiable(imageFiles: [ImageFile], subFolderMode: Int, mainCategoryName: String, subCategoryName: String) -> [ImageFileId] {
         var imageFileIds: [ImageFileId] = []
         for i in 0..<imageFiles.count {
-            imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
+            if subFolderMode == 1 {
+                imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).path + "/" + imageFiles[i].imageFile)))
+            } else {
+                imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
+            }
         }
         return imageFileIds
     }
@@ -536,7 +624,7 @@ class CategoryManager {
     static func convertIdentifiable(mainCategorys: [MainCategory]) -> [MainCategoryId] {
         var mainCategoryIds: [MainCategoryId] = []
         for i in 0..<mainCategorys.count {
-            mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items)))
+            mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items), subFolderMode: mainCategorys[i].subFolderMode))
         }
         return mainCategoryIds
     }
@@ -550,7 +638,7 @@ class CategoryManager {
     static func convertNoIdentifiable(mainCategoryIds: [MainCategoryId]) -> [MainCategory] {
         var mainCategorys: [MainCategory] = []
         for i in 0..<mainCategoryIds.count {
-            mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items)))
+            mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items), subFolderMode: mainCategoryIds[i].subFolderMode))
         }
         return mainCategorys
     }
@@ -685,6 +773,13 @@ class ZipManager {
     static let fileManager = FileManager.default
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    static func replaceString(targetString: String) -> String {
+        var replacedString: String {
+            let dictionary = [" ": "_", ".": ",", ":": "", "¥": "", "/": "", "?": "", "<": "", ">": "", "*": "", "|": "", "\"": ""]
+            return dictionary.reduce(targetString) { $0.replacingOccurrences(of: $1.key, with: $1.value)}
+        }
+        return replacedString != "" ? replacedString : "_"
+    }
     static func moveImagesFromWorkSpaceToTrashBox(images: [String], workSpace: inout [WorkSpaceImageFile]) {
         let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
         ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(workSpaceImageFile))
@@ -693,7 +788,10 @@ class ZipManager {
     static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile], duplicateSpace: inout [DuplicateImageFile]) {
         let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
         let workSpaceImageFile = "@\(targetImageFile)"
-        let beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
+        var beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
+        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(targetImageFile)
+        }
         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
@@ -715,7 +813,11 @@ class ZipManager {
         } else {
             beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(subDirectory + "/" + workSpaceImageFile)
         }
-        let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
+        var afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
+        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+            ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
+            afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFile)
+        }
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
         workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})

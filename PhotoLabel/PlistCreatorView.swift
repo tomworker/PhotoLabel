@@ -28,7 +28,7 @@ struct PlistCreatorView: View {
             }
             Button {
                 if plistName != "" {
-                    plistName = plistName.replacingOccurrences(of: " ", with: "_")
+                    plistName = ZipManager.replaceString(targetString: plistName)
                     let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
                     var tempSubCategorys: [SubCategory] = []
                     for i in 0..<mainCategory.count {
@@ -39,7 +39,7 @@ struct PlistCreatorView: View {
                                     tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: 0, images: []))
                                 }
                             }
-                            mainCategorys.append(MainCategory(mainCategory: mainCategory[i], items: tempSubCategorys))
+                            mainCategorys.append(MainCategory(mainCategory: mainCategory[i], items: tempSubCategorys, subFolderMode: 0))
                         }
                     }
                     CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
