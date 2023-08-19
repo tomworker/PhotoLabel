@@ -22,6 +22,8 @@ struct ConfigView: View {
     @State var maxEntryOfCategorys = 0
     @State var maxEntryOfDetails = 0
     @State var maxEntryOfPhotos = 0
+    @State var iPadCheckBoxMatrixColumnWidth = 0
+    @State var checkBoxMatrixColumnWidth = 0
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
@@ -43,6 +45,8 @@ struct ConfigView: View {
                     maxEntryOfCategorys = ConfigManager.initialMaxNumberOfMainCategory
                     maxEntryOfDetails = ConfigManager.initialMaxNumberOfSubCategory
                     maxEntryOfPhotos = ConfigManager.initialMaxNumberOfImageFile
+                    iPadCheckBoxMatrixColumnWidth = ConfigManager.initialIPadCheckBoxMatrixColumnWidth
+                    checkBoxMatrixColumnWidth = ConfigManager.initialCheckBoxMatrixColumnWidth
                 } label: {
                     Text("Reset")
                         .frame(width: 80, height: 30)
@@ -53,7 +57,7 @@ struct ConfigView: View {
                 }
                 Button {
                     let jsonUrl = documentDirectoryUrl.appendingPathComponent("config.json")
-                    let config = Config(iPadMaxColCatBtn: iPadMaxColumnsCategoryButton, iPadMaxColDetBtn: iPadMaxColumnsDetailsButton, iPadMaxColPhoto: iPadMaxColumnsPhotos,maxColCatBtn: maxColumnsCategoryButton, maxColDetBtn: maxColumnsDetailsButton, maxColPhoto: maxColumnsPhotos, iPadMaxRowCatBtn: iPadMaxRowsCategoryButton, iPadMaxRowDetBtn: iPadMaxRowsDetailsButton, maxRowCatBtn: iPadMaxRowsCategoryButton, maxRowDetBtn: maxRowsDetailsButton, maxEntCat: maxEntryOfCategorys, maxEntDet: maxEntryOfDetails, maxEntPhoto: maxEntryOfPhotos)
+                    let config = Config(iPadMaxColCatBtn: iPadMaxColumnsCategoryButton, iPadMaxColDetBtn: iPadMaxColumnsDetailsButton, iPadMaxColPhoto: iPadMaxColumnsPhotos,maxColCatBtn: maxColumnsCategoryButton, maxColDetBtn: maxColumnsDetailsButton, maxColPhoto: maxColumnsPhotos, iPadMaxRowCatBtn: iPadMaxRowsCategoryButton, iPadMaxRowDetBtn: iPadMaxRowsDetailsButton, maxRowCatBtn: maxRowsCategoryButton, maxRowDetBtn: maxRowsDetailsButton, maxEntCat: maxEntryOfCategorys, maxEntDet: maxEntryOfDetails, maxEntPhoto: maxEntryOfPhotos, iPadChkBoxMtxColWidth: iPadCheckBoxMatrixColumnWidth, chkBoxMtxColWidth: checkBoxMatrixColumnWidth)
                     JsonManager.write(fileUrl: jsonUrl, config: config)
                     showConfig = false
                 } label: {
@@ -228,6 +232,28 @@ struct ConfigView: View {
                 }
                 .pickerStyle(.segmented)
             }
+            VStack(alignment: .leading) {
+                Text("Column width of : ") + Text("CheckBox Matrix")
+                Picker(selection: $iPadCheckBoxMatrixColumnWidth, label: Text("Config9")) {
+                    Text("50").tag(50)
+                    Text("90").tag(90)
+                    Text("130").tag(130)
+                    Text("170").tag(170)
+                    Text("210").tag(210)
+                }
+                .pickerStyle(.segmented)
+            }
+            VStack(alignment: .leading) {
+                Text("Column width of : ") + Text("CheckBox Matrix")
+                Picker(selection: $checkBoxMatrixColumnWidth, label: Text("Config10")) {
+                    Text("40").tag(40)
+                    Text("60").tag(60)
+                    Text("80").tag(80)
+                    Text("100").tag(100)
+                    Text("120").tag(120)
+                }
+                .pickerStyle(.segmented)
+            }
             Spacer()
                 .onAppear {
                     initialLoad()
@@ -271,6 +297,12 @@ struct ConfigView: View {
                 .onChange(of: maxEntryOfPhotos ) { newValue in
                     ConfigManager.maxNumberOfImageFile = maxEntryOfPhotos
                 }
+                .onChange(of: iPadCheckBoxMatrixColumnWidth ) { newValue in
+                    ConfigManager.iPadCheckBoxMatrixColumnWidth = iPadCheckBoxMatrixColumnWidth
+                }
+                .onChange(of: checkBoxMatrixColumnWidth ) { newValue in
+                    ConfigManager.checkBoxMatrixColumnWidth = checkBoxMatrixColumnWidth
+                }
         }
     }
     private func initialLoad() {
@@ -290,6 +322,8 @@ struct ConfigView: View {
             maxEntryOfCategorys = config.maxEntCat
             maxEntryOfDetails = config.maxEntDet
             maxEntryOfPhotos = config.maxEntPhoto
+            iPadCheckBoxMatrixColumnWidth = config.iPadChkBoxMtxColWidth
+            checkBoxMatrixColumnWidth = config.chkBoxMtxColWidth
         } else {
             iPadMaxColumnsCategoryButton = ConfigManager.iPadMainColumnNumber
             iPadMaxColumnsDetailsButton = ConfigManager.iPadSubColumnNumber
@@ -304,6 +338,8 @@ struct ConfigView: View {
             maxEntryOfCategorys = ConfigManager.maxNumberOfMainCategory
             maxEntryOfDetails = ConfigManager.maxNumberOfSubCategory
             maxEntryOfPhotos = ConfigManager.maxNumberOfImageFile
+            iPadCheckBoxMatrixColumnWidth = ConfigManager.iPadCheckBoxMatrixColumnWidth
+            checkBoxMatrixColumnWidth = ConfigManager.checkBoxMatrixColumnWidth
         }
     }
 }
@@ -321,6 +357,8 @@ struct Config: Encodable, Decodable {
     var maxEntCat: Int
     var maxEntDet: Int
     var maxEntPhoto: Int
+    var iPadChkBoxMtxColWidth: Int
+    var chkBoxMtxColWidth: Int
 }
 class JsonManager {
     static func write(fileUrl: URL, config: Config) {
@@ -341,7 +379,7 @@ class JsonManager {
             return config
         } catch {
             print(error)
-            return Config(iPadMaxColCatBtn: 0, iPadMaxColDetBtn: 0, iPadMaxColPhoto: 0, maxColCatBtn: 0, maxColDetBtn: 0, maxColPhoto: 0, iPadMaxRowCatBtn: 0, iPadMaxRowDetBtn: 0, maxRowCatBtn: 0, maxRowDetBtn: 0, maxEntCat: 0, maxEntDet: 0, maxEntPhoto: 0)
+            return Config(iPadMaxColCatBtn: 0, iPadMaxColDetBtn: 0, iPadMaxColPhoto: 0, maxColCatBtn: 0, maxColDetBtn: 0, maxColPhoto: 0, iPadMaxRowCatBtn: 0, iPadMaxRowDetBtn: 0, maxRowCatBtn: 0, maxRowDetBtn: 0, maxEntCat: 0, maxEntDet: 0, maxEntPhoto: 0, iPadChkBoxMtxColWidth: 0, chkBoxMtxColWidth: 0)
         }
     }
 }

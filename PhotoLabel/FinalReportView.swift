@@ -18,17 +18,21 @@ struct FinalReportView: View {
     var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
 
     var body: some View {
-        HStack {
-            Spacer()
-            Button {
-                showFinalReport = false
-            } label: {
-                Image(systemName: "xmark")
-                    .frame(width: 30, height: 30)
-                    .background(.orange)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.trailing)
+        ZStack {
+            Text("Final Report")
+                .bold()
+            HStack {
+                Spacer()
+                Button {
+                    showFinalReport = false
+                } label: {
+                    Image(systemName: "xmark")
+                        .frame(width: 30, height: 30)
+                        .background(.orange)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.trailing)
+                }
             }
         }
         ScrollView {
