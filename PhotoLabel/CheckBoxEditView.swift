@@ -18,7 +18,7 @@ struct CheckBoxEditView: View {
     @State var targetImageFileIndex = -1
     @State var showImageView = false
     @State var isEditSubCategory = false
-    @State var initialOriginx = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? 210 : 130)
+    @State var initialOriginx = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(5) - CGFloat(1)) * CGFloat(10)) / CGFloat(5) + CGFloat(10) : (UIScreen.main.bounds.width - (CGFloat(3) - CGFloat(1)) * CGFloat(10)) / CGFloat(3) + CGFloat(10))
     var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(3) - 1) * 10) / CGFloat(3)), spacing: 5), count: 1)
     var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(5) - 1) * 10) / CGFloat(5)), spacing: 5), count: 1)
 
@@ -102,12 +102,12 @@ struct CheckBoxEditView: View {
                             }
                             Spacer()
                         }
-                        .frame(height: UIDevice.current.userInterfaceIdiom == .pad ? 210 : 130)
+                        .frame(height: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(5) - 1) * 10) / CGFloat(5) + 10 : (UIScreen.main.bounds.width - (CGFloat(3) - 1) * 10) / CGFloat(3) + 10)
                         
                     }
                     Spacer()
                 }
-                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? 210 : 130)
+                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(5) - 1) * 10) / CGFloat(5) + 10 : (UIScreen.main.bounds.width - (CGFloat(3) - 1) * 10) / CGFloat(3) + 10)
 
                 if mainCategoryIds.count >= 2 {
                     HStack(spacing: 0) {
@@ -150,7 +150,7 @@ struct CheckBoxEditView: View {
                                     }
                                     Spacer()
                                 }
-                                .frame(height: UIDevice.current.userInterfaceIdiom == .pad ? 210 : 130)
+                                .frame(height: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(5) - 1) * 10) / CGFloat(5) + 10 : (UIScreen.main.bounds.width - (CGFloat(3) - 1) * 10) / CGFloat(3) + 10)
                                 .background((subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
                             }
                             .alert("", isPresented: $isEditSubCategory, actions: {
