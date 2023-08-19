@@ -25,6 +25,7 @@ struct PlistEditorView: View {
     @State var isMaxNumberSubError = false
     @State var isMaxNumberImageError = false
     @State var selectedIndex: [Int] = [-1, -1]
+    let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
         HStack {
@@ -147,11 +148,20 @@ struct PlistEditorView: View {
                         changePlacePlist()
                     } label: {
                         Text("Change Places")
-                            .frame(width: 150, height: 30)
+                            .frame(width: 140, height: 30)
                             .background(.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                             .padding(.leading)
+                    }
+                    Button {
+                        copyPlist()
+                    } label: {
+                        Text("Copy \(selectedIndex[0] + 1) to \(selectedIndex[1] + 1) w/o photos")
+                        .frame(width: 220, height: 30)
+                        .background(.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                     }
                     Spacer()
                 }
@@ -246,6 +256,26 @@ struct PlistEditorView: View {
             subFolderModes[place1] = 0
         } else {
             subFolderModes[place1] = 1
+        }
+    }
+    private func copyPlist() {
+        let place1 = selectedIndex[0]
+        let place2 = selectedIndex[1]
+        if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+            mainCategoryStrings.insert("", at: place2)
+            subFolderModes.insert(0, at: place2)
+            subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place2)
+            countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place2)
+            imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
+            if place1 < place2 {
+                mainCategoryStrings[place2] = mainCategoryStrings[place1]
+                subFolderModes[place2] = subFolderModes[place1]
+                subCategoryStrings[place2] = subCategoryStrings[place1]
+            } else {
+                mainCategoryStrings[place2] = mainCategoryStrings[place1 + 1]
+                subFolderModes[place2] = subFolderModes[place1 + 1]
+                subCategoryStrings[place2] = subCategoryStrings[place1 + 1]
+            }
         }
     }
     private func insertBlankPlist() {

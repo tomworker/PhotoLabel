@@ -3,4 +3,54 @@
    uuid = "087C33D7-87F2-4327-8E80-C1B591069106"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "718F82BC-2386-47CB-9C68-80ED350FF630"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PhotoLabel/CheckBoxEditView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "138"
+            endingLineNumber = "138"
+            landmarkName = "body"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "718F82BC-2386-47CB-9C68-80ED350FF630 - e99732e55ad346e7"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in closure #2 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onLongPressGesture(minimumDuration: Swift.Double, maximumDistance: CoreGraphics.CGFloat, perform: () -&gt; (), onPressingChanged: Swift.Optional&lt;(Swift.Bool) -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.Spacer, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onLongPressGesture(minimumDuration: Swift.Double, maximumDistance: CoreGraphics.CGFloat, perform: () -&gt; (), onPressingChanged: Swift.Optional&lt;(Swift.Bool) -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.Spacer, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 (PhotoLabel.SubCategoryId) -&gt; &lt;&lt;opaque return type of SwiftUI.View.background&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.ShapeStyle&gt;(_: &#x3c4;_1_0, ignoresSafeAreaEdges: SwiftUI.Edge.Set) -&gt; some&gt;&gt;.0 in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt; in closure #2 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, Swift.Optional&lt;SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;&gt;, SwiftUI.Spacer)&gt; in closure #3 () -&gt; SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, Swift.Optional&lt;SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;&gt;, SwiftUI.Spacer)&gt;&gt; in PhotoLabel.CheckBoxEditView.body.getter : some"
+                  moduleName = "PhotoLabel"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tomworker/Desktop/PhotoLabel/PhotoLabel/CheckBoxEditView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "164"
+                  endingLineNumber = "164"
+                  offsetFromSymbolStart = "840">
+               </Location>
+               <Location
+                  uuid = "718F82BC-2386-47CB-9C68-80ED350FF630 - e99732e55ad346e7"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in closure #2 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onLongPressGesture(minimumDuration: Swift.Double, maximumDistance: CoreGraphics.CGFloat, perform: () -&gt; (), onPressingChanged: Swift.Optional&lt;(Swift.Bool) -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.Spacer, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.onLongPressGesture(minimumDuration: Swift.Double, maximumDistance: CoreGraphics.CGFloat, perform: () -&gt; (), onPressingChanged: Swift.Optional&lt;(Swift.Bool) -&gt; ()&gt;) -&gt; some&gt;&gt;.0, SwiftUI.Spacer, SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.Spacer, &lt;&lt;opaque return type of SwiftUI.View.onTapGesture(count: Swift.Int, perform: () -&gt; ()) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 (PhotoLabel.SubCategoryId) -&gt; &lt;&lt;opaque return type of SwiftUI.View.background&lt;&#x3c4;_0_0 where &#x3c4;_1_0: SwiftUI.ShapeStyle&gt;(_: &#x3c4;_1_0, ignoresSafeAreaEdges: SwiftUI.Edge.Set) -&gt; some&gt;&gt;.0 in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt; in closure #2 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt; in closure #1 () -&gt; SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, Swift.Optional&lt;SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;&gt;, SwiftUI.Spacer)&gt; in closure #3 () -&gt; SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.frame(width: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, height: Swift.Optional&lt;CoreGraphics.CGFloat&gt;, alignment: SwiftUI.Alignment) -&gt; some&gt;&gt;.0, Swift.Optional&lt;SwiftUI.HStack&lt;SwiftUI.TupleView&lt;(SwiftUI.VStack&lt;SwiftUI.TupleView&lt;(&lt;&lt;opaque return type of SwiftUI.View.alert&lt;&#x3c4;_0_0, &#x3c4;_0_1 where &#x3c4;_1_0: SwiftUI.View, &#x3c4;_1_1: SwiftUI.View&gt;(_: SwiftUI.LocalizedStringKey, isPresented: SwiftUI.Binding&lt;Swift.Bool&gt;, actions: () -&gt; &#x3c4;_1_0, message: () -&gt; &#x3c4;_1_1) -&gt; some&gt;&gt;.0, SwiftUI.Spacer)&gt;&gt;, SwiftUI.Spacer)&gt;&gt;&gt;, SwiftUI.Spacer)&gt;&gt; in PhotoLabel.CheckBoxEditView.body.getter : some"
+                  moduleName = "PhotoLabel"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tomworker/Desktop/PhotoLabel/PhotoLabel/CheckBoxEditView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "164"
+                  endingLineNumber = "164"
+                  offsetFromSymbolStart = "492">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

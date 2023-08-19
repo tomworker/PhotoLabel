@@ -18,6 +18,7 @@ struct CategorySelectorView: View {
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
     @State var showSubCategory = false
+    @State var showCheckBoxMatrix = false
     @State var showFinalReport = false
     @State var moveToTrashBox = false
     @State var targetMainCategoryIndex = -1
@@ -57,12 +58,26 @@ struct CategorySelectorView: View {
                     HStack {
                         Spacer()
                         Button {
+                            showCheckBoxMatrix = true
+                        } label: {
+                            HStack {
+                                Text("CheckBox Matrix")
+                            }
+                            .frame(width: 160, height: 30)
+                            .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .fullScreenCover(isPresented: $showCheckBoxMatrix) {
+                            CheckBoxMatrixView(showCheckBoxMatrix: $showCheckBoxMatrix, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl)
+                        }
+                        Button {
                             showFinalReport = true
                         } label: {
                             HStack {
                                 Text("Final Report")
                             }
-                            .frame(width: 130, height: 30)
+                            .frame(width: 120, height: 30)
                             .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                             .foregroundColor(.white)
                             .cornerRadius(10)

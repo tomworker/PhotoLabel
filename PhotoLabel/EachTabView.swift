@@ -27,6 +27,7 @@ struct EachTabView: View {
     @State var showImageView = false
     @State var showImageView2 = false
     @State var isDuplicateMode = false
+    @State var isEditSubCategory = false
     let sheetId = 2
     var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
     var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
@@ -124,6 +125,17 @@ struct EachTabView: View {
                                     .foregroundColor(.white)
                             }
                             Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)
+                                .onLongPressGesture {
+                                    isEditSubCategory = true
+                                }
+                                .alert("", isPresented: $isEditSubCategory, actions: {
+                                    let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory
+                                    TextField("SubCategory", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)
+                                    Button("Edit", action: {ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)})
+                                    Button("Cancel", role: .cancel, action: {mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory = initialValue})
+                                }, message: {
+                               
+                                })
                             if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages == 0 {
                                 LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                                     ZStack{

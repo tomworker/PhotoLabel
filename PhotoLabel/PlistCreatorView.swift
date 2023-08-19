@@ -46,8 +46,8 @@ struct PlistCreatorView: View {
                     showPlistCreator = false
                 }
             } label : {
-                Text("Save & exit")
-                    .frame(width: 100, height: 30)
+                Text("Save")
+                    .frame(width: 50, height: 30)
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)

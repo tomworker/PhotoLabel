@@ -184,19 +184,24 @@ struct ContentView: View {
                 let jsonUrl = documentDirectoryUrl.appendingPathComponent("config.json")
                 if FileManager.default.fileExists(atPath: jsonUrl.path) {
                     let config = JsonManager.load(fileUrl: jsonUrl)
-                    ConfigManager.iPadMainColumnNumber = config.iPadMaxColCatBtn
-                    ConfigManager.iPadSubColumnNumber = config.iPadMaxColDetBtn
-                    ConfigManager.iPadImageColumnNumber = config.iPadMaxColPhoto
-                    ConfigManager.mainColumnNumber = config.maxColCatBtn
-                    ConfigManager.subColumnNumber = config.maxColDetBtn
-                    ConfigManager.imageColumnNumber = config.maxColPhoto
-                    ConfigManager.iPadMainRowNumber = config.iPadMaxRowCatBtn
-                    ConfigManager.iPadSubRowNumber = config.iPadMaxRowDetBtn
-                    ConfigManager.mainRowNumber = config.maxRowCatBtn
-                    ConfigManager.subRowNumber = config.maxRowDetBtn
-                    ConfigManager.maxNumberOfMainCategory = config.maxEntCat
-                    ConfigManager.maxNumberOfSubCategory = config.maxEntDet
-                    ConfigManager.maxNumberOfImageFile = config.maxEntPhoto
+                    if config.iPadMaxColCatBtn == 0 {
+                    } else {
+                        ConfigManager.iPadMainColumnNumber = config.iPadMaxColCatBtn
+                        ConfigManager.iPadSubColumnNumber = config.iPadMaxColDetBtn
+                        ConfigManager.iPadImageColumnNumber = config.iPadMaxColPhoto
+                        ConfigManager.mainColumnNumber = config.maxColCatBtn
+                        ConfigManager.subColumnNumber = config.maxColDetBtn
+                        ConfigManager.imageColumnNumber = config.maxColPhoto
+                        ConfigManager.iPadMainRowNumber = config.iPadMaxRowCatBtn
+                        ConfigManager.iPadSubRowNumber = config.iPadMaxRowDetBtn
+                        ConfigManager.mainRowNumber = config.maxRowCatBtn
+                        ConfigManager.subRowNumber = config.maxRowDetBtn
+                        ConfigManager.maxNumberOfMainCategory = config.maxEntCat
+                        ConfigManager.maxNumberOfSubCategory = config.maxEntDet
+                        ConfigManager.maxNumberOfImageFile = config.maxEntPhoto
+                        ConfigManager.iPadCheckBoxMatrixColumnWidth = config.iPadChkBoxMtxColWidth
+                        ConfigManager.checkBoxMatrixColumnWidth = config.chkBoxMtxColWidth
+                    }
                 }
                 showPlistList()
             }
@@ -493,7 +498,7 @@ struct ImageFileId: Identifiable {
 }
 struct SubCategoryId: Identifiable {
     var id: Int
-    let subCategory: String
+    var subCategory: String
     var countStoredImages: Int
     var images: [ImageFile]
     var isTargeted: Bool
@@ -536,6 +541,8 @@ class ConfigManager {
     static var maxNumberOfMainCategory = 99
     static var maxNumberOfSubCategory = 99
     static var maxNumberOfImageFile = 99
+    static var iPadCheckBoxMatrixColumnWidth = 130
+    static var checkBoxMatrixColumnWidth = 80
     static let initialIPadMainColumnNumber = 6
     static let initialIPadSubColumnNumber = 4
     static let initialIPadImageColumnNumber = 5
@@ -549,6 +556,8 @@ class ConfigManager {
     static let initialMaxNumberOfMainCategory = 99
     static let initialMaxNumberOfSubCategory = 99
     static let initialMaxNumberOfImageFile = 99
+    static let initialIPadCheckBoxMatrixColumnWidth = 130
+    static let initialCheckBoxMatrixColumnWidth = 80
 }
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -835,14 +844,27 @@ class ZipManager {
             plistNoExtensionName.replaceSubrange(range, with: "")
         }
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
-        CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+        var tempImageFiles: [String]
+        let targetImgPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
+        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
         let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
         let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-        ZipManager.remove(fileUrl: targetZipUrl)
-        ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
-        ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
-        ZipManager.remove(fileUrl: targetUrl)
+        do {
+            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+            if tempImageFiles.count == 0 {
+                ZipManager.remove(fileUrl: targetImgPlistUrl)
+                ZipManager.remove(fileUrl: targetZipUrl)
+                CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+            } else {
+                CategoryManager.write(fileUrl: targetImgPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+                ZipManager.remove(fileUrl: targetZipUrl)
+                ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
+                ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
+                ZipManager.remove(fileUrl: targetUrl)
+            }
+        } catch {
+            print(error)
+        }
     }
     static func savePlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
         var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
@@ -850,7 +872,11 @@ class ZipManager {
             plistNoExtensionName.replaceSubrange(range, with: "")
         }
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
+        var targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
+        let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
+        if fileManager.fileExists(atPath: targetZipUrl.path) {
+            targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
+        }
         CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
     }
     static func saveZip(fileUrl: URL) {
