@@ -171,10 +171,19 @@ struct CategorySelectorView: View {
                     if showSubCategory {
                         HStack {
                             Button {
-                                var transaction = Transaction()
-                                transaction.disablesAnimations = true
-                                withTransaction(transaction) {
-                                    showPhotoCapture = true
+                                if  UIDevice.current.userInterfaceIdiom == .phone {
+                                    var transaction = Transaction()
+                                    transaction.disablesAnimations = true
+                                    withTransaction(transaction) {
+                                        showPhotoCapture = true
+                                    }
+                                } else {
+                                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                                        print("Camera is available")
+                                        showPhotoCapture.toggle()
+                                    } else {
+                                        print("Camara is not available")
+                                    }
                                 }
                             } label: {
                                 Image(systemName: "camera")
@@ -185,7 +194,11 @@ struct CategorySelectorView: View {
                                     .padding(.leading)
                             }
                             .fullScreenCover(isPresented: $showPhotoCapture) {
-                                PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                if  UIDevice.current.userInterfaceIdiom == .phone {
+                                    PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                } else {
+                                    ImagePickerView(sheetId: sheetId, sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                }
                             }
                             Button {
                                 showPhotoLibrary = true

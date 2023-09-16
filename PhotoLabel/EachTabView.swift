@@ -42,10 +42,19 @@ struct EachTabView: View {
                         VStack(spacing: 5) {
                             HStack {
                                 Button {
-                                    var transaction = Transaction()
-                                    transaction.disablesAnimations = true
-                                    withTransaction(transaction) {
-                                        showPhotoCapture = true
+                                    if  UIDevice.current.userInterfaceIdiom == .phone {
+                                        var transaction = Transaction()
+                                        transaction.disablesAnimations = true
+                                        withTransaction(transaction) {
+                                            showPhotoCapture = true
+                                        }
+                                    } else {
+                                        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                                            print("Camera is available")
+                                            showPhotoCapture.toggle()
+                                        } else {
+                                            print("Camara is not available")
+                                        }
                                     }
                                 } label: {
                                     Image(systemName: "camera")
@@ -56,7 +65,11 @@ struct EachTabView: View {
                                         .padding(.leading)
                                 }
                                 .fullScreenCover(isPresented: $showPhotoCapture) {
-                                    PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                    if  UIDevice.current.userInterfaceIdiom == .phone {
+                                        PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                    } else {
+                                        ImagePickerView(sheetId: sheetId, sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                    }
                                 }
                                 Button {
                                     showPhotoLibrary2.toggle()
