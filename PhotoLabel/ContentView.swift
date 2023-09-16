@@ -9,6 +9,7 @@ import SwiftUI
 import ZIPFoundation
 
 struct ContentView: View {
+    @StateObject var photoCapture = PhotoCapture()
     @State var mainCategoryIds: [MainCategoryId] = []
     @State var workSpace: [WorkSpaceImageFile] = []
     @State var duplicateSpace: [DuplicateImageFile] = []
@@ -254,7 +255,7 @@ struct ContentView: View {
                             }
                             .fullScreenCover(isPresented: $showCategorySelector1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                CategorySelectorView(showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
+                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
                             }
                             .fullScreenCover(isPresented: $showPlistEditor1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
@@ -291,7 +292,7 @@ struct ContentView: View {
                                 }
                                 .fullScreenCover(isPresented: $showCategorySelector2[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    CategorySelectorView(showCategorySelector: $showCategorySelector2[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
+                                    CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector2[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
                                 }
                                 .fullScreenCover(isPresented: $showPlistEditor2[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
@@ -828,13 +829,13 @@ class ZipManager {
             afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFile)
         }
         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: 0)
+        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
         workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
         print("Added to plist:\(plistImageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }
     static func moveImagesFromDuplicateSpaceToPlist(imageFile: String, mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int) {
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: 0)
+        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
         print("Added to plist:\(imageFile)")
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }

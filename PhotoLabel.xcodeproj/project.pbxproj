@@ -11,6 +11,10 @@
 		983E70D62A8F3C7D003D525A /* CheckBoxMatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */; };
 		985296112A7209460052AC45 /* ImageTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985296102A7209460052AC45 /* ImageTabView.swift */; };
 		985540072A8E174000590679 /* CheckBoxEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985540062A8E174000590679 /* CheckBoxEditView.swift */; };
+		9869A7162AB466920058ED73 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7152AB466920058ED73 /* PhotoCaptureView.swift */; };
+		9869A7182AB466EC0058ED73 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7172AB466EC0058ED73 /* CameraView.swift */; };
+		9869A71A2AB467290058ED73 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7192AB467290058ED73 /* PhotoCapture.swift */; };
+		9869A71C2AB467870058ED73 /* MotionSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A71B2AB467870058ED73 /* MotionSensor.swift */; };
 		9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */; };
 		989697182A35FE3800EE3599 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 989697172A35FE3800EE3599 /* ZIPFoundation */; };
 		9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697192A35FEB700EE3599 /* CategorySelectorView.swift */; };
@@ -34,6 +38,10 @@
 		983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxMatrixView.swift; sourceTree = "<group>"; };
 		985296102A7209460052AC45 /* ImageTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageTabView.swift; sourceTree = "<group>"; };
 		985540062A8E174000590679 /* CheckBoxEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxEditView.swift; sourceTree = "<group>"; };
+		9869A7152AB466920058ED73 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
+		9869A7172AB466EC0058ED73 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		9869A7192AB467290058ED73 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
+		9869A71B2AB467870058ED73 /* MotionSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionSensor.swift; sourceTree = "<group>"; };
 		9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryImagePickerView.swift; sourceTree = "<group>"; };
 		989697152A35FC6000EE3599 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		989697192A35FEB700EE3599 /* CategorySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectorView.swift; sourceTree = "<group>"; };
@@ -91,6 +99,10 @@
 				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
 				989697212A35FF7200EE3599 /* EachTabView.swift */,
 				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
+				9869A7152AB466920058ED73 /* PhotoCaptureView.swift */,
+				9869A7172AB466EC0058ED73 /* CameraView.swift */,
+				9869A7192AB467290058ED73 /* PhotoCapture.swift */,
+				9869A71B2AB467870058ED73 /* MotionSensor.swift */,
 				9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */,
 				9896971D2A35FF2300EE3599 /* ImageView.swift */,
 				985296102A7209460052AC45 /* ImageTabView.swift */,
@@ -199,15 +211,19 @@
 				985540072A8E174000590679 /* CheckBoxEditView.swift in Sources */,
 				985296112A7209460052AC45 /* ImageTabView.swift in Sources */,
 				989697282A35FFDB00EE3599 /* PlistCreatorSubView.swift in Sources */,
+				9869A71A2AB467290058ED73 /* PhotoCapture.swift in Sources */,
 				9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */,
 				989697222A35FF7200EE3599 /* EachTabView.swift in Sources */,
 				9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */,
 				989697262A35FFB500EE3599 /* PlistEditorView.swift in Sources */,
 				9896971C2A35FEFB00EE3599 /* FinalReportView.swift in Sources */,
 				9896972A2A36000200EE3599 /* PlistEditorSubView.swift in Sources */,
+				9869A7182AB466EC0058ED73 /* CameraView.swift in Sources */,
+				9869A71C2AB467870058ED73 /* MotionSensor.swift in Sources */,
 				983E70D62A8F3C7D003D525A /* CheckBoxMatrixView.swift in Sources */,
 				98C753782A35F14400648C02 /* ContentView.swift in Sources */,
 				9830C6DB2A4EC844004971E5 /* ConfigView.swift in Sources */,
+				9869A7162AB466920058ED73 /* PhotoCaptureView.swift in Sources */,
 				98C753762A35F14400648C02 /* PhotoLabelApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -354,12 +370,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -388,12 +404,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6.1;
+				MARKETING_VERSION = 1.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gmail.tom106worker.PhotoLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
