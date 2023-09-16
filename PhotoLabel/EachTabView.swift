@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EachTabView: View {
+    @StateObject var photoCapture: PhotoCapture
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
@@ -16,7 +17,7 @@ struct EachTabView: View {
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
     @State var moveToWorkSpace = false
-    @State var showImagePicker2 = false
+    @State var showPhotoCapture = false
     @State var showPhotoLibrary2 = false
     @State var isTargeted1 = false
     @State var isTargetedIndex1 = -1
@@ -41,11 +42,10 @@ struct EachTabView: View {
                         VStack(spacing: 5) {
                             HStack {
                                 Button {
-                                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                                        print("Camera is available")
-                                        showImagePicker2.toggle()
-                                    } else {
-                                        print("Camara is not available")
+                                    var transaction = Transaction()
+                                    transaction.disablesAnimations = true
+                                    withTransaction(transaction) {
+                                        showPhotoCapture = true
                                     }
                                 } label: {
                                     Image(systemName: "camera")
@@ -55,8 +55,8 @@ struct EachTabView: View {
                                         .cornerRadius(10)
                                         .padding(.leading)
                                 }
-                                .sheet(isPresented: $showImagePicker2) {
-                                    ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                .fullScreenCover(isPresented: $showPhotoCapture) {
+                                    PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Button {
                                     showPhotoLibrary2.toggle()
@@ -67,7 +67,7 @@ struct EachTabView: View {
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
                                 }
-                                .sheet(isPresented: $showPhotoLibrary2) {
+                                .fullScreenCover(isPresented: $showPhotoLibrary2) {
                                     PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Spacer()
@@ -89,9 +89,6 @@ struct EachTabView: View {
                                                 if URL(string: indexs2[0])!.lastPathComponent.first == "@" {
                                                 } else {
                                                     ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
-                                                    if workSpace.count >= 2 {
-                                                        CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
-                                                    }
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
                                             }
@@ -167,7 +164,7 @@ struct EachTabView: View {
                                                         }
                                                         do {
                                                             try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: 0)
+                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                                                             ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex)
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                         } catch {
@@ -177,7 +174,7 @@ struct EachTabView: View {
                                                 } else if indexs3.first! == "1" {
                                                     var duplicateSpaceImageFileName = URL(string: indexs2[0])!.lastPathComponent
                                                     duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory) , at: 0)
+                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory) , at: duplicateSpace.count)
                                                     ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
@@ -231,7 +228,7 @@ struct EachTabView: View {
                                                         }
                                                         do {
                                                             try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: 0)
+                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                                                             ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex)
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                         } catch {
@@ -241,7 +238,7 @@ struct EachTabView: View {
                                                 } else if indexs3.first! == "1" {
                                                     var duplicateSpaceImageFileName = URL(string: indexs2[0])!.lastPathComponent
                                                     duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: 0)
+                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                                                     ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 } else if indexs3.first! == "0" {
@@ -374,9 +371,6 @@ struct EachTabView: View {
                                                 CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
                                             } else if indexs3.first! == "0"  {
                                                 ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
-                                                if workSpace.count >= 2 {
-                                                    CategoryManager.moveItemFromLastToFirst(image: WorkSpaceImageFileId(id: workSpace.count - 1, workSpaceImageFile: WorkSpaceImageFile(imageFile: indexs1.first!, subDirectory: "")), workSpace: &workSpace)
-                                                }
                                                 ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
                                             return true

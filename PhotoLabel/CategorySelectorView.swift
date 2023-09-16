@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct CategorySelectorView: View {
+    @StateObject var photoCapture: PhotoCapture
     @Binding var showCategorySelector: Bool
     @State var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     @State var fileUrl: URL
     @State var plistCategoryName: String
-    @State var showImagePicker = false
+    @State var showPhotoCapture = false
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
     @State var showSubCategory = false
@@ -170,11 +171,10 @@ struct CategorySelectorView: View {
                     if showSubCategory {
                         HStack {
                             Button {
-                                if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                                    print("Camera is available")
-                                    showImagePicker.toggle()
-                                } else {
-                                    print("Camara is not available")
+                                var transaction = Transaction()
+                                transaction.disablesAnimations = true
+                                withTransaction(transaction) {
+                                    showPhotoCapture = true
                                 }
                             } label: {
                                 Image(systemName: "camera")
@@ -184,8 +184,8 @@ struct CategorySelectorView: View {
                                     .cornerRadius(10)
                                     .padding(.leading)
                             }
-                            .sheet(isPresented: $showImagePicker) {
-                                ImagePickerView(sheetId: sheetId, sourceType: .camera, showImagePicker: $showImagePicker, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                            .fullScreenCover(isPresented: $showPhotoCapture) {
+                                PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Button {
                                 showPhotoLibrary = true
@@ -196,7 +196,7 @@ struct CategorySelectorView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
                             }
-                            .sheet(isPresented: $showPhotoLibrary) {
+                            .fullScreenCover(isPresented: $showPhotoLibrary) {
                                 PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: -1, subCategoryIndex: -1, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                             }
                             Spacer()
@@ -292,7 +292,7 @@ struct CategorySelectorView: View {
                                                             }
                                                             do {
                                                                 try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
+                                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
                                                                 ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id)
                                                                 ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                             } catch {
@@ -302,7 +302,7 @@ struct CategorySelectorView: View {
                                                     } else if indexs3.first! == "1" {
                                                         var duplicateSpaceImageFileName = URL(string: indexs2.first!)!.lastPathComponent
                                                         duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: 0)
+                                                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
                                                         ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, workSpace: &workSpace)
                                                         ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                     }
@@ -312,7 +312,7 @@ struct CategorySelectorView: View {
                                                 }
                                         }
                                         .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex)
+                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex)
                                         }
                                     }
                                 }

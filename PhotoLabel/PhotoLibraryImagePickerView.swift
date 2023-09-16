@@ -48,15 +48,15 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                             switch self.parent.sheetId {
                             case 1:
                                 try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
-                                self.parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: 0)
+                                self.parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: self.parent.workSpace.count)
                             case 2:
                                 if self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode == 1 {
                                     ZipManager.create(directoryUrl: self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)))
                                     plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
                                 }
                                 try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                                self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: 0)
-                                self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: 0)
+                                self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: self.parent.duplicateSpace.count)
+                                self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.count)
                                 self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].countStoredImages += 1
                             default:
                                 print("SheetId have failed to be found:\(self.parent.sheetId)")
@@ -106,4 +106,3 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
         //none
     }
 }
-
