@@ -10,7 +10,7 @@ import SwiftUI
 struct ImagePickerView: UIViewControllerRepresentable {
     let sheetId: Int
     let sourceType: UIImagePickerController.SourceType
-    @Binding var showImagePicker: Bool
+    @Binding var showPhotoCapture: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
@@ -38,7 +38,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     switch parent.sheetId {
                     case 1:
                         try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
-                        parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: 0)
+                        parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: parent.workSpace.count)
                         ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                     case 2:
                         if parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode == 1 {
@@ -46,8 +46,8 @@ struct ImagePickerView: UIViewControllerRepresentable {
                             plistJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
                         }
                         try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                        parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: 0)
-                        parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: 0)
+                        parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: parent.duplicateSpace.count)
+                        parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.count)
                         parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].countStoredImages += 1
                         ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                     default:
@@ -57,10 +57,10 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     print("Writing Jpg file failed with error:\(error)")
                 }
             }
-            parent.showImagePicker.toggle()
+            parent.showPhotoCapture.toggle()
         }
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.showImagePicker.toggle()
+            parent.showPhotoCapture.toggle()
         }
     }
     func makeCoordinator() -> Coordinator {
