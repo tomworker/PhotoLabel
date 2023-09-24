@@ -248,7 +248,7 @@ struct ConfigView: View {
                 Picker(selection: $checkBoxMatrixColumnWidth, label: Text("Config10")) {
                     Text("40").tag(40)
                     Text("60").tag(60)
-                    Text("80").tag(80)
+                    Text("80").tag(77)
                     Text("100").tag(100)
                     Text("120").tag(120)
                 }

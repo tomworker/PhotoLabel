@@ -27,7 +27,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let originalImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyyMMddHHmmss"
+                dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                 let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
                 let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
                 let workSpaceJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)

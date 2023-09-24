@@ -175,6 +175,19 @@ struct PhotoCaptureView: View {
                 HStack {
                     Spacer()
                     ForEach(photoCapture.device!.virtualDeviceSwitchOverVideoZoomFactors, id: \.self) { value in
+                        if value == photoCapture.device!.virtualDeviceSwitchOverVideoZoomFactors[0] {
+                            Button {
+                                photoCapture.selectDevice(zoomFactor: CGFloat(1))
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .frame(width: 50, height: 50)
+                                        .foregroundColor(.black.opacity(0.3))
+                                    Text("0.5x")
+                                        .foregroundColor(.white)
+                                }
+                            }
+                        }
                         Button {
                             photoCapture.selectDevice(zoomFactor: CGFloat(value.floatValue))
                         } label: {
@@ -182,7 +195,7 @@ struct PhotoCaptureView: View {
                                 Circle()
                                     .frame(width: 50, height: 50)
                                     .foregroundColor(.black.opacity(0.3))
-                                Text(String(format: value.floatValue < 1.0 ? "%.1f" : "%.0f", value.floatValue) + "x")
+                                Text(String(format: Int((value.floatValue / 2) * 10) % 10 == 0 ? "%.0f" : "%.1f", value.floatValue / 2) + "x")
                                     .foregroundColor(.white)
                             }
                         }
@@ -196,6 +209,9 @@ struct PhotoCaptureView: View {
                         Button {
                             isNoAnimation = true
                             showPhotoCapture = false
+                            if photoCapture.device!.position == .front {
+                                photoCapture.flipCameraDevice()
+                            }
                             photoCapture.reset(zoomReset: true)
                             AppDelegate.orientationLock = .allButUpsideDown
                             guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
@@ -266,7 +282,7 @@ struct PhotoCaptureView: View {
                                             break
                                         }
                                         let dateFormatter = DateFormatter()
-                                        dateFormatter.dateFormat = "yyyyMMddHHmmss"
+                                        dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                                         let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
                                         let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
                                         let workSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)

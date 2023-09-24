@@ -70,7 +70,7 @@ struct CategorySelectorView: View {
                             .cornerRadius(10)
                         }
                         .fullScreenCover(isPresented: $showCheckBoxMatrix) {
-                            CheckBoxMatrixView(showCheckBoxMatrix: $showCheckBoxMatrix, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl)
+                            CheckBoxMatrixView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, showCheckBoxMatrix: $showCheckBoxMatrix, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl)
                         }
                         Button {
                             showFinalReport = true
@@ -295,7 +295,7 @@ struct CategorySelectorView: View {
                                                     if indexs3.first! == "2" {
                                                         if let originalImage = UIImage(contentsOfFile: duplicateSpace[Int(indexs1.first!)!].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].subCategoryName)).appendingPathComponent(indexs2.first!).path : tempDirectoryUrl.appendingPathComponent(indexs2.first!).path) {
                                                             let dateFormatter = DateFormatter()
-                                                            dateFormatter.dateFormat = "yyyyMMddHHmmss"
+                                                            dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                                                             let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
                                                             let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                                                             var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
@@ -355,7 +355,7 @@ struct CategorySelectorView: View {
                         ForEach(duplicateSpace.indices, id: \.self) { index in
                             if let uiimage = UIImage(contentsOfFile: duplicateSpace[index].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].subCategoryName)).appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path) {
                                 ZStack {
-                                    Image(uiImage: uiimage)
+                                    Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                         .resizable()
                                         .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                         .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
@@ -411,7 +411,7 @@ struct CategorySelectorView: View {
                         ForEach(CategoryManager.convertIdentifiable(workSpaceImageFiles: workSpace)) { workSpaceImageFileId in
                             if let uiimage = UIImage(contentsOfFile: workSpaceImageFileId.workSpaceImageFile.imageFile) {
                                 ZStack {
-                                    Image(uiImage: uiimage)
+                                    Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                         .resizable()
                                         .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                         .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
