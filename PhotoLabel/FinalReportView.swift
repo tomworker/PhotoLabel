@@ -55,14 +55,14 @@ struct FinalReportView: View {
                     LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                         ForEach(CategoryManager.convertIdentifiable(imageFiles: subCategoryId.images, subFolderMode: mainCategoryId.subFolderMode, mainCategoryName: mainCategoryId.mainCategory, subCategoryName: subCategoryId.subCategory)) { imageFileId in
                             if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
-                                Image(uiImage: uiimage)
+                                Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                     .resizable()
                                     .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                     .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                     .cornerRadius(10)
-                                    //Recovery code for onTapGesture problem
+                                //Recovery code for onTapGesture problem
                                     .onChange(of: showImageView) { newValue in }
-                                    //Above code goes well for some reason.
+                                //Above code goes well for some reason.
                                     .onTapGesture(count: 1) {
                                         showImageView = true
                                         self.targetMainCategoryIndex = mainCategoryId.id

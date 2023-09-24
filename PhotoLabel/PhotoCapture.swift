@@ -77,7 +77,17 @@ class PhotoCapture: NSObject, ObservableObject {
             }
         }
         if zoomReset == true {
-            baseZoomFactor = 1.0
+            switch device!.deviceType {
+            case .builtInTripleCamera:
+                baseZoomFactor = 2.0
+                break
+            case .builtInDualWideCamera:
+                baseZoomFactor = 2.0
+                break
+            default:
+                baseZoomFactor = 1.0
+                break
+            }
             do {
                 try device?.lockForConfiguration()
                 if device!.isAutoFocusRangeRestrictionSupported {

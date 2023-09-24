@@ -528,6 +528,21 @@ struct DuplicateImageFileId: Identifiable{
     var id: Int
     let duplicateImageFile: DuplicateImageFile
 }
+class ImageManager {
+    static func downSize(uiimage: UIImage, scale: CGFloat) -> UIImage {
+        autoreleasepool {
+            let cgimage = uiimage.cgImage
+            let ciimage = CIImage(cgImage: cgimage!)
+            let matrix = CGAffineTransform(scaleX: scale, y: scale)
+            let ciimage2 = ciimage.transformed(by: matrix)
+            let context = CIContext(options: nil)
+            let cgimage2 = context.createCGImage(ciimage2, from: ciimage2.extent)
+            let uiimage2 = UIImage(cgImage: cgimage2!, scale: uiimage.scale, orientation: uiimage.imageOrientation)
+            return uiimage2
+        }
+    }
+}
+
 class ConfigManager {
     static var iPadMainColumnNumber = 6
     static var iPadSubColumnNumber = 4
@@ -543,7 +558,7 @@ class ConfigManager {
     static var maxNumberOfSubCategory = 99
     static var maxNumberOfImageFile = 99
     static var iPadCheckBoxMatrixColumnWidth = 130
-    static var checkBoxMatrixColumnWidth = 80
+    static var checkBoxMatrixColumnWidth = 77
     static let initialIPadMainColumnNumber = 6
     static let initialIPadSubColumnNumber = 4
     static let initialIPadImageColumnNumber = 5
@@ -558,7 +573,7 @@ class ConfigManager {
     static let initialMaxNumberOfSubCategory = 99
     static let initialMaxNumberOfImageFile = 99
     static let initialIPadCheckBoxMatrixColumnWidth = 130
-    static let initialCheckBoxMatrixColumnWidth = 80
+    static let initialCheckBoxMatrixColumnWidth = 77
 }
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
