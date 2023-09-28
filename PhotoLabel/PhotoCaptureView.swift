@@ -26,7 +26,8 @@ struct PhotoCaptureView: View {
     @State var isSelectFlashMode = false
     let deviceWidth = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
     let deviceHeight = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
-
+    private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+    
     var body: some View {
         if AppDelegate.orientationLock == .allButUpsideDown && isNoAnimation == false {
             Spacer()
@@ -51,7 +52,7 @@ struct PhotoCaptureView: View {
                         guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
                         window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                     }
-                    .onChange(of: sensor.xGrv + sensor.xAcc) { newValue in
+                    .onReceive(timer) { _ in
                         photoCapture.setUserAccelaration(xAcc: Double(sensor.xAcc)!, yAcc: Double(sensor.yAcc)!, zAcc: Double(sensor.zAcc)!)
                         if fabs(Double(sensor.xGrv)!) < 0.2 && fabs(Double(sensor.yGrv)!) < 0.2 {
                             //none
@@ -207,15 +208,12 @@ struct PhotoCaptureView: View {
                     Spacer()
                     HStack {
                         Button {
-                            isNoAnimation = true
-                            showPhotoCapture = false
-                            if photoCapture.device!.position == .front {
-                                photoCapture.flipCameraDevice()
+                            if photoCapture.isPreparedImage == false {
+                                cancelView()
+                            } else {
+                                saveImage()
+                                cancelView()
                             }
-                            photoCapture.reset(zoomReset: true)
-                            AppDelegate.orientationLock = .allButUpsideDown
-                            guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
-                            window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         } label: {
                             Text("Cancel")
                                 .foregroundColor(.white)
@@ -258,7 +256,12 @@ struct PhotoCaptureView: View {
                         VStack {
                             Button {
                                 photoCapture.setPhotoOrientation(photoOrientation: photoOrientation)
-                                photoCapture.takePhoto()
+                                if photoCapture.isPreparedImage == false {
+                                    photoCapture.takePhoto()
+                                } else {
+                                    saveImage()
+                                    photoCapture.takePhoto()
+                                }
                             } label: {
                                 Circle()
                                     .frame(width: 50, height: 50)
@@ -266,53 +269,7 @@ struct PhotoCaptureView: View {
                             }
                             .onChange(of:photoCapture.isPreparedImage) { value in
                                 if photoCapture.isPreparedImage == true {
-                                    if photoCapture.image != nil {
-                                        switch photoOrientation {
-                                        case "H":
-                                            let cgImage = photoCapture.image?.cgImage
-                                            let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.up)
-                                            photoCapture.image? = rotatedImage
-                                            break
-                                        case "V":
-                                            let cgImage = photoCapture.image?.cgImage
-                                            let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.right)
-                                            photoCapture.image? = rotatedImage
-                                            break
-                                        default:
-                                            break
-                                        }
-                                        let dateFormatter = DateFormatter()
-                                        dateFormatter.dateFormat = "yyyyMMddHHmmssS"
-                                        let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
-                                        let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
-                                        let workSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
-                                        let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                                        var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
-                                        let duplicateSpaceImageFileName = plistImageFileName
-                                        do {
-                                            switch sheetId {
-                                            case 1:
-                                                try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
-                                                workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: workSpace.count)
-                                                ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                            case 2:
-                                                if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-                                                    ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-                                                    plistJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
-                                                }
-                                                try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-                                                ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                            default:
-                                                print("SheetId have failed to be found:\(sheetId)")
-                                            }
-                                        } catch {
-                                            print("Writing Jpg file failed with error:\(error)")
-                                        }
-                                    }
-                                    photoCapture.isPreparedImage = false
+                                    saveImage()
                                 }
                             }
                         }
@@ -323,5 +280,74 @@ struct PhotoCaptureView: View {
             .ignoresSafeArea(.all)
             .background(.black)
         }
+    }
+    private func saveImage() {
+        autoreleasepool {
+            if photoCapture.image != nil {
+                switch photoOrientation {
+                case "H":
+                    let cgImage = photoCapture.image?.cgImage
+                    let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.up)
+                    photoCapture.image? = rotatedImage
+                    break
+                case "V":
+                    let cgImage = photoCapture.image?.cgImage
+                    let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.right)
+                    photoCapture.image? = rotatedImage
+                    break
+                default:
+                    break
+                }
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyyMMddHHmmssS"
+                let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
+                let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
+                let workSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
+                let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
+                var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
+                let duplicateSpaceImageFileName = plistImageFileName
+                do {
+                    switch sheetId {
+                    case 1:
+                        try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
+                        workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: workSpace.count)
+                        //ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        DispatchQueue.main.async {
+                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        }
+                    case 2:
+                        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+                            ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
+                            plistJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
+                        }
+                        try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
+                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
+                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+                        //ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        DispatchQueue.main.async {
+                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        }
+                    default:
+                        print("SheetId have failed to be found:\(sheetId)")
+                    }
+                } catch {
+                    print("Writing Jpg file failed with error:\(error)")
+                }
+            }
+            photoCapture.isPreparedImage = false
+        }
+    }
+    private func cancelView() {
+        isNoAnimation = true
+        showPhotoCapture = false
+        if photoCapture.device!.position == .front {
+            photoCapture.flipCameraDevice()
+        }
+        photoCapture.reset(zoomReset: true)
+        AppDelegate.orientationLock = .allButUpsideDown
+        guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
+        window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        ZipManager.saveZip(fileUrl: fileUrl)
     }
 }
