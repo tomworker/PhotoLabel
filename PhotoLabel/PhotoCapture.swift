@@ -9,32 +9,33 @@ import SwiftUI
 import AVFoundation
 
 class PhotoCapture: NSObject, ObservableObject {
-    @Published var image: UIImage?
-    @Published var isImage = false
+    var image: UIImage?
+    var isImage = false
     var captureSession = AVCaptureSession()
-    @Published var videoPreviewLayer: AVCaptureVideoPreviewLayer!
+    var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     var dataOutput = AVCapturePhotoOutput()
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    @Published var photoOrientation = "H"
+    var photoOrientation = "H"
     var baseZoomFactor: CGFloat = 1.0
-    @Published var device: AVCaptureDevice?
+    var device: AVCaptureDevice?
     var actions = [UInt: (() -> Void)]()
-    @Published var tapPoint = CGPoint(x: 0.5, y: 0.5)
+    var tapPoint = CGPoint(x: 0.5, y: 0.5)
     @Published var tapPoint2 = CGPoint(x: UIScreen.main.bounds.width / 2, y: (UIScreen.main.bounds.height / 2))
-    @Published var isAutoExposureAutoFocusLocked = false
-    @Published var isShowInterestArea = false
-    @Published var isShowInterestAreaWeak = false
-    @Published var isMoved = false
-    @Published var addingPosition = CGFloat(0.0)
-    @Published var initialValue = CGFloat(0.0)
-    @Published var endedValue = CGFloat(0.0)
-    @Published var userAccelarationX = Double(0.0)
-    @Published var userAccelarationY = Double(0.0)
-    @Published var userAccelarationZ = Double(0.0)
+    var isAutoExposureAutoFocusLocked = false
+    var isShowInterestArea = false
+    var isShowInterestAreaWeak = false
+    var isMoved = false
+    var addingPosition = CGFloat(0.0)
+    var initialValue = CGFloat(0.0)
+    var endedValue = CGFloat(0.0)
+    var userAccelarationX = Double(0.0)
+    var userAccelarationY = Double(0.0)
+    var userAccelarationZ = Double(0.0)
     var interestTimer: Timer?
-    @Published var flashMode = "auto"
-    @Published var isFlipCameraDevice = false
-    @Published var isPreparedImage = false
+    var flashMode = "auto"
+    var isFlipCameraDevice = false
+    var isPreparedImage = false
+    let semaphore = DispatchSemaphore(value: 0)
 
     override init() {
         super.init()
@@ -42,8 +43,11 @@ class PhotoCapture: NSObject, ObservableObject {
         reset(zoomReset: true)
     }
     func setupCaptureSession(withPosition cameraPosition: AVCaptureDevice.Position) {
-        device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition)
-        if let backCameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
+        if let backCameraDevice = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: cameraPosition) {
+            device = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: cameraPosition)
+        } else if let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition) {
+            device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition)
+        } else if let backCameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
             device = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition)
         } else if let backCameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition) {
             device = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition)
@@ -82,6 +86,9 @@ class PhotoCapture: NSObject, ObservableObject {
                 baseZoomFactor = 2.0
                 break
             case .builtInDualWideCamera:
+                baseZoomFactor = 2.0
+                break
+            case .builtInUltraWideCamera:
                 baseZoomFactor = 2.0
                 break
             default:
@@ -348,7 +355,6 @@ class PhotoCapture: NSObject, ObservableObject {
             settings.flashMode = .auto
             break
         }
-        isPreparedImage = false
         dataOutput.capturePhoto(with: settings, delegate: self)
     }
     func setPhotoOrientation(photoOrientation: String) {
