@@ -15,7 +15,7 @@ class PhotoCapture: NSObject, ObservableObject {
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
     var dataOutput = AVCapturePhotoOutput()
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    var photoOrientation = "H"
+    var photoOrientation = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
     var baseZoomFactor: CGFloat = 1.0
     var device: AVCaptureDevice?
     var actions = [UInt: (() -> Void)]()

@@ -67,10 +67,16 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                         if i == results.count - 1 {
                             switch self.parent.sheetId {
                             case 1:
-                                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
+                                ZipManager.savePlist(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
+                                DispatchQueue.global(qos: .background).async {
+                                    ZipManager.saveZip(fileUrl: self.parent.fileUrl)
+                                }
                             case 2:
-                                ZipManager.savePlistAndZip(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
-                            default:
+                                ZipManager.savePlist(fileUrl: self.parent.fileUrl, mainCategoryIds: self.parent.mainCategoryIds)
+                                DispatchQueue.global(qos: .background).async {
+                                    ZipManager.saveZip(fileUrl: self.parent.fileUrl)
+                                }
+                                default:
                                 print("SheetId have failed to be found:\(self.parent.sheetId)")
                             }
                         }

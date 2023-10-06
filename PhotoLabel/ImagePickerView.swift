@@ -39,7 +39,10 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     case 1:
                         try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
                         parent.workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: parent.workSpace.count)
-                        ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
+                        ZipManager.savePlist(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
+                        DispatchQueue.global(qos: .background).async {
+                            ZipManager.saveZip(fileUrl: self.parent.fileUrl)
+                        }
                     case 2:
                         if parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode == 1 {
                             ZipManager.create(directoryUrl: parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory)))
@@ -49,7 +52,10 @@ struct ImagePickerView: UIViewControllerRepresentable {
                         parent.duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: parent.duplicateSpace.count)
                         parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.count)
                         parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].countStoredImages += 1
-                        ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
+                        ZipManager.savePlist(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
+                        DispatchQueue.global(qos: .background).async {
+                            ZipManager.saveZip(fileUrl: self.parent.fileUrl)
+                        }
                     default:
                         print("SheetId have failed to be found:\(parent.sheetId)")
                     }
