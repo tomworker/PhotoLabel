@@ -236,7 +236,10 @@ struct CategorySelectorView: View {
                                     indexs3.append(arr[2])
                                     if indexs3.first! != "2" {
                                         ZipManager.moveImagesFromWorkSpaceToTrashBox(images: indexs1, workSpace: &workSpace)
-                                        ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        DispatchQueue.global(qos: .background).async {
+                                            ZipManager.saveZip(fileUrl: fileUrl)
+                                        }
                                     }
                                     return true
                                 } isTargeted: { isTargeted in
@@ -307,7 +310,10 @@ struct CategorySelectorView: View {
                                                                 try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
                                                                 duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
                                                                 ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id)
-                                                                ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                                DispatchQueue.global(qos: .background).async {
+                                                                    ZipManager.saveZip(fileUrl: fileUrl)
+                                                                }
                                                             } catch {
                                                                 print("Writing Jpg file failed with error:\(error)")
                                                             }
@@ -317,7 +323,10 @@ struct CategorySelectorView: View {
                                                         duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
                                                         duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
                                                         ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, workSpace: &workSpace)
-                                                        ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                        DispatchQueue.global(qos: .background).async {
+                                                            ZipManager.saveZip(fileUrl: fileUrl)
+                                                        }
                                                     }
                                                     return true
                                                 } isTargeted: { isTargeted in

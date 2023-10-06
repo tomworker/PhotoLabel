@@ -21,6 +21,7 @@ struct PhotoCaptureView: View {
     let fileUrl: URL
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     @State var photoOrientation = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
+    @State var photoOrientationAtShot = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
     @State var sliderVal = 0.5
     @State var isNoAnimation = false
     @State var isSelectFlashMode = false
@@ -276,6 +277,7 @@ struct PhotoCaptureView: View {
                                         if photoCapture.isProcedureRunning == false {
                                             if photoCapture.image == nil {
                                                 photoCapture.takePhoto()
+                                                photoOrientationAtShot = photoOrientation
                                                 photoCapture.isProcedureRunning = true
                                             } else {
                                                 print("isProcedureRunning false & image not nil")
@@ -286,6 +288,7 @@ struct PhotoCaptureView: View {
                                             } else {
                                                 saveImage()
                                                 photoCapture.takePhoto()
+                                                photoOrientationAtShot = photoOrientation
                                                 photoCapture.isProcedureRunning = true
                                             }
                                         }
@@ -303,7 +306,7 @@ struct PhotoCaptureView: View {
     private func saveImage() {
         autoreleasepool {
             if photoCapture.image != nil {
-                switch photoOrientation {
+                switch photoOrientationAtShot {
                 case "H":
                     let cgImage = photoCapture.image?.cgImage
                     let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.up)
