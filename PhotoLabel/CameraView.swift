@@ -9,10 +9,9 @@ import SwiftUI
 import AVFoundation
 
 struct CameraView: UIViewControllerRepresentable {
-    @Binding var caLayer: CALayer
+    let caLayer: CALayer
     @State var photoCapture: PhotoCapture
     @State var viewController = UIViewController()
-    @State var caLayer2: CALayer
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<CameraView>) -> UIViewController {
         caLayer.frame = viewController.view.bounds

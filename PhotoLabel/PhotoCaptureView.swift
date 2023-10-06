@@ -11,7 +11,7 @@ struct PhotoCaptureView: View {
     @StateObject var photoCapture: PhotoCapture
     @StateObject var sensor = MotionSensor()
     @Binding var showPhotoCapture: Bool
-    @State var caLayer: CALayer
+    let caLayer: CALayer
     let sheetId: Int
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
@@ -20,7 +20,7 @@ struct PhotoCaptureView: View {
     @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
-    @State var photoOrientation = "H"
+    @State var photoOrientation = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
     @State var sliderVal = 0.5
     @State var isNoAnimation = false
     @State var isSelectFlashMode = false
@@ -41,7 +41,7 @@ struct PhotoCaptureView: View {
             ZStack {
                 ZStack {
                     VStack {
-                        CameraView(caLayer: $caLayer, photoCapture: photoCapture, caLayer2: photoCapture.videoPreviewLayer)
+                        CameraView(caLayer: caLayer, photoCapture: photoCapture)
                             .onPinchGesture()
                             .onPanGesture()
                             .onLongPressGesture()
@@ -208,11 +208,15 @@ struct PhotoCaptureView: View {
                     Spacer()
                     HStack {
                         Button {
-                            if photoCapture.isPreparedImage == false {
+                            if photoCapture.isProcedureRunning == false {
                                 cancelView()
                             } else {
-                                saveImage()
-                                cancelView()
+                                if photoCapture.image == nil {
+                                    //none
+                                } else {
+                                    saveImage()
+                                    cancelView()
+                                }
                             }
                         } label: {
                             Text("Cancel")
@@ -254,23 +258,38 @@ struct PhotoCaptureView: View {
                                 .foregroundColor(.black)
                         }
                         VStack {
-                            Button {
-                                photoCapture.setPhotoOrientation(photoOrientation: photoOrientation)
-                                if photoCapture.isPreparedImage == false {
-                                    photoCapture.takePhoto()
-                                } else {
-                                    saveImage()
-                                    photoCapture.takePhoto()
-                                }
-                            } label: {
+                            if photoCapture.isProcedureRunning == true {
+                                Circle()
+                                    .frame(width: 50, height: 50)
+                                    .foregroundColor(.gray)
+                                    .onReceive(timer) { _ in
+                                        if photoCapture.isProcedureRunning == true && photoCapture.image != nil {
+                                            saveImage()
+                                        }
+                                    }
+                            } else {
                                 Circle()
                                     .frame(width: 50, height: 50)
                                     .foregroundColor(.white)
-                            }
-                            .onChange(of:photoCapture.isPreparedImage) { value in
-                                if photoCapture.isPreparedImage == true {
-                                    saveImage()
-                                }
+                                    .onTapGesture {
+                                        photoCapture.setPhotoOrientation(photoOrientation: photoOrientation)
+                                        if photoCapture.isProcedureRunning == false {
+                                            if photoCapture.image == nil {
+                                                photoCapture.takePhoto()
+                                                photoCapture.isProcedureRunning = true
+                                            } else {
+                                                print("isProcedureRunning false & image not nil")
+                                            }
+                                        } else {
+                                            if photoCapture.image == nil {
+                                                //none
+                                            } else {
+                                                saveImage()
+                                                photoCapture.takePhoto()
+                                                photoCapture.isProcedureRunning = true
+                                            }
+                                        }
+                                    }
                             }
                         }
                     }
@@ -311,10 +330,7 @@ struct PhotoCaptureView: View {
                     case 1:
                         try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
                         workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: workSpace.count)
-                        //ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                        DispatchQueue.main.async {
-                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                        }
+                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                     case 2:
                         if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
                             ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
@@ -324,10 +340,7 @@ struct PhotoCaptureView: View {
                         duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
                         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-                        //ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                        DispatchQueue.main.async {
-                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                        }
+                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                     default:
                         print("SheetId have failed to be found:\(sheetId)")
                     }
@@ -335,12 +348,14 @@ struct PhotoCaptureView: View {
                     print("Writing Jpg file failed with error:\(error)")
                 }
             }
-            photoCapture.isPreparedImage = false
+            photoCapture.isProcedureRunning = false
+            photoCapture.image = nil
         }
     }
     private func cancelView() {
         isNoAnimation = true
         showPhotoCapture = false
+        photoCapture.image = nil
         if photoCapture.device!.position == .front {
             photoCapture.flipCameraDevice()
         }
@@ -348,6 +363,8 @@ struct PhotoCaptureView: View {
         AppDelegate.orientationLock = .allButUpsideDown
         guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
         window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-        ZipManager.saveZip(fileUrl: fileUrl)
+        DispatchQueue.global(qos: .background).async {
+            ZipManager.saveZip(fileUrl: fileUrl)
+        }
     }
 }

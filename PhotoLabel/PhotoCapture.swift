@@ -34,8 +34,7 @@ class PhotoCapture: NSObject, ObservableObject {
     var interestTimer: Timer?
     var flashMode = "auto"
     var isFlipCameraDevice = false
-    var isPreparedImage = false
-    let semaphore = DispatchSemaphore(value: 0)
+    var isProcedureRunning = false
 
     override init() {
         super.init()
@@ -43,16 +42,14 @@ class PhotoCapture: NSObject, ObservableObject {
         reset(zoomReset: true)
     }
     func setupCaptureSession(withPosition cameraPosition: AVCaptureDevice.Position) {
-        if let backCameraDevice = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: cameraPosition) {
-            device = AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: cameraPosition)
-        } else if let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition) {
-            device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition)
-        } else if let backCameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
-            device = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition)
-        } else if let backCameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition) {
-            device = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition)
-        } else if let backCameraDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: cameraPosition) {
-            device = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: cameraPosition)
+        if let cameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition) {
+            device = cameraDevice
+        } else if let cameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
+            device = cameraDevice
+        } else if let cameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition) {
+            device = cameraDevice
+        } else if let cameraDevice = AVCaptureDevice.default(.builtInDualCamera, for: .video, position: cameraPosition) {
+            device = cameraDevice
         }
         captureSession.beginConfiguration()
         guard let deviceInput = try? AVCaptureDeviceInput(device: device!), captureSession.canAddInput(deviceInput) else { return }
@@ -62,7 +59,7 @@ class PhotoCapture: NSObject, ObservableObject {
         captureSession.sessionPreset = AVCaptureSession.Preset.photo
         captureSession.commitConfiguration()
         videoPreviewLayer = AVCaptureVideoPreviewLayer.init(session: captureSession)
-        DispatchQueue.main.async {
+        DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
     }
@@ -82,6 +79,13 @@ class PhotoCapture: NSObject, ObservableObject {
         }
         if zoomReset == true {
             switch device!.deviceType {
+            case .builtInWideAngleCamera:
+                if device!.virtualDeviceSwitchOverVideoZoomFactors.count == 0 {
+                    baseZoomFactor = 1.0
+                } else {
+                    baseZoomFactor = CGFloat(device!.virtualDeviceSwitchOverVideoZoomFactors[0].floatValue)
+                }
+                break
             case .builtInTripleCamera:
                 baseZoomFactor = 2.0
                 break
@@ -365,7 +369,6 @@ extension PhotoCapture: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let imageData = photo.fileDataRepresentation(), let uiImage = UIImage(data: imageData) {
             image = uiImage
-            isPreparedImage = true
         }
     }
 }
