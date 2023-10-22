@@ -42,9 +42,8 @@ class PhotoCapture: NSObject, ObservableObject {
         reset(zoomReset: true)
     }
     func setupCaptureSession(withPosition cameraPosition: AVCaptureDevice.Position) {
-        if let cameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition) {
-            device = cameraDevice
-        } else if let cameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
+        device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: cameraPosition)
+        if let cameraDevice = AVCaptureDevice.default(.builtInTripleCamera, for: .video, position: cameraPosition) {
             device = cameraDevice
         } else if let cameraDevice = AVCaptureDevice.default(.builtInDualWideCamera, for: .video, position: cameraPosition) {
             device = cameraDevice
@@ -79,13 +78,6 @@ class PhotoCapture: NSObject, ObservableObject {
         }
         if zoomReset == true {
             switch device!.deviceType {
-            case .builtInWideAngleCamera:
-                if device!.virtualDeviceSwitchOverVideoZoomFactors.count == 0 {
-                    baseZoomFactor = 1.0
-                } else {
-                    baseZoomFactor = CGFloat(device!.virtualDeviceSwitchOverVideoZoomFactors[0].floatValue)
-                }
-                break
             case .builtInTripleCamera:
                 baseZoomFactor = 2.0
                 break
@@ -95,8 +87,22 @@ class PhotoCapture: NSObject, ObservableObject {
             case .builtInUltraWideCamera:
                 baseZoomFactor = 2.0
                 break
-            default:
+            case .builtInDualCamera:
                 baseZoomFactor = 1.0
+                break
+            case .builtInWideAngleCamera:
+                if device!.virtualDeviceSwitchOverVideoZoomFactors.count == 0 {
+                    baseZoomFactor = 1.0
+                } else {
+                    baseZoomFactor = CGFloat(device!.virtualDeviceSwitchOverVideoZoomFactors[0].floatValue)
+                }
+                break
+            default:
+                if device!.virtualDeviceSwitchOverVideoZoomFactors.count == 0 {
+                    baseZoomFactor = 1.0
+                } else {
+                    baseZoomFactor = CGFloat(device!.virtualDeviceSwitchOverVideoZoomFactors[0].floatValue)
+                }
                 break
             }
             do {
