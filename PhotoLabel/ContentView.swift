@@ -882,6 +882,25 @@ class ZipManager {
             print(error)
         }
     }
+    static func saveImgPlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
+        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+        if let range = plistNoExtensionName.range(of: "&img") {
+            plistNoExtensionName.replaceSubrange(range, with: "")
+        }
+        let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
+        var tempImageFiles: [String]
+        let targetImgPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
+        do {
+            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+            if tempImageFiles.count == 0 {
+                //none
+            } else {
+                CategoryManager.write(fileUrl: targetImgPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+            }
+        } catch {
+            print(error)
+        }
+    }
     static func savePlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
         var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         if let range = plistNoExtensionName.range(of: "&img") {
