@@ -251,13 +251,11 @@ struct ContentView: View {
                                     let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
                                     let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
                                     ZipManager.remove(fileUrl: targetZipUrl)
-
                                     isChangeFlag.toggle()
                                 }))
                             }
                             .fullScreenCover(isPresented: $showCategorySelector1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                //CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
                                 CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent)
                             }
                             .fullScreenCover(isPresented: $showPlistEditor1[item]) {
@@ -300,7 +298,6 @@ struct ContentView: View {
     }
     private func loadPlist(fileUrl: URL, showCategorySelector: inout Bool) {
         showCategorySelector = true
-        //isCancelLoad = false
         ZipManager.remove(directoryUrl: tempDirectoryUrl)
         let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let zipUrl = documentDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
