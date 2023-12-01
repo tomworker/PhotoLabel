@@ -137,7 +137,6 @@ struct CheckBoxMatrixView: View {
                                                 VStack(spacing: 0) {
                                                     HStack(spacing: 0) {
                                                         Text(mainCategoryIds[noSelectedIndex[index]].mainCategory)
-                                                        Spacer()
                                                     }
                                                     .frame(height: 50)
                                                 }
@@ -200,10 +199,10 @@ struct CheckBoxMatrixView: View {
                                                     self.targetSubCategoryIndex4 = [0, self.targetSubCategoryIndex]
                                                     }
                                                     .fullScreenCover(isPresented: $showImageView) {
-                                                    ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[0].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[0].subFolderMode, mainCategoryName: mainCategoryIds[0].mainCategory, subCategoryName: mainCategoryIds[0].items[targetSubCategoryIndex].subCategory))
+                                                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[0].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[0].subFolderMode, mainCategoryName: mainCategoryIds[0].mainCategory, subCategoryName: mainCategoryIds[0].items[targetSubCategoryIndex].subCategory))
                                                     }
                                                     .fullScreenCover(isPresented: $showImageStocker) {
-                                                    ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
+                                                        ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
                                                     }
                                                 } else {
                                                     VStack(alignment: .center, spacing: 0) {

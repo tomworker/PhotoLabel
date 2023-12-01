@@ -21,6 +21,7 @@ struct ContentView: View {
     @State var showCategorySelector1: [Bool]
     @State var showCategorySelector2: [Bool]
     @State var showConfig = false
+    @State var isRemove = false
     @State var isCancelLoad = false
     @State var cancelLoadMessage = ""
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -82,15 +83,9 @@ struct ContentView: View {
                                     .frame(width: 50, height: 50)
                                     .foregroundColor(.indigo)
                                     .background(.clear)
-                                Text("&img")
-                                    .frame(width: 50, height: 50)
-                                    .baselineOffset(-5)
-                                    .foregroundColor(.indigo)
-                                    .font(.system(size: 10))
-                                    .fontWeight(.bold)
                                 Text(".plist")
                                     .frame(width: 50, height: 50)
-                                    .baselineOffset(-25)
+                                    .baselineOffset(-10)
                                     .foregroundColor(.indigo)
                                     .font(.system(size: 10))
                                     .fontWeight(.bold)
@@ -176,7 +171,6 @@ struct ContentView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
-                    //.padding(.trailing)
             }
             .onChange(of: showPlistCreator || isChangeFlag) { newValue in
                 showPlistList()
@@ -224,7 +218,7 @@ struct ContentView: View {
             List {
                 Section(header: Text("Photo Label").font(.title) + Text(" Plist (XML File)")) {
                     ForEach(documentDirectoryFiles.indices, id:\.self) { item in
-                        if documentDirectoryFiles[item].suffix(6) == ".plist" && documentDirectoryFiles[item].suffix(10) != "&img.plist" {
+                        if documentDirectoryFiles[item].suffix(6) == ".plist" {
                             let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
                             Button {
                                 loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector1[item])
@@ -236,8 +230,7 @@ struct ContentView: View {
                             }
                             .swipeActions {
                                 Button(role: .destructive) {
-                                    ZipManager.remove(fileUrl: targetPlistUrl)
-                                    isChangeFlag.toggle()
+                                    isRemove = true;
                                 } label : {
                                     Label("Remove", systemImage: "trash")
                                 }
@@ -250,54 +243,24 @@ struct ContentView: View {
                                 }
                                 .tint(.blue)
                             }
-                            .alert(isPresented: $isCancelLoad) {
-                                Alert(title: Text("Notice"), message: Text(cancelLoadMessage))
+                            .alert(isPresented: $isRemove) {
+                                Alert(title: Text("Really remove it?"),
+                                      primaryButton: .cancel(Text("Cancel")),
+                                      secondaryButton: .destructive(Text("Remove"), action: {
+                                    ZipManager.remove(fileUrl: targetPlistUrl)
+                                    let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
+                                    let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
+                                    ZipManager.remove(fileUrl: targetZipUrl)
+                                    isChangeFlag.toggle()
+                                }))
                             }
                             .fullScreenCover(isPresented: $showCategorySelector1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
+                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent)
                             }
                             .fullScreenCover(isPresented: $showPlistEditor1[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
                                 PlistEditorView(showPlistEditor: $showPlistEditor1[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
-                            }
-                        }
-                    }
-                }
-                Section(header: Text("Photo Link Label").font(.title2) + Text(" &img.plist links photo labels to photos")) {
-                    ForEach(documentDirectoryFiles.indices, id:\.self) { item in
-                        if documentDirectoryFiles[item].suffix(10) == "&img.plist" {
-                            let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
-                            HStack {
-                                Button {
-                                    loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector2[item])
-                                } label: {
-                                    Text(documentDirectoryFiles[item])
-                                }
-                                .onChange(of: showPlistEditor2[item]) { newValue in
-                                    showPlistListEdit()
-                                }
-                                .swipeActions {
-                                    Button {
-                                        showPlistEditor2[item] = true
-                                        plistName = documentDirectoryFiles[item]
-                                        plistName = plistName.replacingOccurrences(of: ".plist", with: "")
-                                    } label : {
-                                        Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
-                                    }
-                                    .tint(.blue)
-                                }
-                                .alert(isPresented: $isCancelLoad) {
-                                    Alert(title: Text("Notice"), message: Text(cancelLoadMessage))
-                                }
-                                .fullScreenCover(isPresented: $showCategorySelector2[item]) {
-                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector2[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "&img", with: ""))
-                                }
-                                .fullScreenCover(isPresented: $showPlistEditor2[item]) {
-                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    PlistEditorView(showPlistEditor: $showPlistEditor2[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
-                                }
                             }
                         }
                     }
@@ -335,37 +298,14 @@ struct ContentView: View {
     }
     private func loadPlist(fileUrl: URL, showCategorySelector: inout Bool) {
         showCategorySelector = true
-        isCancelLoad = false
         ZipManager.remove(directoryUrl: tempDirectoryUrl)
-        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        if let range = plistNoExtensionName.range(of: "&img") {
-            plistNoExtensionName.replaceSubrange(range, with: "")
-            let zipUrl = documentDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-            if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
-                ZipManager.unzipDirectory(zipUrl: zipUrl, directoryUrl: documentDirectoryUrl)
-                ZipManager.rename(atFileUrl: documentDirectoryUrl.appendingPathComponent(plistNoExtensionName, isDirectory: true), toFileUrl: tempDirectoryUrl)
-            } else {
-                showCategorySelector = false
-                isCancelLoad = true
-                cancelLoadMessage = "Loading plist has been canceled because the following files are required in the same folder:\n\(zipUrl.lastPathComponent)"
-            }
+        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+        let zipUrl = documentDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
+        if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
+            ZipManager.unzipDirectory(zipUrl: zipUrl, directoryUrl: documentDirectoryUrl)
+            ZipManager.rename(atFileUrl: documentDirectoryUrl.appendingPathComponent(plistNoExtensionName, isDirectory: true), toFileUrl: tempDirectoryUrl)
         } else {
-            let plistUrl = documentDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
-            let zipUrl = documentDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-            cancelLoadMessage = "Loading plist has been canceled because the following files exist in the same folder:"
-            if ZipManager.fileManager.fileExists(atPath: plistUrl.path) {
-                showCategorySelector = false
-                isCancelLoad = true
-                cancelLoadMessage += "\n\(plistUrl.lastPathComponent)"
-            }
-            if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
-                showCategorySelector = false
-                isCancelLoad = true
-                cancelLoadMessage += "\n\(zipUrl.lastPathComponent)"
-            }
-            if isCancelLoad == false {
-                ZipManager.create(directoryUrl: tempDirectoryUrl)
-            }
+            ZipManager.create(directoryUrl: tempDirectoryUrl)
         }
         var tempImageFiles: [String]
         var initialTempImageFileUrl: URL
@@ -855,24 +795,18 @@ class ZipManager {
         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }
     static func savePlistAndZip(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
-        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        if let range = plistNoExtensionName.range(of: "&img") {
-            plistNoExtensionName.replaceSubrange(range, with: "")
-        }
+        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
         var tempImageFiles: [String]
-        let targetImgPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
         let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
         let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
         let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
         do {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+            CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
             if tempImageFiles.count == 0 {
-                ZipManager.remove(fileUrl: targetImgPlistUrl)
                 ZipManager.remove(fileUrl: targetZipUrl)
-                CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
             } else {
-                CategoryManager.write(fileUrl: targetImgPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
                 ZipManager.remove(fileUrl: targetZipUrl)
                 ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
                 ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
@@ -882,43 +816,14 @@ class ZipManager {
             print(error)
         }
     }
-    static func saveImgPlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
-        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        if let range = plistNoExtensionName.range(of: "&img") {
-            plistNoExtensionName.replaceSubrange(range, with: "")
-        }
-        let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        var tempImageFiles: [String]
-        let targetImgPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
-        do {
-            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
-            if tempImageFiles.count == 0 {
-                //none
-            } else {
-                CategoryManager.write(fileUrl: targetImgPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
-            }
-        } catch {
-            print(error)
-        }
-    }
     static func savePlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
-        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        if let range = plistNoExtensionName.range(of: "&img") {
-            plistNoExtensionName.replaceSubrange(range, with: "")
-        }
+        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        var targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
-        let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-        if fileManager.fileExists(atPath: targetZipUrl.path) {
-            targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + "&img.plist")
-        }
+        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
         CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
     }
     static func saveZip(fileUrl: URL) {
-        var plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        if let range = plistNoExtensionName.range(of: "&img") {
-            plistNoExtensionName.replaceSubrange(range, with: "")
-        }
+        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
         let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
         let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")

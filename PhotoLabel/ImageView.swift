@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ImageView: View {
+    @Binding var fileUrl: URL
     @Binding var showImageView: Bool
     let imageFile: String
     @State var lastValue: CGFloat = 1.0
@@ -103,6 +104,44 @@ struct ImageView: View {
                 HStack {
                     Spacer()
                     Button {
+                        if let uiimage = UIImage(contentsOfFile: imageFile) {
+                            let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2)
+                            do {
+                                try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                ZipManager.saveZip(fileUrl: fileUrl)
+                                showImageView = false
+                            } catch {
+                                print(error)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "rotate.right")
+                            .frame(width: 30, height: 30)
+                            .background(.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding()
+                    }
+                    Button {
+                        if let uiimage = UIImage(contentsOfFile: imageFile) {
+                            let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2)
+                            do {
+                                try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                ZipManager.saveZip(fileUrl: fileUrl)
+                                showImageView = false
+                            } catch {
+                                print(error)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "rotate.left")
+                            .frame(width: 30, height: 30)
+                            .background(.gray)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding()
+                    }
+                    Button {
                         showImageView = false
                     } label: {
                         Image(systemName: "xmark")
@@ -113,8 +152,24 @@ struct ImageView: View {
                             .padding()
                     }
                 }
+                .background(.black.opacity(0.3))
                 Spacer()
             }
         }
+    }
+    private func rotateImage(_ image: UIImage, radians: CGFloat) -> UIImage {
+        let rotatedSize = CGRect(origin: .zero, size: image.size)
+            .applying(CGAffineTransform(rotationAngle: radians))
+            .integral.size
+        UIGraphicsBeginImageContextWithOptions(rotatedSize, false, image.scale)
+        let context = UIGraphicsGetCurrentContext()!
+        context.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
+        context.rotate(by: radians)
+        context.scaleBy(x: 1, y: -1)
+        context.translateBy(x: -image.size.width / 2, y: -image.size.height / 2)
+        context.draw(image.cgImage!, in: .init(origin: .zero, size: image.size))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return newImage
     }
 }

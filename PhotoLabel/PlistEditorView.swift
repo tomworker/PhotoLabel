@@ -54,15 +54,7 @@ struct PlistEditorView: View {
                 if plistName == initialPlistName {
                     savePlist(isRename: false, isCopy: false)
                 } else {
-                    if initialPlistName.range(of: "&img") == nil {
-                        savePlist(isRename: false, isCopy: false)
-                    } else {
-                        if String(plistName.suffix(4)) == "&img" && plistName.count >= 5 {
-                            isRename = true
-                        } else {
-                            isPlistNameError = true
-                        }
-                    }
+                    isRename = true
                 }
             } label : {
                 Text("Save")
@@ -70,11 +62,6 @@ struct PlistEditorView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
-            }
-            .alert(isPresented: $isPlistNameError) {
-                Alert(title: Text("Canceled"), message: Text("It needs \"&img.plist\"."),
-                    dismissButton: .default(Text("OK"), action: {
-                }))
             }
             Button {
                 showPlistEditor = false
@@ -338,9 +325,6 @@ struct PlistEditorView: View {
     }
     private func savePlist(isRename: Bool, isCopy: Bool) {
         plistName = ZipManager.replaceString(targetString: plistName)
-        if plistName == "&img" {
-            plistName = "_&img"
-        }
         if isRename == true && plistName == initialPlistName {
             return
         }
@@ -368,16 +352,18 @@ struct PlistEditorView: View {
         CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
         showPlistEditor = false
         if isRename {
-            var atZipName = initialPlistName
-            atZipName = atZipName.replacingOccurrences(of: "&img", with: "") + ".zip"
+            let atZipName = initialPlistName + ".zip"
             let atZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(atZipName)
-            var toZipName = plistName
-            toZipName = toZipName.replacingOccurrences(of: "&img", with: "") + ".zip"
+            let toZipName = plistName + ".zip"
             let toZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(toZipName)
             if isCopy {
-                ZipManager.copyZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
+                    ZipManager.copyZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                }
             } else {
-                ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
+                    ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                }
                 let oldPlistName = initialPlistName + ".plist"
                 let oldPlistUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(oldPlistName)
                 ZipManager.remove(fileUrl: oldPlistUrl)

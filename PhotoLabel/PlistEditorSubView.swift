@@ -153,5 +153,4 @@ struct PlistEditorSubView: View {
             }
         }
     }
-
 }
