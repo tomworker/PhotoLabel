@@ -333,7 +333,7 @@ struct PhotoCaptureView: View {
                     case 1:
                         try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
                         workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: workSpace.count)
-                        ZipManager.saveImgPlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                     case 2:
                         if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
                             ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
@@ -343,7 +343,7 @@ struct PhotoCaptureView: View {
                         duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
                         mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-                        ZipManager.saveImgPlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                     default:
                         print("SheetId have failed to be found:\(sheetId)")
                     }

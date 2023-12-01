@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FinalReportView: View {
+    @Binding var fileUrl: URL
     @Binding var showFinalReport: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @State var targetMainCategoryIndex = -1
@@ -70,7 +71,7 @@ struct FinalReportView: View {
                                         self.targetImageFileIndex = imageFileId.id
                                     }
                                     .fullScreenCover(isPresented: $showImageView) {
-                                        ImageTabView(showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
+                                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
                                     }
                             }
                         }

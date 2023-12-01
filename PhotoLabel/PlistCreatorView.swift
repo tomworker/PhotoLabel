@@ -11,6 +11,7 @@ struct PlistCreatorView: View {
     @State var mainCategory: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
     @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var plistName: String = ""
+    @State var isSaveError = false;
     @Binding var showPlistCreator: Bool
     @State var mainCategorys: [MainCategory] = []
 
@@ -29,21 +30,26 @@ struct PlistCreatorView: View {
             Button {
                 if plistName != "" {
                     plistName = ZipManager.replaceString(targetString: plistName)
-                    let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
-                    var tempSubCategorys: [SubCategory] = []
-                    for i in 0..<mainCategory.count {
-                        if mainCategory[i] != "" {
-                            tempSubCategorys = []
-                            for j in 0..<subCategoryStrings[i].count {
-                                if subCategoryStrings[i][j] != "" {
-                                    tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: 0, images: []))
+                    let zipUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".zip")
+                    if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
+                        isSaveError = true;
+                    } else {
+                        let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
+                        var tempSubCategorys: [SubCategory] = []
+                        for i in 0..<mainCategory.count {
+                            if mainCategory[i] != "" {
+                                tempSubCategorys = []
+                                for j in 0..<subCategoryStrings[i].count {
+                                    if subCategoryStrings[i][j] != "" {
+                                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: 0, images: []))
+                                    }
                                 }
+                                mainCategorys.append(MainCategory(mainCategory: mainCategory[i], items: tempSubCategorys, subFolderMode: 0))
                             }
-                            mainCategorys.append(MainCategory(mainCategory: mainCategory[i], items: tempSubCategorys, subFolderMode: 0))
                         }
+                        CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
+                        showPlistCreator = false
                     }
-                    CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
-                    showPlistCreator = false
                 }
             } label : {
                 Text("Save")
@@ -51,6 +57,9 @@ struct PlistCreatorView: View {
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
+            }
+            .alert(isPresented: $isSaveError) {
+                Alert(title: Text("Save Error"), message: Text("Zip file already exists!"))
             }
             Button {
                 showPlistCreator = false

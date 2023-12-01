@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ImageTabView: View {
+    @Binding var fileUrl: URL
     @Binding var showImageView: Bool
     @State var targetImageFileIndex: Int
     let imageFileIds: [ImageFileId]
@@ -15,7 +16,7 @@ struct ImageTabView: View {
     var body: some View {
         TabView(selection: $targetImageFileIndex) {
             ForEach(imageFileIds.indices, id: \.self) { index in
-                ImageView(showImageView: $showImageView, imageFile: imageFileIds[index].imageFile.imageFile).tag(index)
+                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: imageFileIds[index].imageFile.imageFile).tag(index)
             }
         }
         .tabViewStyle(PageTabViewStyle())

@@ -27,6 +27,8 @@ struct EachTabView: View {
     @State var targetImageFileIndex = -1
     @State var showImageView = false
     @State var showImageView2 = false
+    @State var isDeleteMode = false
+    @State var isWorkSpaceMode = false
     @State var isDuplicateMode = false
     @State var isEditSubCategory = false
     let sheetId = 2
@@ -84,32 +86,22 @@ struct EachTabView: View {
                                     PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 Spacer()
-                                Button {
-                                } label: {
-                                    Text("To Workspace")
-                                        .frame(maxWidth: .infinity, minHeight: 30)
-                                        .background(moveToWorkSpace ? .orange : subCategoryIndex % 2 == 0 ? .brown.opacity(0.8) : .indigo.opacity(0.8))
-                                        .foregroundColor(.white)
-                                        .dropDestination(for: String.self) { indexs, location in
-                                            let arr: [String] = indexs.first!.components(separatedBy: ":")
-                                            var indexs1: [String] = []
-                                            indexs1.append(arr[0])
-                                            var indexs2: [String] = []
-                                            indexs2.append(arr[1])
-                                            var indexs3: [String] = []
-                                            indexs3.append(arr[2])
-                                            if indexs3.first! != "2" {
-                                                if URL(string: indexs2[0])!.lastPathComponent.first == "@" {
-                                                } else {
-                                                    ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
-                                                    ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                }
-                                            }
-                                            return true
-                                        } isTargeted: { isTargeted in
-                                            moveToWorkSpace = isTargeted
-                                        }
+                                Toggle(isOn: $isDeleteMode) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(isDeleteMode ? .blue : .gray.opacity(0.5))
                                 }
+                                .fixedSize()
+                                .tint(.blue)
+                                Spacer()
+                                Toggle(isOn: $isWorkSpaceMode) {
+                                    HStack {
+                                        Image(systemName: "square.and.arrow.up")
+                                            .foregroundColor(isWorkSpaceMode ? .blue : .gray.opacity(0.5))
+                                            .rotationEffect(Angle(degrees: 180))
+                                    }
+                                }
+                                .fixedSize()
+                                .tint(.blue)
                                 Spacer()
                                 Button {
                                     showImageStocker = false
@@ -202,13 +194,49 @@ struct EachTabView: View {
                             LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                                 ForEach(CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)) { imageFileId in
                                     if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
-                                        Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
-                                            .resizable()
-                                            .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                            .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75: uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                        ZStack {
+                                            Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
+                                                .resizable()
+                                                .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75: uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
                                             //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75: uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                            .cornerRadius(10)
-                                            .border(.indigo, width: isTargeted1 && imageFileId.id == isTargetedIndex1 ? 3 : .zero)
+                                                .cornerRadius(10)
+                                                .border(.indigo, width: isTargeted1 && imageFileId.id == isTargetedIndex1 ? 3 : .zero)
+                                                HStack {
+                                                    if isDeleteMode == true {
+                                                        Button {
+                                                            let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileId.id].imageFile
+                                                            ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
+                                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
+                                                            duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
+                                                            print("Removed from plist:\(targetImageFile)")
+                                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
+                                                            ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                        } label: {
+                                                            Image(systemName: "trash")
+                                                                .frame(width: 30, height: 30)
+                                                                .background(.black.opacity(0.3))
+                                                                .foregroundColor(.white)
+                                                                .cornerRadius(10)
+                                                        }
+                                                    }
+                                                    if isWorkSpaceMode == true {
+                                                        Button {
+                                                            var indexs1: [String] = []
+                                                            indexs1.append(String(imageFileId.id))
+                                                            ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
+                                                            ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                        } label: {
+                                                            Image(systemName: "square.and.arrow.up")
+                                                                .frame(width: 30, height: 30)
+                                                                .rotationEffect(Angle(degrees: 180))
+                                                                .background(.black.opacity(0.3))
+                                                                .foregroundColor(.white)
+                                                                .cornerRadius(10)
+                                                        }
+                                                    }
+                                                }
+                                            }
                                             .onTapGesture(count: 2) {
                                                 CategoryManager.moveItemFromLastToFirst(image: imageFileId, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
                                                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
@@ -264,7 +292,7 @@ struct EachTabView: View {
                                                 self.isTargetedIndex1 = imageFileId.id
                                             }
                                             .fullScreenCover(isPresented: $showImageView2) {
-                                                ImageTabView(showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory))
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory))
                                             }
                                     }
                                 }
@@ -278,11 +306,19 @@ struct EachTabView: View {
                             }
                             .fixedSize()
                             .tint(.brown.opacity(0.8))
-                            Text("Workspace (drag & drop)")
+                            HStack {
+                                Text("Move to Workspace: ")
+                                Image(systemName: "square.and.arrow.up")
+                                    .rotationEffect(Angle(degrees: 180))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .foregroundColor(.white)
+                            Text("Move to top (double tap)")
                                 .frame(maxWidth: .infinity)
                                 .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .foregroundColor(.white)
-                            Text("Move to top (double tap)")
+                            Text("Move to Stocker (drag & drop)")
                                 .frame(maxWidth: .infinity)
                                 .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .foregroundColor(.white)
@@ -319,7 +355,8 @@ struct EachTabView: View {
                                                 self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path
                                             }
                                         }
-                                        .draggable(String(index) + ":" + duplicateSpace[index].imageFile.imageFile + ":2") {
+                                        //.draggable(String(index) + ":" + duplicateSpace[index].imageFile.imageFile + ":2") {
+                                        .draggable("\(String(index)):\(duplicateSpace[index].imageFile.imageFile):2") {
                                             Image(uiImage: uiimage).border(.secondary)
                                         }
                                         .dropDestination(for: String.self) { indexs, location in
@@ -339,7 +376,7 @@ struct EachTabView: View {
                                             self.isTargetedIndex2 = index
                                         }
                                         .fullScreenCover(isPresented: $showImageView) {
-                                            ImageView(showImageView: $showImageView, imageFile: targetImageFile)
+                                            ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile)
                                         }
                                     }
                                 }
@@ -361,6 +398,23 @@ struct EachTabView: View {
                                                     .foregroundColor(.white.opacity(0.5))
                                                     .background(.black.opacity(0.5))
                                             }
+                                            HStack {
+                                                if isDeleteMode == true {
+                                                    Button {
+                                                        let targetImageFile = workSpace[workSpaceImageFileId.id].imageFile
+                                                        ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
+                                                        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: targetImageFile, subDirectory: "")})
+                                                        print("Removed from WorkSpace:\(targetImageFile)")
+                                                        ZipManager.saveZip(fileUrl: fileUrl)
+                                                    } label: {
+                                                        Image(systemName: "trash")
+                                                            .frame(width: 30, height: 30)
+                                                            .background(.black.opacity(0.3))
+                                                            .foregroundColor(.white)
+                                                            .cornerRadius(10)
+                                                    }
+                                                }
+                                            }
                                         }
                                         .onTapGesture(count: 2) {
                                             CategoryManager.moveItemFromLastToFirst(image: workSpaceImageFileId, workSpace: &workSpace)
@@ -369,7 +423,8 @@ struct EachTabView: View {
                                             showImageView = true
                                             self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
                                         }
-                                        .draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
+                                        //.draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
+                                        .draggable("\(String(workSpaceImageFileId.id)):\(workSpaceImageFileId.workSpaceImageFile.imageFile):1") {
                                             Image(uiImage: uiimage).border(.secondary)
                                         }
                                         .dropDestination(for: String.self) { indexs, location in
@@ -392,7 +447,7 @@ struct EachTabView: View {
                                             self.isTargetedIndex2 = workSpaceImageFileId.id
                                         }
                                         .fullScreenCover(isPresented: $showImageView) {
-                                            ImageView(showImageView: $showImageView, imageFile: targetImageFile)
+                                            ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile)
                                         }
                                     }
                                 }
