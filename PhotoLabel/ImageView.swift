@@ -105,7 +105,7 @@ struct ImageView: View {
                     Spacer()
                     Button {
                         if let uiimage = UIImage(contentsOfFile: imageFile) {
-                            let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2)
+                            let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2, isClockwise: true)
                             do {
                                 try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
                                 ZipManager.saveZip(fileUrl: fileUrl)
@@ -124,7 +124,7 @@ struct ImageView: View {
                     }
                     Button {
                         if let uiimage = UIImage(contentsOfFile: imageFile) {
-                            let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2)
+                            let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2, isClockwise: false)
                             do {
                                 try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
                                 ZipManager.saveZip(fileUrl: fileUrl)
@@ -157,19 +157,55 @@ struct ImageView: View {
             }
         }
     }
-    private func rotateImage(_ image: UIImage, radians: CGFloat) -> UIImage {
-        let rotatedSize = CGRect(origin: .zero, size: image.size)
-            .applying(CGAffineTransform(rotationAngle: radians))
-            .integral.size
-        UIGraphicsBeginImageContextWithOptions(rotatedSize, false, image.scale)
-        let context = UIGraphicsGetCurrentContext()!
-        context.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
-        context.rotate(by: radians)
-        context.scaleBy(x: 1, y: -1)
-        context.translateBy(x: -image.size.width / 2, y: -image.size.height / 2)
-        context.draw(image.cgImage!, in: .init(origin: .zero, size: image.size))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return newImage
+    private func rotateImage(_ image: UIImage, radians: CGFloat, isClockwise: Bool) -> UIImage {
+        autoreleasepool {
+            if image.imageOrientation == .up {
+                let rotatedSize = CGRect(origin: .zero, size: image.size)
+                    .applying(CGAffineTransform(rotationAngle: radians))
+                    .integral.size
+                UIGraphicsBeginImageContextWithOptions(rotatedSize, false, image.scale)
+                let context = UIGraphicsGetCurrentContext()!
+                context.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
+                context.rotate(by: radians)
+                context.scaleBy(x: 1, y: -1)
+                context.translateBy(x: -image.size.width / 2, y: -image.size.height / 2)
+                context.draw(image.cgImage!, in: .init(origin: .zero, size: image.size))
+                let newImage = UIGraphicsGetImageFromCurrentImageContext()!
+                UIGraphicsEndImageContext()
+                return newImage
+            } else {
+                let cgImage = image.cgImage
+                let newImage = UIImage(cgImage: cgImage!, scale: image.scale, orientation: UIImage.Orientation.up)
+                if (image.imageOrientation == .right && !isClockwise) || (image.imageOrientation == .left && isClockwise) {
+                    return newImage
+                } else {
+                    var radians2 = radians
+                    if image.imageOrientation == .right && isClockwise {
+                        radians2 = -CGFloat.pi
+                    } else if image.imageOrientation == .left && !isClockwise {
+                        radians2 = CGFloat.pi
+                    } else if image.imageOrientation == .down && !isClockwise {
+                        radians2 = -CGFloat.pi / 2
+                    } else if image.imageOrientation == .down && isClockwise {
+                        radians2 = CGFloat.pi / 2
+                    } else {
+                        return newImage
+                    }
+                    let rotatedSize = CGRect(origin: .zero, size: newImage.size)
+                        .applying(CGAffineTransform(rotationAngle: radians2))
+                        .integral.size
+                    UIGraphicsBeginImageContextWithOptions(rotatedSize, false, newImage.scale)
+                    let context = UIGraphicsGetCurrentContext()!
+                    context.translateBy(x: rotatedSize.width / 2, y: rotatedSize.height / 2)
+                    context.rotate(by: radians2)
+                    context.scaleBy(x: 1, y: -1)
+                    context.translateBy(x: -newImage.size.width / 2, y: -newImage.size.height / 2)
+                    context.draw(newImage.cgImage!, in: .init(origin: .zero, size: newImage.size))
+                    let newImage2 = UIGraphicsGetImageFromCurrentImageContext()!
+                    UIGraphicsEndImageContext()
+                    return newImage2
+                }
+            }
+        }
     }
 }
