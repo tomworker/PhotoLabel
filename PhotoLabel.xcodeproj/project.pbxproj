@@ -30,6 +30,7 @@
 		98C753782A35F14400648C02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C753772A35F14400648C02 /* ContentView.swift */; };
 		98C7537A2A35F14500648C02 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C753792A35F14500648C02 /* Assets.xcassets */; };
 		98C7537D2A35F14500648C02 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C7537C2A35F14500648C02 /* Preview Assets.xcassets */; };
+		98DE84EE2B1B1076007FD173 /* CheckBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +58,7 @@
 		98C753772A35F14400648C02 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		98C753792A35F14500648C02 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98C7537C2A35F14500648C02 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 				9896971D2A35FF2300EE3599 /* ImageView.swift */,
 				985296102A7209460052AC45 /* ImageTabView.swift */,
 				983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */,
+				98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */,
 				9896971B2A35FEFB00EE3599 /* FinalReportView.swift */,
 				989697232A35FF9800EE3599 /* PlistCreatorView.swift */,
 				989697252A35FFB500EE3599 /* PlistEditorView.swift */,
@@ -208,6 +211,7 @@
 				985296112A7209460052AC45 /* ImageTabView.swift in Sources */,
 				989697282A35FFDB00EE3599 /* PlistCreatorSubView.swift in Sources */,
 				9869A71A2AB467290058ED73 /* PhotoCapture.swift in Sources */,
+				98DE84EE2B1B1076007FD173 /* CheckBoxView.swift in Sources */,
 				9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */,
 				989697222A35FF7200EE3599 /* EachTabView.swift in Sources */,
 				9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */,
