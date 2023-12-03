@@ -19,6 +19,7 @@ struct CategorySelectorView: View {
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
     @State var showSubCategory = false
+    @State var showCheckBox = false
     @State var showCheckBoxMatrix = false
     @State var showFinalReport = false
     @State var moveToTrashBox = false
@@ -59,12 +60,26 @@ struct CategorySelectorView: View {
                     HStack {
                         Spacer()
                         Button {
+                            showCheckBox = true
+                        } label: {
+                            HStack {
+                                Text("CheckBox")
+                            }
+                            .frame(width: 90, height: 30)
+                            .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                        }
+                        .fullScreenCover(isPresented: $showCheckBox) {
+                            CheckBoxView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox)
+                        }
+                        Button {
                             showCheckBoxMatrix = true
                         } label: {
                             HStack {
-                                Text("CheckBox Matrix")
+                                Text("Matrix")
                             }
-                            .frame(width: 160, height: 30)
+                            .frame(width: 70, height: 30)
                             .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                             .foregroundColor(.white)
                             .cornerRadius(10)
