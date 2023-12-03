@@ -124,12 +124,6 @@ struct CheckBoxView: View {
                                                                     targetSubCategoryIndex = subCategoryId.id
                                                                     targetSubCategoryIndex4 = [targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex, targetSubCategoryIndex]
                                                                     }
-                                                                    .fullScreenCover(isPresented: $showImageView) {
-                                                                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
-                                                                    }
-                                                                    .fullScreenCover(isPresented: $showImageStocker) {
-                                                                        ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
-                                                                    }
                                                             } else {
                                                                 VStack(alignment: .center, spacing: 0) {
                                                                     Text("Now loading...")
@@ -143,6 +137,12 @@ struct CheckBoxView: View {
                                                     }
                                                 }
                                             }
+                                        }
+                                        .fullScreenCover(isPresented: $showImageView) {
+                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
+                                        }
+                                        .fullScreenCover(isPresented: $showImageStocker) {
+                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
                                         }
                                     }
                                     Spacer()

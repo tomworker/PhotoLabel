@@ -198,12 +198,6 @@ struct CheckBoxMatrixView: View {
                                                     self.targetSubCategoryIndex = subCategoryId.id
                                                     self.targetSubCategoryIndex4 = [0, self.targetSubCategoryIndex]
                                                     }
-                                                    .fullScreenCover(isPresented: $showImageView) {
-                                                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[0].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[0].subFolderMode, mainCategoryName: mainCategoryIds[0].mainCategory, subCategoryName: mainCategoryIds[0].items[targetSubCategoryIndex].subCategory))
-                                                    }
-                                                    .fullScreenCover(isPresented: $showImageStocker) {
-                                                        ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
-                                                    }
                                                 } else {
                                                     VStack(alignment: .center, spacing: 0) {
                                                         Text("Now loading...")
@@ -223,6 +217,12 @@ struct CheckBoxMatrixView: View {
                                     Spacer()
                                 }
                                 .frame(height: initialOriginx)
+                                .fullScreenCover(isPresented: $showImageView) {
+                                    ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[0].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[0].subFolderMode, mainCategoryName: mainCategoryIds[0].mainCategory, subCategoryName: mainCategoryIds[0].items[targetSubCategoryIndex].subCategory))
+                                }
+                                .fullScreenCover(isPresented: $showImageStocker) {
+                                    ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
+                                }
                             }
                             Spacer()
                         }
