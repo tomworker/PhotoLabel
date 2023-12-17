@@ -39,14 +39,20 @@ struct FinalReportView: View {
         ScrollView {
             ForEach(mainCategoryIds) { mainCategoryId in
                 HStack {
-                    Text(mainCategoryId.mainCategory + ":")
-                        .bold()
+                    if let range = mainCategoryId.mainCategory.range(of: ":=") {
+                        let idx = mainCategoryId.mainCategory.index(range.lowerBound, offsetBy: -1)
+                        Text(mainCategoryId.mainCategory[...idx] + ":")
+                            .bold()
+                    }
                     Spacer()
                 }
                 ForEach(mainCategoryId.items) { subCategoryId in
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("- " + subCategoryId.subCategory)
+                            if let range = subCategoryId.subCategory.range(of: ":=") {
+                                let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                Text("- " + subCategoryId.subCategory[...idx])
+                            }
                             if subCategoryId.countStoredImages == 0 {
                                 Text("  N/A")
                             }

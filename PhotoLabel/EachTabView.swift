@@ -16,6 +16,8 @@ struct EachTabView: View {
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
+    @State var subCategory = ""
+    @State var subCategory2 = ""
     @State var moveToWorkSpace = false
     @State var showPhotoCapture = false
     @State var showPhotoLibrary2 = false
@@ -121,23 +123,43 @@ struct EachTabView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(subCategoryIndex % 2 == 0 ? LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.2), .indigo.opacity(0.2), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.clear, .brown.opacity(0.2), .brown.opacity(0.2), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                     .foregroundColor(subCategoryIndex % 2 == 0 ? .indigo : .brown).bold()
-                                Text("Category: " + mainCategoryIds[mainCategoryIndex].mainCategory)
-                                    .frame(maxWidth: .infinity)
-                                    .background(subCategoryIndex % 2 == 0 ? LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.8), .indigo.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.clear, .brown.opacity(0.8), .brown.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .foregroundColor(.white)
-                            }
-                            Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)
-                                .onLongPressGesture {
-                                    isEditSubCategory = true
+                                if let range = mainCategoryIds[mainCategoryIndex].mainCategory.range(of: ":=") {
+                                    let idx = mainCategoryIds[mainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: -1)
+                                    Text("Category: " + mainCategoryIds[mainCategoryIndex].mainCategory[...idx])
+                                        .frame(maxWidth: .infinity)
+                                        .background(subCategoryIndex % 2 == 0 ? LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.8), .indigo.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.clear, .brown.opacity(0.8), .brown.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                        .foregroundColor(.white)
                                 }
-                                .alert("", isPresented: $isEditSubCategory, actions: {
-                                    let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory
-                                    TextField("SubCategory", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)
-                                    Button("Edit", action: {ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)})
-                                    Button("Cancel", role: .cancel, action: {mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory = initialValue})
-                                }, message: {
-                               
-                                })
+                            }
+                            if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
+                                let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)
+                                Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory[...idx])
+                                    .onLongPressGesture {
+                                        isEditSubCategory = true
+                                        var array: [String] = ["", ""]
+                                        if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
+                                            let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)
+                                            let idx2 = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: 1)
+                                            array[0] = String(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory[...idx])
+                                            array[1] = String(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory[idx2...])
+                                        } else {
+                                            array[0] = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory
+                                            array[1] = "=-,-,-"
+                                        }
+                                        subCategory = array[0]
+                                        subCategory2 = array[1]
+                                    }
+                                    .alert("", isPresented: $isEditSubCategory, actions: {
+                                        TextField("SubCategory", text: $subCategory)
+                                        Button("Edit", action: {
+                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory = subCategory + ":" + subCategory2
+                                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        })
+                                        Button("Cancel", role: .cancel, action: {subCategory = ""})
+                                    }, message: {
+                                        
+                                    })
+                            }
                             if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages == 0 {
                                 LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                                     ZStack{

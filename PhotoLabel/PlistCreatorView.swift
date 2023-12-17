@@ -41,10 +41,10 @@ struct PlistCreatorView: View {
                                 tempSubCategorys = []
                                 for j in 0..<subCategoryStrings[i].count {
                                     if subCategoryStrings[i][j] != "" {
-                                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: 0, images: []))
+                                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + ":=-,-,-", countStoredImages: 0, images: []))
                                     }
                                 }
-                                mainCategorys.append(MainCategory(mainCategory: mainCategory[i], items: tempSubCategorys, subFolderMode: 0))
+                                mainCategorys.append(MainCategory(mainCategory: mainCategory[i] + ":=,,", items: tempSubCategorys, subFolderMode: 0))
                             }
                         }
                         CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
