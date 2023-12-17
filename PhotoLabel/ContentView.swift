@@ -836,12 +836,22 @@ class ZipManager {
     static func saveZip(fileUrl: URL) {
         let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
+        var tempImageFiles: [String]
         let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
         let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-        ZipManager.remove(fileUrl: targetZipUrl)
-        ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
-        ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
-        ZipManager.remove(fileUrl: targetUrl)
+        do {
+            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+            if tempImageFiles.count == 0 {
+                ZipManager.remove(fileUrl: targetZipUrl)
+            } else {
+                ZipManager.remove(fileUrl: targetZipUrl)
+                ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
+                ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
+                ZipManager.remove(fileUrl: targetUrl)
+            }
+        } catch {
+            print(error)
+        }
     }
     static func copyZip(atZipUrl: URL, toZipUrl: URL) {
         let atDirUrl = atZipUrl.deletingPathExtension()
