@@ -299,7 +299,6 @@ struct CheckBoxView: View {
                                             }
                                         }
                                         .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight + 25)
-                                        .foregroundColor(.white)
                                     }
                                     .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth))
                                     .background((subCategoryId.id + index) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
