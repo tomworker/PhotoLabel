@@ -39,9 +39,20 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 HStack {
                     ZStack(alignment: .top) {
-                        Rectangle()
-                            .frame(width: 100, height: 100)
-                            .foregroundStyle(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                        VStack(spacing: 7) {
+                            ForEach(0..<4) { i in
+                                HStack(spacing: 7) {
+                                    ForEach(0..<4) { j in
+                                        VStack {
+                                        }
+                                        .frame(width: 33, height: 33)
+                                        .background((i + j) % 2 == 0 ? .orange : .brown)
+                                    }
+                                }
+                            }
+                        }
+                            .frame(width: 99, height: 99)
+                            .background(.black)
                             .cornerRadius(20)
                         Image(systemName: "camera").font(.system(size: 50))
                             .frame(width: 100, height: 79)
@@ -49,7 +60,7 @@ struct ContentView: View {
                             .background(.clear)
                             .cornerRadius(10)
                         Text("Label")
-                            .baselineOffset(-59)
+                            .baselineOffset(-58.5)
                             .foregroundColor(.white)
                             .font(.system(size: 25))
                             .fontWeight(.bold)
@@ -446,7 +457,7 @@ struct SubCategoryId: Identifiable {
 }
 struct MainCategoryId: Identifiable {
     var id: Int
-    let mainCategory: String
+    var mainCategory: String
     var items: [SubCategoryId]
     let subFolderMode: Int
 }
@@ -497,8 +508,8 @@ class ConfigManager {
     static var maxNumberOfMainCategory = 99
     static var maxNumberOfSubCategory = 99
     static var maxNumberOfImageFile = 99
-    static var iPadCheckBoxMatrixColumnWidth = 130
-    static var checkBoxMatrixColumnWidth = 77
+    static var iPadCheckBoxMatrixColumnWidth = 90
+    static var checkBoxMatrixColumnWidth = 60
     static let initialIPadMainColumnNumber = 6
     static let initialIPadSubColumnNumber = 4
     static let initialIPadImageColumnNumber = 5
@@ -512,8 +523,8 @@ class ConfigManager {
     static let initialMaxNumberOfMainCategory = 99
     static let initialMaxNumberOfSubCategory = 99
     static let initialMaxNumberOfImageFile = 99
-    static let initialIPadCheckBoxMatrixColumnWidth = 130
-    static let initialCheckBoxMatrixColumnWidth = 77
+    static let initialIPadCheckBoxMatrixColumnWidth = 90
+    static let initialCheckBoxMatrixColumnWidth = 60
 }
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)

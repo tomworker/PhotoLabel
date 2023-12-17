@@ -13,8 +13,10 @@ struct PlistEditorView: View {
     @State var initialPlistName = ""
     @State var mainCategoryIds: [MainCategoryId]
     @State var mainCategoryStrings: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
+    @State var mainCategoryStrings2: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
     @State var subFolderModes: [Int] = Array(repeating: 0, count: ConfigManager.maxNumberOfMainCategory)
     @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
+    @State var subCategoryStrings2: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var mainCategorys: [MainCategory] = []
@@ -103,19 +105,40 @@ struct PlistEditorView: View {
         .onAppear {
             initialPlistName = plistName
             mainCategorys = CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds)
+            var array: [String] = ["", ""]
             for i in 0..<mainCategorys.count {
                 if mainCategorys.count > ConfigManager.maxNumberOfMainCategory {
                     isMaxNumberMainError = true
                     break
                 }
-                mainCategoryStrings[i] = mainCategorys[i].mainCategory
+                if let range = mainCategorys[i].mainCategory.range(of: ":=") {
+                    let idx = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: -1)
+                    let idx2 = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: 1)
+                    array[0] = String(mainCategorys[i].mainCategory[...idx])
+                    array[1] = String(mainCategorys[i].mainCategory[idx2...])
+                } else {
+                    array[0] = mainCategorys[i].mainCategory
+                    array[1] = "=,,"
+                }
+                mainCategoryStrings[i] = array[0]
+                mainCategoryStrings2[i] = array[1]
                 subFolderModes[i] = mainCategorys[i].subFolderMode
                 for j in 0..<mainCategorys[i].items.count {
                     if mainCategorys[i].items.count > ConfigManager.maxNumberOfSubCategory {
                         isMaxNumberSubError = true
                         break
                     }
-                    subCategoryStrings[i][j] = mainCategorys[i].items[j].subCategory
+                    if let range = mainCategorys[i].items[j].subCategory.range(of: ":=") {
+                        let idx = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: -1)
+                        let idx2 = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: 1)
+                        array[0] = String(mainCategorys[i].items[j].subCategory[...idx])
+                        array[1] = String(mainCategorys[i].items[j].subCategory[idx2...])
+                    } else {
+                        array[0] = mainCategorys[i].items[j].subCategory
+                        array[1] = "=-,-,-"
+                    }
+                    subCategoryStrings[i][j] = array[0]
+                    subCategoryStrings2[i][j] = array[1]
                     countStoredImages[i][j] = mainCategorys[i].items[j].countStoredImages
                     for k in 0..<mainCategorys[i].items[j].countStoredImages{
                         if mainCategorys[i].items[j].countStoredImages > ConfigManager.maxNumberOfImageFile {
@@ -343,10 +366,16 @@ struct PlistEditorView: View {
                                 tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
                             }
                         }
-                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
+                        if subCategoryStrings2[i][j] == "" {
+                            subCategoryStrings2[i][j] = "=-,-,-"
+                        }
+                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + ":" + subCategoryStrings2[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
                     }
                 }
-                mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i], items: tempSubCategorys, subFolderMode: subFolderModes[i]))
+                if mainCategoryStrings2[i] == "" {
+                    mainCategoryStrings2[i] = "=,,"
+                }
+                mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i] + ":" + mainCategoryStrings2[i], items: tempSubCategorys, subFolderMode: subFolderModes[i]))
             }
         }
         CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)

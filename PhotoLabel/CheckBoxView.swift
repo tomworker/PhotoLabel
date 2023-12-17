@@ -16,13 +16,22 @@ struct CheckBoxView: View {
     @Binding var fileUrl: URL
     @Binding var targetMainCategoryIndex: Int
     @Binding var showCheckBox: Bool
+    @State var mainCategory = ""
+    @State var mainCategory2: [String] = Array(repeating: "", count: 3)
+    @State var subCategory = ""
+    @State var subCategory2: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
+    @State var subCategory3: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
+    @State var subCategory4: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
     @State var targetSubCategoryIndex = -1
-    @State var targetSubCategoryIndex3 = -1
-    @State var targetSubCategoryIndex4: [Int] = [-1, -1]
+    @State var targetSubCategoryIndex2: [Int] = [-1, -1]
+    @State var targetCheckInfoIndex = 0
     @State var targetImageFileIndex = 0
     @State var showImageView = false
     @State var showImageStocker = false
     @State var isToggleCheckBox = false
+    @State var isEditCheckItem: [Bool] = Array(repeating: false, count: 3)
+    @State var isEditCheckInfo: [Bool] = Array(repeating: false, count: ConfigManager.maxNumberOfSubCategory)
+    @State var isClear = false
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let initialOriginx = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) / CGFloat(5) + CGFloat(10) : (UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(3) + CGFloat(10))
     let imageWidth = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) / CGFloat(5) : (UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(3))
@@ -35,12 +44,12 @@ struct CheckBoxView: View {
         VStack(spacing: 0) {
             ZStack {
                 VStack(spacing: 0) {
-                    Text("CheckBox")
+                    Text("CheckSheet")
                         .bold()
                 }
                 HStack(spacing: 0) {
                     Button {
-                        clearCheckBox()
+                        isClear = true
                     } label: {
                         Text("Clear")
                             .frame(width: 70, height: 30)
@@ -61,16 +70,75 @@ struct CheckBoxView: View {
                             .padding(.trailing)
                     }
                 }
+                .alert(isPresented: $isClear) {
+                    Alert(title: Text("Clear all checks & remarks?"),
+                          primaryButton: .cancel(Text("Cancel")),
+                          secondaryButton: .destructive(Text("All Clear"), action: {
+                        clearCheckBox()
+                    }))
+                }
             }
             .frame(height: 50)
+            .onAppear() {
+                var array: [String] = ["", ""]
+                if targetMainCategoryIndex == -1 {
+                    targetMainCategoryIndex = 0
+                }
+                if let range = mainCategoryIds[targetMainCategoryIndex].mainCategory.range(of: ":=") {
+                    let idx = mainCategoryIds[targetMainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: -1)
+                    let idx2 = mainCategoryIds[targetMainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: 2)
+                    array[0] = String(mainCategoryIds[targetMainCategoryIndex].mainCategory[...idx])
+                    array[1] = String(mainCategoryIds[targetMainCategoryIndex].mainCategory[idx2...])
+                } else {
+                    array[0] = mainCategoryIds[targetMainCategoryIndex].mainCategory
+                    array[1] = ",,"
+                }
+                mainCategory = array[0]
+                mainCategory2 = array[1].components(separatedBy: ",")
+            }
             HStack(spacing: 0) {
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
-                        Text(mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].mainCategory)
+                        Text(mainCategory)
                         Spacer()
                     }
                 }
-                .frame(width: initialOriginx, height: 25)
+                .frame(width: initialOriginx * 1.4, height: 25)
+                VStack(spacing: 0) {
+                    HStack(spacing: 0) {
+                        ForEach(mainCategory2.indices, id: \.self) { index in
+                            Text(mainCategory2[index] == "" ? "CHK" + String(index + 1) : mainCategory2[index])
+                                .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth))
+                                .background(index % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
+                                .onLongPressGesture {
+                                    isEditCheckItem[index] = true
+                                    var array: [String] = ["", ""]
+                                    if let range = mainCategoryIds[targetMainCategoryIndex].mainCategory.range(of: ":=") {
+                                        let idx = mainCategoryIds[targetMainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: -1)
+                                        let idx2 = mainCategoryIds[targetMainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: 2)
+                                        array[0] = String(mainCategoryIds[targetMainCategoryIndex].mainCategory[...idx])
+                                        array[1] = String(mainCategoryIds[targetMainCategoryIndex].mainCategory[idx2...])
+                                    } else {
+                                        array[0] = mainCategoryIds[targetMainCategoryIndex].mainCategory
+                                        array[1] = ",,"
+                                    }
+                                    mainCategory = array[0]
+                                    mainCategory2 = array[1].components(separatedBy: ",")
+                                }
+                                .alert("", isPresented: $isEditCheckItem[index], actions: {
+                                    let initialValue = mainCategory2[index]
+                                    TextField("CheckItem", text: $mainCategory2[index])
+                                    Button("Edit", action: {
+                                        mainCategoryIds[targetMainCategoryIndex].mainCategory = mainCategory + ":=" + mainCategory2[0] + "," + mainCategory2[1] + "," + mainCategory2[2]
+                                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                    })
+                                    Button("Cancel", role: .cancel, action: {mainCategory2[index] = initialValue})
+                                }, message: {
+                               
+                                })
+                        }
+                    }
+                }
                 Spacer()
             }
             ScrollView {
@@ -80,7 +148,10 @@ struct CheckBoxView: View {
                             HStack(alignment: .top, spacing: 0) {
                                 VStack(alignment: .center, spacing: 0) {
                                     HStack(spacing: 0) {
-                                        Text(subCategoryId.subCategory)
+                                        if let range = subCategoryId.subCategory.range(of: ":=") {
+                                            let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                            Text(subCategoryId.subCategory[...idx])
+                                        }
                                         Spacer()
                                     }
                                     .background((subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
@@ -99,7 +170,7 @@ struct CheckBoxView: View {
                                                 .onLongPressGesture {
                                                     showImageStocker = true
                                                     targetSubCategoryIndex = subCategoryId.id
-                                                    targetSubCategoryIndex4 = [targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex, targetSubCategoryIndex]
+                                                    targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
                                                 }
                                             } else {
                                                 ForEach(subCategoryId.images.indices, id: \.self) { index in
@@ -120,9 +191,9 @@ struct CheckBoxView: View {
                                                                         targetImageFileIndex = index
                                                                     }
                                                                     .onLongPressGesture {
-                                                                    showImageStocker = true
-                                                                    targetSubCategoryIndex = subCategoryId.id
-                                                                    targetSubCategoryIndex4 = [targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex, targetSubCategoryIndex]
+                                                                        showImageStocker = true
+                                                                        targetSubCategoryIndex = subCategoryId.id
+                                                                        targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
                                                                     }
                                                             } else {
                                                                 VStack(alignment: .center, spacing: 0) {
@@ -139,46 +210,101 @@ struct CheckBoxView: View {
                                             }
                                         }
                                         .fullScreenCover(isPresented: $showImageView) {
-                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
+                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
                                         }
                                         .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex4)
+                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2)
                                         }
                                     }
                                     Spacer()
                                 }
-                                .frame(width: initialOriginx * 1.5)
-                                VStack(alignment: .leading, spacing: 0) {
-                                    HStack(spacing: 0) {
-                                        //Text(subCategoryId.subCategory)
-                                        Spacer()
-                                    }
-                                    .frame(height: 25)
-                                    VStack(alignment: .center, spacing: 0) {
-                                        HStack(spacing: 0) {
-                                            Spacer()
-                                            ZStack {
-                                                Image(systemName: subCategoryId.subCategory.last == "*" ? "checkmark.circle.fill" : "circle")
-                                                    .foregroundColor(.blue)
-                                                    .offset(y: -12.5)
-                                                Circle()
-                                                    .foregroundColor(.gray.opacity(0.1))
-                                                    .frame(width: 35, height: 35)
-                                                    .offset(y: -12.5)
-                                                    .onTapGesture {
-                                                        isToggleCheckBox = true
-                                                        toggleCheckBox(mainCategoryIndex: targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, subCategory: subCategoryId.subCategory)
+                                .frame(width: initialOriginx * 1.4)
+                                ForEach(mainCategory2.indices, id: \.self) { index in
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        VStack(alignment: .center, spacing: 0) {
+                                            HStack(spacing: 0) {
+                                                Spacer()
+                                                VStack(spacing: 0) {
+                                                    if let range = subCategoryId.subCategory.range(of: ":=") {
+                                                        let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: 2)
+                                                        let array = subCategoryId.subCategory[idx...].components(separatedBy: ",")
+                                                        let checkInfo = String(array[index][array[index].startIndex])
+                                                        let idx2 = array[index].index(array[index].startIndex,offsetBy: 1)
+                                                        let remarks = String(array[index][idx2...])
+                                                        ZStack {
+                                                            Image(systemName: checkInfo == "*" ? "checkmark.circle.fill" : "circle")
+                                                                .foregroundColor(.blue)
+                                                                .offset(y: 8)
+                                                            Circle()
+                                                                .foregroundColor(.gray.opacity(0.1))
+                                                                .frame(width: 35, height: 35)
+                                                                .offset(y: 8)
+                                                                .onTapGesture {
+                                                                    isToggleCheckBox = true
+                                                                    toggleCheckBox(mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, subCategory: subCategoryId.subCategory, checkInfos: array, index: index)
+                                                                }
+                                                        }
+                                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: 45)
+                                                        VStack(spacing: 0) {
+                                                            if remarks == "" {
+                                                                Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                                                                    .frame(width: 30, height: 30)
+                                                                    .background(.black.opacity(0.3))
+                                                                    .foregroundColor(.white.opacity(0.3))
+                                                                    .cornerRadius(10)
+                                                                    .onLongPressGesture {
+                                                                        isEditCheckInfo[subCategoryId.id] = true
+                                                                        let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                                                        subCategory = String(subCategoryId.subCategory[...idx3])
+                                                                        subCategory2[subCategoryId.id] = array
+                                                                        for i in 0..<3 {
+                                                                            subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
+                                                                            let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
+                                                                            subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
+                                                                        }
+                                                                        targetCheckInfoIndex = index
+                                                                    }
+                                                            } else {
+                                                                Text(remarks)
+                                                                    .onLongPressGesture {
+                                                                        isEditCheckInfo[subCategoryId.id] = true
+                                                                        let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                                                        subCategory = String(subCategoryId.subCategory[...idx3])
+                                                                        subCategory2[subCategoryId.id] = array
+                                                                        for i in 0..<3 {
+                                                                            subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
+                                                                            let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
+                                                                            subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
+                                                                        }
+                                                                        targetCheckInfoIndex = index
+                                                                    }
+                                                            }
+                                                        }
+                                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight - 20)
+                                                        .alert("", isPresented: $isEditCheckInfo[subCategoryId.id], actions: {
+                                                            let initialValue = subCategory2[subCategoryId.id][targetCheckInfoIndex]
+                                                            TextField("Remarks", text: $subCategory4[subCategoryId.id][targetCheckInfoIndex])
+                                                            Button("Edit", action: {
+                                                                subCategory2[subCategoryId.id][targetCheckInfoIndex] = subCategory3[subCategoryId.id][targetCheckInfoIndex] + subCategory4[subCategoryId.id][targetCheckInfoIndex]
+                                                                mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory = subCategory + ":=" + subCategory2[subCategoryId.id][0] + "," + subCategory2[subCategoryId.id][1] + "," + subCategory2[subCategoryId.id][2]
+                                                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                            })
+                                                            Button("Cancel", role: .cancel, action: {subCategory2[subCategoryId.id][targetCheckInfoIndex] = initialValue})
+                                                        }, message: {
+                                                            
+                                                        })
                                                     }
+                                                }
+                                                Spacer()
                                             }
-                                            Spacer()
                                         }
+                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight + 25)
+                                        .foregroundColor(.white)
                                     }
-                                    .frame(width: imageWidth, height: imageHeight)
-                                    .foregroundColor(.white)
+                                    .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth))
+                                    .background((subCategoryId.id + index) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
+                                    .offset(y: 2)
                                 }
-                                .frame(width: imageWidth)
-                                .background((subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
-                                .offset(y: 2)
                                 Spacer()
                             }
                             .frame(height: imageHeight + 25)
@@ -203,27 +329,29 @@ struct CheckBoxView: View {
     }
     private func clearCheckBox() {
         autoreleasepool {
-            var initialValue = ""
-            var toIdx = initialValue.startIndex
-            for i in 0..<mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items.count {
-                initialValue = mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[i].subCategory
-                toIdx = initialValue.index(initialValue.endIndex, offsetBy: -2)
-                if initialValue.last == "*" {
-                    mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items[i].subCategory = String(initialValue[...toIdx])
+            for i in 0..<mainCategoryIds[targetMainCategoryIndex].items.count {
+                if let range = mainCategoryIds[targetMainCategoryIndex].items[i].subCategory.range(of: ":=") {
+                    mainCategoryIds[targetMainCategoryIndex].items[i].subCategory = mainCategoryIds[targetMainCategoryIndex].items[i].subCategory[...range.lowerBound] + "=-,-,-"
                 }
             }
             ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
         }
     }
-    private func toggleCheckBox(mainCategoryIndex: Int, subCategoryIndex: Int, subCategory: String) {
+    private func toggleCheckBox(mainCategoryIndex: Int, subCategoryIndex: Int, subCategory: String, checkInfos: [String], index: Int) {
         autoreleasepool {
-            targetSubCategoryIndex3 = subCategoryIndex
-            let initialValue = mainCategoryIds[mainCategoryIndex].items[targetSubCategoryIndex3].subCategory
-            let toIdx = initialValue.index(initialValue.endIndex, offsetBy: -2)
-            if subCategory.last == "*" {
-                mainCategoryIds[mainCategoryIndex].items[targetSubCategoryIndex3].subCategory = String(initialValue[...toIdx])
-            } else {
-                mainCategoryIds[mainCategoryIndex].items[targetSubCategoryIndex3].subCategory = initialValue + "*"
+            if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
+                let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)
+                var array = checkInfos
+                var checkInfo = String(checkInfos[index][checkInfos[index].startIndex])
+                let idx2 = checkInfos[index].index(checkInfos[index].startIndex, offsetBy: 1)
+                let remarks = checkInfos[index][idx2...]
+                if checkInfo == "-" {
+                    checkInfo = "*"
+                } else if checkInfo == "*" {
+                    checkInfo = "-"
+                }
+                array[index] = checkInfo + remarks
+                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory[...idx] + ":=" + array[0] + "," + array[1] + "," + array[2]
             }
             ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
         }

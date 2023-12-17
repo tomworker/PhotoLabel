@@ -150,6 +150,17 @@ struct ConfigView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                VStack(alignment: .leading) {
+                    Text("Column width of : ") + Text("CheckSheet")
+                    Picker(selection: $iPadCheckBoxMatrixColumnWidth, label: Text("Config9")) {
+                        Text("50").tag(50)
+                        Text("90").tag(90)
+                        Text("130").tag(130)
+                        Text("170").tag(170)
+                        Text("210").tag(210)
+                    }
+                    .pickerStyle(.segmented)
+                }
             } else {
                 VStack(alignment: .leading) {
                     Text("Max columns of : ") + Text("Category Button")
@@ -204,6 +215,17 @@ struct ConfigView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                VStack(alignment: .leading) {
+                    Text("Column width of : ") + Text("CheckSheet")
+                    Picker(selection: $checkBoxMatrixColumnWidth, label: Text("Config10")) {
+                        Text("40").tag(40)
+                        Text("60").tag(60)
+                        Text("80").tag(77)
+                        Text("100").tag(100)
+                        Text("120").tag(120)
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
             VStack(alignment: .leading) {
                 Text("Max entry of : ") + Text("Categorys per plist")
@@ -229,28 +251,6 @@ struct ConfigView: View {
                     Text("9").tag(9)
                     Text("99").tag(99)
                     Text("999").tag(999)
-                }
-                .pickerStyle(.segmented)
-            }
-            VStack(alignment: .leading) {
-                Text("Column width of : ") + Text("CheckBox Matrix")
-                Picker(selection: $iPadCheckBoxMatrixColumnWidth, label: Text("Config9")) {
-                    Text("50").tag(50)
-                    Text("90").tag(90)
-                    Text("130").tag(130)
-                    Text("170").tag(170)
-                    Text("210").tag(210)
-                }
-                .pickerStyle(.segmented)
-            }
-            VStack(alignment: .leading) {
-                Text("Column width of : ") + Text("CheckBox Matrix")
-                Picker(selection: $checkBoxMatrixColumnWidth, label: Text("Config10")) {
-                    Text("40").tag(40)
-                    Text("60").tag(60)
-                    Text("80").tag(77)
-                    Text("100").tag(100)
-                    Text("120").tag(120)
                 }
                 .pickerStyle(.segmented)
             }
