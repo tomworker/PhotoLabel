@@ -25,6 +25,7 @@ struct EachTabView: View {
     @State var isTargetedIndex1 = -1
     @State var isTargeted2 = false
     @State var isTargetedIndex2 = -1
+    @State var isTargeted3 = false
     @State var targetImageFile = ""
     @State var targetImageFileIndex = -1
     @State var showImageView = false
@@ -34,8 +35,6 @@ struct EachTabView: View {
     @State var isDuplicateMode = false
     @State var isEditSubCategory = false
     let sheetId = 2
-    var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
-    var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
@@ -112,13 +111,13 @@ struct EachTabView: View {
                                 VStack {
                                     Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))
                                         .frame(maxWidth: .infinity)
-                                        .background(subCategoryIndex % 2 == 0 ? LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.2), .indigo.opacity(0.2), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.clear, .brown.opacity(0.2), .brown.opacity(0.2), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                                        .foregroundColor(subCategoryIndex % 2 == 0 ? .indigo : .brown).bold()
+                                        .background(LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.2), .indigo.opacity(0.2), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                        .foregroundColor(.indigo).bold()
                                     if let range = mainCategoryIds[mainCategoryIndex].mainCategory.range(of: ":=") {
                                         let idx = mainCategoryIds[mainCategoryIndex].mainCategory.index(range.lowerBound, offsetBy: -1)
                                         Text("Category: " + mainCategoryIds[mainCategoryIndex].mainCategory[...idx])
                                             .frame(maxWidth: .infinity)
-                                            .background(subCategoryIndex % 2 == 0 ? LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.8), .indigo.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.clear, .brown.opacity(0.8), .brown.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                            .background(LinearGradient(gradient: Gradient(colors: [.clear, .indigo.opacity(0.8), .indigo.opacity(0.8), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing) )
                                             .foregroundColor(.white)
                                     }
                                 }
@@ -162,15 +161,14 @@ struct EachTabView: View {
                                         })
                                 }
                                 if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages == 0 {
-                                    LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
+                                    LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                         ZStack{
                                             Text("Take photo\n        or\nMove here")
-                                                .aspectRatio(4 / 3, contentMode: .fit)
-                                                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber), height: UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                                .frame(width: CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), height: CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
                                                 .foregroundColor(.white)
                                                 .background(.gray.opacity((0.3)))
                                                 .cornerRadius(10)
-                                                .border(.indigo, width: isTargeted1 ? 3 : .zero)
+                                                .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted3, index: 0, isTargetedIndex: 0))
                                                 .dropDestination(for: String.self) { indexs, location in
                                                     let arr: [String] = indexs.first!.components(separatedBy: ":")
                                                     var indexs1: [String] = []
@@ -208,23 +206,22 @@ struct EachTabView: View {
                                                     }
                                                     return true
                                                 } isTargeted: { isTargeted in
-                                                    self.isTargeted1 = isTargeted
+                                                    self.isTargeted3 = isTargeted
                                                 }
                                         }
                                     }
                                     
                                 }
-                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
+                                LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                     ForEach(CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)) { imageFileId in
                                         if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
                                             ZStack {
                                                 Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                                     .resizable()
-                                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75: uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                                //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75: uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                                    .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
+                                                    .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
                                                     .cornerRadius(10)
-                                                    .border(.indigo, width: isTargeted1 && imageFileId.id == isTargetedIndex1 ? 3 : .zero)
+                                                    .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted1, index: imageFileId.id, isTargetedIndex: isTargetedIndex1))
                                                 HStack {
                                                     if isDeleteMode == true {
                                                         Button {
@@ -268,7 +265,7 @@ struct EachTabView: View {
                                                 showImageView2 = true
                                                 self.targetImageFileIndex = imageFileId.id
                                             }
-                                            .draggable(String(imageFileId.id) + ":" + imageFileId.imageFile.imageFile + ":0") {
+                                            .draggable("\(String(imageFileId.id)):\(imageFileId.imageFile.imageFile):0") {
                                                 Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.1))
                                             }
                                             .dropDestination(for: String.self) { indexs, location in
@@ -341,30 +338,38 @@ struct EachTabView: View {
                                     .frame(maxWidth: .infinity)
                                     .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                     .foregroundColor(.white)
-                                Text("Move to Stocker (drag & drop)")
-                                    .frame(maxWidth: .infinity)
-                                    .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                                    .foregroundColor(.white)
+                                HStack {
+                                    Text("Move to Stocker (drag & drop): ")
+                                    Image(systemName: "square.and.arrow.up")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .foregroundColor(.white)
                             }
                             if isDuplicateMode {
-                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
+                                LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                     ForEach(duplicateSpace.indices, id: \.self) { index in
                                         if let uiimage = UIImage(contentsOfFile: duplicateSpace[index].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[index].subCategoryName)).appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path) {
                                             ZStack {
                                                 Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                                     .resizable()
-                                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                                //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                                    .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
+                                                    .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
                                                     .cornerRadius(10)
-                                                    .border(.indigo, width: isTargeted2 && index == isTargetedIndex2 ? 3 : .zero)
+                                                    .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted2, index: index, isTargetedIndex: isTargetedIndex2))
                                                 VStack {
-                                                    Text(duplicateSpace[index].mainCategoryName)
-                                                        .foregroundColor(.white.opacity(0.5))
-                                                        .background(.black.opacity(0.5))
-                                                    Text(duplicateSpace[index].subCategoryName)
-                                                        .foregroundColor(.white.opacity(0.5))
-                                                        .background(.black.opacity(0.5))
+                                                    if let range = duplicateSpace[index].mainCategoryName.range(of: ":=") {
+                                                        let idx = duplicateSpace[index].mainCategoryName.index(range.lowerBound, offsetBy: -1)
+                                                        Text(duplicateSpace[index].mainCategoryName[...idx])
+                                                            .foregroundColor(.white.opacity(0.5))
+                                                            .background(.black.opacity(0.5))
+                                                    }
+                                                    if let range = duplicateSpace[index].subCategoryName.range(of: ":=") {
+                                                        let idx = duplicateSpace[index].subCategoryName.index(range.lowerBound, offsetBy: -1)
+                                                        Text(duplicateSpace[index].subCategoryName[...idx])
+                                                            .foregroundColor(.white.opacity(0.5))
+                                                            .background(.black.opacity(0.5))
+                                                    }
                                                 }
                                             }
                                             .onTapGesture(count: 2) {
@@ -378,7 +383,6 @@ struct EachTabView: View {
                                                     self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[index].imageFile.imageFile).path
                                                 }
                                             }
-                                            //.draggable(String(index) + ":" + duplicateSpace[index].imageFile.imageFile + ":2") {
                                             .draggable("\(String(index)):\(duplicateSpace[index].imageFile.imageFile):2") {
                                                 Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.1))
                                             }
@@ -405,17 +409,16 @@ struct EachTabView: View {
                                     }
                                 }
                             } else {
-                                LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1, spacing: 5) {
+                                LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                     ForEach(CategoryManager.convertIdentifiable(workSpaceImageFiles: workSpace)) { workSpaceImageFileId in
                                         if let uiimage = UIImage(contentsOfFile: workSpaceImageFileId.workSpaceImageFile.imageFile) {
                                             ZStack {
                                                 Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                                     .resizable()
-                                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) / 0.1) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                                //.frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                                    .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
+                                                    .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
                                                     .cornerRadius(10)
-                                                    .border(.indigo, width: isTargeted2 && workSpaceImageFileId.id == isTargetedIndex2 ? 3 : .zero)
+                                                    .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted2, index: workSpaceImageFileId.id, isTargetedIndex: isTargetedIndex2))
                                                 VStack {
                                                     Text(workSpaceImageFileId.workSpaceImageFile.subDirectory)
                                                         .foregroundColor(.white.opacity(0.5))
@@ -463,7 +466,6 @@ struct EachTabView: View {
                                                 showImageView = true
                                                 self.targetImageFile = workSpaceImageFileId.workSpaceImageFile.imageFile
                                             }
-                                            //.draggable(String(workSpaceImageFileId.id) + ":" + workSpaceImageFileId.workSpaceImageFile.imageFile + ":1") {
                                             .draggable("\(String(workSpaceImageFileId.id)):\(workSpaceImageFileId.workSpaceImageFile.imageFile):1") {
                                                 Image(uiImage: uiimage).border(.secondary)
                                             }

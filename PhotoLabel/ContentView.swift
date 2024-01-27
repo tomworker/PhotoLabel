@@ -561,6 +561,46 @@ class CategoryManager {
             }
         }
     }
+    static func getColumns(userInterfaceIdiom: UIUserInterfaceIdiom) -> [GridItem] {
+        let columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
+        let columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
+        if userInterfaceIdiom == .pad {
+            return columns2
+        } else {
+            return columns1
+        }
+    }
+    static func getAspectRatio(width: CGFloat, height: CGFloat) -> CGFloat {
+        var aspectRatio = 1.0
+        if width > height {
+            aspectRatio = 4 / 3
+        } else if width == height {
+            aspectRatio = 1.0
+        } else {
+            aspectRatio = 3 / 4
+        }
+        return aspectRatio
+    }
+    static func getImageWidth(width: CGFloat, height: CGFloat, userInterfaceIdiom: UIUserInterfaceIdiom) -> CGFloat {
+        var imageWidth: CGFloat
+        if userInterfaceIdiom == .pad {
+            imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)
+        } else {
+            imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)
+        }
+        if width > height {
+            return imageWidth
+        } else {
+            return imageWidth * 0.75
+        }
+    }
+    static func getBorderWidth(isTargeted: Bool, index: Int, isTargetedIndex: Int) -> CGFloat {
+        if isTargeted && index == isTargetedIndex {
+            return 3.0
+        } else {
+            return 0.0
+        }
+    }
     static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
         var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
         for i in 0..<workSpaceImageFiles.count {
