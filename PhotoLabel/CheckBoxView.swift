@@ -36,7 +36,7 @@ struct CheckBoxView: View {
     let initialOriginx = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) / CGFloat(5) + CGFloat(10) : (UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(3) + CGFloat(10))
     let imageWidth = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) / CGFloat(5) : (UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(3))
     let imageHeight = CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? (UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) * CGFloat(0.15) : (UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(4))
-    let lowerLoadLimit = UIDevice.current.userInterfaceIdiom == .pad ? 10 : 5
+    let lowerLoadLimit = UIDevice.current.userInterfaceIdiom == .pad ? 10 : 6
     let upperLoadLimit = UIDevice.current.userInterfaceIdiom == .pad ? 16 : 8
     @State var originy = 150.0
     
