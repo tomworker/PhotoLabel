@@ -530,258 +530,296 @@ class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     static func write(fileUrl: URL, mainCategorys: [MainCategory]) {
-        let encoder = PropertyListEncoder()
-        encoder.outputFormat = .xml
-        guard let data = try? encoder.encode(mainCategorys) else { return }
-        if FileManager.default.fileExists(atPath: fileUrl.path) {
-            try? data.write(to: fileUrl)
-        } else {
-            FileManager.default.createFile(atPath: fileUrl.path, contents: data, attributes: nil)
+        autoreleasepool {
+            let encoder = PropertyListEncoder()
+            encoder.outputFormat = .xml
+            guard let data = try? encoder.encode(mainCategorys) else { return }
+            if FileManager.default.fileExists(atPath: fileUrl.path) {
+                try? data.write(to: fileUrl)
+            } else {
+                FileManager.default.createFile(atPath: fileUrl.path, contents: data, attributes: nil)
+            }
         }
     }
     static func load(fileUrl: URL) -> [MainCategory] {
-        let decoder = PropertyListDecoder()
-        do {
-            let data = try Data.init(contentsOf: fileUrl)
-            let mainCategorys = try decoder.decode([MainCategory].self, from: data)
-            return mainCategorys
-        } catch {
-            print(error)
+        autoreleasepool {
+            let decoder = PropertyListDecoder()
             do {
                 let data = try Data.init(contentsOf: fileUrl)
-                let oldMainCategorys = try decoder.decode([OldMainCategory].self, from: data)
-                var mainCategorys: [MainCategory] = []
-                for i in 0..<oldMainCategorys.count {
-                    mainCategorys.append(MainCategory(mainCategory: oldMainCategorys[i].mainCategory, items: oldMainCategorys[i].items, subFolderMode: 0))
-                }
+                let mainCategorys = try decoder.decode([MainCategory].self, from: data)
                 return mainCategorys
             } catch {
                 print(error)
-                return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])], subFolderMode: 0)]
+                do {
+                    let data = try Data.init(contentsOf: fileUrl)
+                    let oldMainCategorys = try decoder.decode([OldMainCategory].self, from: data)
+                    var mainCategorys: [MainCategory] = []
+                    for i in 0..<oldMainCategorys.count {
+                        mainCategorys.append(MainCategory(mainCategory: oldMainCategorys[i].mainCategory, items: oldMainCategorys[i].items, subFolderMode: 0))
+                    }
+                    return mainCategorys
+                } catch {
+                    print(error)
+                    return [MainCategory(mainCategory: "", items: [SubCategory(subCategory: "", countStoredImages: 0, images: [ImageFile(imageFile: "")])], subFolderMode: 0)]
+                }
             }
         }
     }
     static func getColumns(userInterfaceIdiom: UIUserInterfaceIdiom) -> [GridItem] {
-        let columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
-        let columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
-        if userInterfaceIdiom == .pad {
-            return columns2
-        } else {
-            return columns1
+        autoreleasepool {
+            let columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
+            let columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
+            if userInterfaceIdiom == .pad {
+                return columns2
+            } else {
+                return columns1
+            }
         }
     }
     static func getAspectRatio(width: CGFloat, height: CGFloat) -> CGFloat {
-        var aspectRatio = 1.0
-        if width > height {
-            aspectRatio = 4 / 3
-        } else if width == height {
-            aspectRatio = 1.0
-        } else {
-            aspectRatio = 3 / 4
+        autoreleasepool {
+            var aspectRatio = 1.0
+            if width > height {
+                aspectRatio = 4 / 3
+            } else if width == height {
+                aspectRatio = 1.0
+            } else {
+                aspectRatio = 3 / 4
+            }
+            return aspectRatio
         }
-        return aspectRatio
     }
     static func getImageWidth(width: CGFloat, height: CGFloat, userInterfaceIdiom: UIUserInterfaceIdiom) -> CGFloat {
-        var imageWidth: CGFloat
-        if userInterfaceIdiom == .pad {
-            imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)
-        } else {
-            imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)
-        }
-        if width > height {
-            return imageWidth
-        } else {
-            return imageWidth * 0.75
+        autoreleasepool {
+            var imageWidth: CGFloat
+            if userInterfaceIdiom == .pad {
+                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)
+            } else {
+                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)
+            }
+            if width > height {
+                return imageWidth
+            } else {
+                return imageWidth * 0.75
+            }
         }
     }
     static func getBorderWidth(isTargeted: Bool, index: Int, isTargetedIndex: Int) -> CGFloat {
-        if isTargeted && index == isTargetedIndex {
-            return 3.0
-        } else {
-            return 0.0
+        autoreleasepool {
+            if isTargeted && index == isTargetedIndex {
+                return 3.0
+            } else {
+                return 0.0
+            }
         }
     }
     static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
-        var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
-        for i in 0..<workSpaceImageFiles.count {
-            if workSpaceImageFiles[i].subDirectory != "" {
-                workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].subDirectory + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
-            } else {
-                workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+        autoreleasepool {
+            var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
+            for i in 0..<workSpaceImageFiles.count {
+                if workSpaceImageFiles[i].subDirectory != "" {
+                    workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].subDirectory + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+                } else {
+                    workSpaceImageFileIds.append(WorkSpaceImageFileId(id: i, workSpaceImageFile: WorkSpaceImageFile(imageFile: tempDirectoryUrl.path + "/" + workSpaceImageFiles[i].imageFile, subDirectory: workSpaceImageFiles[i].subDirectory)))
+                }
             }
+            return workSpaceImageFileIds
         }
-        return workSpaceImageFileIds
     }
     static func convertIdentifiable(duplicateImageFiles: [DuplicateImageFile]) -> [DuplicateImageFileId] {
-        var duplicateImageFileIds: [DuplicateImageFileId] = []
-        for i in 0..<duplicateImageFiles.count {
-            duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), subFolderMode: duplicateImageFiles[i].subFolderMode, mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
+        autoreleasepool {
+            var duplicateImageFileIds: [DuplicateImageFileId] = []
+            for i in 0..<duplicateImageFiles.count {
+                duplicateImageFileIds.append(DuplicateImageFileId(id: i, duplicateImageFile: DuplicateImageFile(imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + duplicateImageFiles[i].imageFile.imageFile), subFolderMode: duplicateImageFiles[i].subFolderMode, mainCategoryName: duplicateImageFiles[i].mainCategoryName, subCategoryName: duplicateImageFiles[i].subCategoryName)))
+            }
+            return duplicateImageFileIds
         }
-        return duplicateImageFileIds
     }
     static func convertIdentifiable(imageFiles: [ImageFile], subFolderMode: Int, mainCategoryName: String, subCategoryName: String) -> [ImageFileId] {
-        var imageFileIds: [ImageFileId] = []
-        for i in 0..<imageFiles.count {
-            if subFolderMode == 1 {
-                imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).path + "/" + imageFiles[i].imageFile)))
-            } else {
-                imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
+        autoreleasepool {
+            var imageFileIds: [ImageFileId] = []
+            for i in 0..<imageFiles.count {
+                if subFolderMode == 1 {
+                    imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).path + "/" + imageFiles[i].imageFile)))
+                } else {
+                    imageFileIds.append(ImageFileId(id: i, imageFile: ImageFile(imageFile: tempDirectoryUrl.path + "/" + imageFiles[i].imageFile)))
+                }
             }
+            return imageFileIds
         }
-        return imageFileIds
     }
     static func convertIdentifiable(subCategorys: [SubCategory]) -> [SubCategoryId] {
-        var subCategoryIds: [SubCategoryId] = []
-        for i in 0..<subCategorys.count {
-            subCategoryIds.append(SubCategoryId(id: i, subCategory: subCategorys[i].subCategory, countStoredImages: subCategorys[i].countStoredImages, images: subCategorys[i].images, isTargeted: false))
+        autoreleasepool {
+            var subCategoryIds: [SubCategoryId] = []
+            for i in 0..<subCategorys.count {
+                subCategoryIds.append(SubCategoryId(id: i, subCategory: subCategorys[i].subCategory, countStoredImages: subCategorys[i].countStoredImages, images: subCategorys[i].images, isTargeted: false))
+            }
+            return subCategoryIds
         }
-        return subCategoryIds
     }
     static func convertIdentifiable(mainCategorys: [MainCategory]) -> [MainCategoryId] {
-        var mainCategoryIds: [MainCategoryId] = []
-        for i in 0..<mainCategorys.count {
-            mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items), subFolderMode: mainCategorys[i].subFolderMode))
+        autoreleasepool {
+            var mainCategoryIds: [MainCategoryId] = []
+            for i in 0..<mainCategorys.count {
+                mainCategoryIds.append(MainCategoryId(id: i, mainCategory: mainCategorys[i].mainCategory, items: convertIdentifiable(subCategorys: mainCategorys[i].items), subFolderMode: mainCategorys[i].subFolderMode))
+            }
+            return mainCategoryIds
         }
-        return mainCategoryIds
     }
     static func convertNoIdentifiable(subCategoryIds: [SubCategoryId]) -> [SubCategory] {
-        var subCategorys: [SubCategory] = []
-        for i in 0..<subCategoryIds.count {
-            subCategorys.append(SubCategory(subCategory: subCategoryIds[i].subCategory, countStoredImages: subCategoryIds[i].countStoredImages, images: subCategoryIds[i].images))
+        autoreleasepool {
+            var subCategorys: [SubCategory] = []
+            for i in 0..<subCategoryIds.count {
+                subCategorys.append(SubCategory(subCategory: subCategoryIds[i].subCategory, countStoredImages: subCategoryIds[i].countStoredImages, images: subCategoryIds[i].images))
+            }
+            return subCategorys
         }
-        return subCategorys
     }
     static func convertNoIdentifiable(mainCategoryIds: [MainCategoryId]) -> [MainCategory] {
-        var mainCategorys: [MainCategory] = []
-        for i in 0..<mainCategoryIds.count {
-            mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items), subFolderMode: mainCategoryIds[i].subFolderMode))
+        autoreleasepool {
+            var mainCategorys: [MainCategory] = []
+            for i in 0..<mainCategoryIds.count {
+                mainCategorys.append(MainCategory(mainCategory: mainCategoryIds[i].mainCategory, items: convertNoIdentifiable(subCategoryIds: mainCategoryIds[i].items), subFolderMode: mainCategoryIds[i].subFolderMode))
+            }
+            return mainCategorys
         }
-        return mainCategorys
     }
     static func reorderItems(image: ImageFileId, indexs: [String], imageSpace: inout [ImageFile]) {
-        let moveToIndex = image.id
-        let targetIndex = Int(indexs.first!)!
-        let lastIndex = imageSpace.count - 1
-        var imageSpace2: [ImageFile] = []
-        if moveToIndex <= targetIndex {
-            if moveToIndex != 0 {
-                imageSpace2 += imageSpace[0...moveToIndex - 1]
+        autoreleasepool {
+            let moveToIndex = image.id
+            let targetIndex = Int(indexs.first!)!
+            let lastIndex = imageSpace.count - 1
+            var imageSpace2: [ImageFile] = []
+            if moveToIndex <= targetIndex {
+                if moveToIndex != 0 {
+                    imageSpace2 += imageSpace[0...moveToIndex - 1]
+                }
+                imageSpace2 += imageSpace[targetIndex...targetIndex]
+                if moveToIndex != targetIndex {
+                    imageSpace2 += imageSpace[moveToIndex...targetIndex - 1]
+                }
+                if targetIndex != lastIndex {
+                    imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
+                }
             }
-            imageSpace2 += imageSpace[targetIndex...targetIndex]
-            if moveToIndex != targetIndex {
-                imageSpace2 += imageSpace[moveToIndex...targetIndex - 1]
-            }
-            if targetIndex != lastIndex {
-                imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
-            }
-        }
-        if moveToIndex > targetIndex {
-            if targetIndex != 0 {
-                imageSpace2 += imageSpace[0...targetIndex - 1]
-            }
-            if moveToIndex != targetIndex + 1 {
-                imageSpace2 += imageSpace[targetIndex + 1...moveToIndex - 1]
-            }
-            imageSpace2 += imageSpace[targetIndex...targetIndex]
-            imageSpace2 += imageSpace[moveToIndex...lastIndex]
-        }
-        imageSpace = imageSpace2
-    }
-    static func reorderItems(image: WorkSpaceImageFileId, indexs: [String], workSpace: inout [WorkSpaceImageFile]) {
-        let moveToIndex = image.id
-        let targetIndex = Int(indexs.first!)!
-        let lastIndex = workSpace.count - 1
-        var workSpace2: [WorkSpaceImageFile] = []
-        if moveToIndex <= targetIndex {
-            if moveToIndex != 0 {
-                workSpace2 += workSpace[0...moveToIndex - 1]
-            }
-            workSpace2 += workSpace[targetIndex...targetIndex]
-            if moveToIndex != targetIndex {
-                workSpace2 += workSpace[moveToIndex...targetIndex - 1]
-            }
-            if targetIndex != lastIndex {
-                workSpace2 += workSpace[targetIndex + 1...lastIndex]
-            }
-        }
-        if moveToIndex > targetIndex {
-            if targetIndex != 0 {
-                workSpace2 += workSpace[0...targetIndex - 1]
-            }
-            if moveToIndex != targetIndex + 1 {
-                workSpace2 += workSpace[targetIndex + 1...moveToIndex - 1]
-            }
-            workSpace2 += workSpace[targetIndex...targetIndex]
-            workSpace2 += workSpace[moveToIndex...lastIndex]
-        }
-        workSpace = workSpace2
-    }
-    static func reorderItems(image: DuplicateImageFileId, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
-        let moveToIndex = image.id
-        let targetIndex = Int(indexs.first!)!
-        let lastIndex = duplicateSpace.count - 1
-        var duplicateSpace2: [DuplicateImageFile] = []
-        if moveToIndex <= targetIndex {
-            if moveToIndex != 0 {
-                duplicateSpace2 += duplicateSpace[0...moveToIndex - 1]
-            }
-            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-            if moveToIndex != targetIndex {
-                duplicateSpace2 += duplicateSpace[moveToIndex...targetIndex - 1]
-            }
-            if targetIndex != lastIndex {
-                duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
-            }
-        }
-        if moveToIndex > targetIndex {
-            if targetIndex != 0 {
-                duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
-            }
-            if moveToIndex != targetIndex + 1 {
-                duplicateSpace2 += duplicateSpace[targetIndex + 1...moveToIndex - 1]
-            }
-            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-            duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
-        }
-        duplicateSpace = duplicateSpace2
-    }
-    static func moveItemFromLastToFirst(image: ImageFileId, imageSpace: inout [ImageFile]) {
-        let targetIndex = image.id
-        let lastIndex = imageSpace.count - 1
-        var imageSpace2: [ImageFile] = []
-        if targetIndex > 0 {
-            imageSpace2 += imageSpace[targetIndex...targetIndex]
-            imageSpace2 += imageSpace[0...targetIndex - 1]
-            if targetIndex != lastIndex {
-                imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
+            if moveToIndex > targetIndex {
+                if targetIndex != 0 {
+                    imageSpace2 += imageSpace[0...targetIndex - 1]
+                }
+                if moveToIndex != targetIndex + 1 {
+                    imageSpace2 += imageSpace[targetIndex + 1...moveToIndex - 1]
+                }
+                imageSpace2 += imageSpace[targetIndex...targetIndex]
+                imageSpace2 += imageSpace[moveToIndex...lastIndex]
             }
             imageSpace = imageSpace2
         }
     }
-    static func moveItemFromLastToFirst(image: WorkSpaceImageFileId, workSpace: inout [WorkSpaceImageFile]) {
-        let targetIndex = image.id
-        let lastIndex = workSpace.count - 1
-        var workSpace2: [WorkSpaceImageFile] = []
-        if targetIndex > 0 {
-            workSpace2 += workSpace[targetIndex...targetIndex]
-            workSpace2 += workSpace[0...targetIndex - 1]
-            if targetIndex != lastIndex {
-                workSpace2 += workSpace[targetIndex + 1...lastIndex]
+    static func reorderItems(image: WorkSpaceImageFileId, indexs: [String], workSpace: inout [WorkSpaceImageFile]) {
+        autoreleasepool {
+            let moveToIndex = image.id
+            let targetIndex = Int(indexs.first!)!
+            let lastIndex = workSpace.count - 1
+            var workSpace2: [WorkSpaceImageFile] = []
+            if moveToIndex <= targetIndex {
+                if moveToIndex != 0 {
+                    workSpace2 += workSpace[0...moveToIndex - 1]
+                }
+                workSpace2 += workSpace[targetIndex...targetIndex]
+                if moveToIndex != targetIndex {
+                    workSpace2 += workSpace[moveToIndex...targetIndex - 1]
+                }
+                if targetIndex != lastIndex {
+                    workSpace2 += workSpace[targetIndex + 1...lastIndex]
+                }
+            }
+            if moveToIndex > targetIndex {
+                if targetIndex != 0 {
+                    workSpace2 += workSpace[0...targetIndex - 1]
+                }
+                if moveToIndex != targetIndex + 1 {
+                    workSpace2 += workSpace[targetIndex + 1...moveToIndex - 1]
+                }
+                workSpace2 += workSpace[targetIndex...targetIndex]
+                workSpace2 += workSpace[moveToIndex...lastIndex]
             }
             workSpace = workSpace2
         }
     }
-    static func moveItemFromLastToFirst(image: DuplicateImageFileId, duplicateSpace: inout [DuplicateImageFile]) {
-        let targetIndex = image.id
-        let lastIndex = duplicateSpace.count - 1
-        var duplicateSpace2: [DuplicateImageFile] = []
-        if targetIndex > 0 {
-            duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-            duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
-            if targetIndex != lastIndex {
-                duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
+    static func reorderItems(image: DuplicateImageFileId, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
+        autoreleasepool {
+            let moveToIndex = image.id
+            let targetIndex = Int(indexs.first!)!
+            let lastIndex = duplicateSpace.count - 1
+            var duplicateSpace2: [DuplicateImageFile] = []
+            if moveToIndex <= targetIndex {
+                if moveToIndex != 0 {
+                    duplicateSpace2 += duplicateSpace[0...moveToIndex - 1]
+                }
+                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+                if moveToIndex != targetIndex {
+                    duplicateSpace2 += duplicateSpace[moveToIndex...targetIndex - 1]
+                }
+                if targetIndex != lastIndex {
+                    duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
+                }
+            }
+            if moveToIndex > targetIndex {
+                if targetIndex != 0 {
+                    duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
+                }
+                if moveToIndex != targetIndex + 1 {
+                    duplicateSpace2 += duplicateSpace[targetIndex + 1...moveToIndex - 1]
+                }
+                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+                duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
             }
             duplicateSpace = duplicateSpace2
+        }
+    }
+    static func moveItemFromLastToFirst(image: ImageFileId, imageSpace: inout [ImageFile]) {
+        autoreleasepool {
+            let targetIndex = image.id
+            let lastIndex = imageSpace.count - 1
+            var imageSpace2: [ImageFile] = []
+            if targetIndex > 0 {
+                imageSpace2 += imageSpace[targetIndex...targetIndex]
+                imageSpace2 += imageSpace[0...targetIndex - 1]
+                if targetIndex != lastIndex {
+                    imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
+                }
+                imageSpace = imageSpace2
+            }
+        }
+    }
+    static func moveItemFromLastToFirst(image: WorkSpaceImageFileId, workSpace: inout [WorkSpaceImageFile]) {
+        autoreleasepool {
+            let targetIndex = image.id
+            let lastIndex = workSpace.count - 1
+            var workSpace2: [WorkSpaceImageFile] = []
+            if targetIndex > 0 {
+                workSpace2 += workSpace[targetIndex...targetIndex]
+                workSpace2 += workSpace[0...targetIndex - 1]
+                if targetIndex != lastIndex {
+                    workSpace2 += workSpace[targetIndex + 1...lastIndex]
+                }
+                workSpace = workSpace2
+            }
+        }
+    }
+    static func moveItemFromLastToFirst(image: DuplicateImageFileId, duplicateSpace: inout [DuplicateImageFile]) {
+        autoreleasepool {
+            let targetIndex = image.id
+            let lastIndex = duplicateSpace.count - 1
+            var duplicateSpace2: [DuplicateImageFile] = []
+            if targetIndex > 0 {
+                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+                duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
+                if targetIndex != lastIndex {
+                    duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
+                }
+                duplicateSpace = duplicateSpace2
+            }
         }
     }
 }
@@ -790,206 +828,233 @@ class ZipManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     static func replaceString(targetString: String) -> String {
-        var replacedString: String {
-            let dictionary = [" ": "_", ".": ",", ":": "", "¥": "", "/": "", "?": "", "<": "", ">": "", "*": "", "|": "", "\"": ""]
-            return dictionary.reduce(targetString) { $0.replacingOccurrences(of: $1.key, with: $1.value)}
+        autoreleasepool {
+            var replacedString: String {
+                let dictionary = [" ": "_", ".": ",", ":": "", "¥": "", "/": "", "?": "", "<": "", ">": "", "*": "", "|": "", "\"": ""]
+                return dictionary.reduce(targetString) { $0.replacingOccurrences(of: $1.key, with: $1.value)}
+            }
+            return replacedString != "" ? replacedString : "_"
         }
-        return replacedString != "" ? replacedString : "_"
-    }
-    static func moveImagesFromWorkSpaceToTrashBox(images: [String], workSpace: inout [WorkSpaceImageFile]) {
-        let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
-        ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(workSpaceImageFile))
-        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
     }
     static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile], duplicateSpace: inout [DuplicateImageFile]) {
-        let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
-        let workSpaceImageFile = "@\(targetImageFile)"
-        var beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
-        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(targetImageFile)
+        autoreleasepool {
+            let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
+            let workSpaceImageFile = "@\(targetImageFile)"
+            var beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(targetImageFile)
+            if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+                beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(targetImageFile)
+            }
+            let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
+            ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
+            duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
+            workSpace.append(WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: ""))
+            print("Removed from plist:\(targetImageFile)")
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
         }
-        let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
-        ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
-        duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
-        workSpace.append(WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: ""))
-        print("Removed from plist:\(targetImageFile)")
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
     }
     static func moveImagesFromWorkSpaceToPlist(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile]) {
-        let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
-        let subDirectory = workSpace[Int(images.first!)!].subDirectory
-        var plistImageFile = workSpaceImageFile
-        if let range = workSpaceImageFile.range(of: "@") {
-            plistImageFile.replaceSubrange(range, with: "")
+        autoreleasepool {
+            let workSpaceImageFile = workSpace[Int(images.first!)!].imageFile
+            let subDirectory = workSpace[Int(images.first!)!].subDirectory
+            var plistImageFile = workSpaceImageFile
+            if let range = workSpaceImageFile.range(of: "@") {
+                plistImageFile.replaceSubrange(range, with: "")
+            }
+            let beforeRenameUrl: URL
+            if subDirectory == "" {
+                beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
+            } else {
+                beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(subDirectory + "/" + workSpaceImageFile)
+            }
+            var afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
+            if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+                ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
+                afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFile)
+            }
+            ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+            workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
+            print("Added to plist:\(plistImageFile)")
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
         }
-        let beforeRenameUrl: URL
-        if subDirectory == "" {
-            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
-        } else {
-            beforeRenameUrl = tempDirectoryUrl.appendingPathComponent(subDirectory + "/" + workSpaceImageFile)
-        }
-        var afterRenameUrl = tempDirectoryUrl.appendingPathComponent(plistImageFile)
-        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-            ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-            afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFile)
-        }
-        ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
-        print("Added to plist:\(plistImageFile)")
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
     }
     static func moveImagesFromDuplicateSpaceToPlist(imageFile: String, mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int) {
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-        print("Added to plist:\(imageFile)")
-        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+        autoreleasepool {
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+            print("Added to plist:\(imageFile)")
+            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+        }
     }
     static func savePlistAndZip(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
-        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        var tempImageFiles: [String]
-        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
-        let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
-        let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-        do {
-            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
-            CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
-            if tempImageFiles.count == 0 {
-                ZipManager.remove(fileUrl: targetZipUrl)
-            } else {
-                ZipManager.remove(fileUrl: targetZipUrl)
-                ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
-                ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
-                ZipManager.remove(fileUrl: targetUrl)
+        autoreleasepool {
+            let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+            let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
+            var tempImageFiles: [String]
+            let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
+            let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
+            let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
+            do {
+                tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+                CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+                if tempImageFiles.count == 0 {
+                    ZipManager.remove(fileUrl: targetZipUrl)
+                } else {
+                    ZipManager.remove(fileUrl: targetZipUrl)
+                    ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
+                    ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
+                    ZipManager.remove(fileUrl: targetUrl)
+                }
+            } catch {
+                print(error)
             }
-        } catch {
-            print(error)
         }
     }
     static func savePlist(fileUrl: URL, mainCategoryIds: [MainCategoryId]) {
-        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
-        CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+        autoreleasepool {
+            let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+            let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
+            let targetPlistUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".plist")
+            CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
+        }
     }
     static func saveZip(fileUrl: URL) {
-        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
-        let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
-        var tempImageFiles: [String]
-        let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
-        let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
-        do {
-            tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
-            if tempImageFiles.count == 0 {
-                ZipManager.remove(fileUrl: targetZipUrl)
-            } else {
-                ZipManager.remove(fileUrl: targetZipUrl)
-                ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
-                ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
-                ZipManager.remove(fileUrl: targetUrl)
+        autoreleasepool {
+            let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+            let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
+            var tempImageFiles: [String]
+            let targetUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName)
+            let targetZipUrl = plistDirectoryUrl.appendingPathComponent(plistNoExtensionName + ".zip")
+            do {
+                tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
+                if tempImageFiles.count == 0 {
+                    ZipManager.remove(fileUrl: targetZipUrl)
+                } else {
+                    ZipManager.remove(fileUrl: targetZipUrl)
+                    ZipManager.copy(atFileUrl: tempDirectoryUrl, toFileUrl: targetUrl)
+                    ZipManager.create(targetUrl: targetUrl, toZipUrl: targetZipUrl)
+                    ZipManager.remove(fileUrl: targetUrl)
+                }
+            } catch {
+                print(error)
             }
-        } catch {
-            print(error)
         }
     }
     static func copyZip(atZipUrl: URL, toZipUrl: URL) {
-        let atDirUrl = atZipUrl.deletingPathExtension()
-        let toDirUrl = toZipUrl.deletingPathExtension()
-        ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
-        ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
-        ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
-        if fileManager.fileExists(atPath: toZipUrl.path) {
-            ZipManager.remove(fileUrl: atDirUrl)
-            ZipManager.remove(fileUrl: toDirUrl)
+        autoreleasepool {
+            let atDirUrl = atZipUrl.deletingPathExtension()
+            let toDirUrl = toZipUrl.deletingPathExtension()
+            ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
+            ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
+            ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
+            if fileManager.fileExists(atPath: toZipUrl.path) {
+                ZipManager.remove(fileUrl: atDirUrl)
+                ZipManager.remove(fileUrl: toDirUrl)
+            }
         }
     }
     static func renameZip(atZipUrl: URL, toZipUrl: URL) {
-        let atDirUrl = atZipUrl.deletingPathExtension()
-        let toDirUrl = toZipUrl.deletingPathExtension()
-        ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
-        ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
-        ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
-        if fileManager.fileExists(atPath: toZipUrl.path) {
-            ZipManager.remove(fileUrl: atDirUrl)
-            ZipManager.remove(fileUrl: atZipUrl)
-            ZipManager.remove(fileUrl: toDirUrl)
+        autoreleasepool {
+            let atDirUrl = atZipUrl.deletingPathExtension()
+            let toDirUrl = toZipUrl.deletingPathExtension()
+            ZipManager.unzipDirectory(zipUrl: atZipUrl, directoryUrl: documentDirectoryUrl)
+            ZipManager.copy(atFileUrl: atDirUrl, toFileUrl: toDirUrl)
+            ZipManager.create(targetUrl: toDirUrl, toZipUrl: toZipUrl)
+            if fileManager.fileExists(atPath: toZipUrl.path) {
+                ZipManager.remove(fileUrl: atDirUrl)
+                ZipManager.remove(fileUrl: atZipUrl)
+                ZipManager.remove(fileUrl: toDirUrl)
+            }
         }
     }
     static func remove(directoryUrl: URL) {
-        if fileManager.fileExists(atPath: directoryUrl.path) {
-            do {
-                try fileManager.removeItem(atPath: directoryUrl.path)
-                print("Removed directory:\(directoryUrl.path)")
-            } catch {
-                print("Remove of directory has failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: directoryUrl.path) {
+                do {
+                    try fileManager.removeItem(atPath: directoryUrl.path)
+                    print("Removed directory:\(directoryUrl.path)")
+                } catch {
+                    print("Remove of directory has failed with error:\(error)")
+                }
             }
         }
     }
     static func remove(fileUrl: URL) {
-        if fileManager.fileExists(atPath: fileUrl.path) {
-            do {
-                try fileManager.removeItem(atPath: fileUrl.path)
-                print("Removed file:\(fileUrl.path)")
-            } catch {
-                print("Remove of file has failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: fileUrl.path) {
+                do {
+                    try fileManager.removeItem(atPath: fileUrl.path)
+                    print("Removed file:\(fileUrl.path)")
+                } catch {
+                    print("Remove of file has failed with error:\(error)")
+                }
             }
         }
     }
     static func unzipDirectory(zipUrl: URL, directoryUrl: URL) {
-        do {
-            try fileManager.unzipItem(at: zipUrl, to: directoryUrl)
-            print("Extracted ZIP archive:\(zipUrl)->\(directoryUrl)")
-        } catch {
-            print("Extracting ZIP archive has failed with error:\(error)")
-        }
-        let macosxUrl = directoryUrl.appendingPathComponent("__MACOSX")
-        if fileManager.fileExists(atPath: macosxUrl.path) {
-            self.remove(fileUrl: macosxUrl)
+        autoreleasepool {
+            do {
+                try fileManager.unzipItem(at: zipUrl, to: directoryUrl)
+                print("Extracted ZIP archive:\(zipUrl)->\(directoryUrl)")
+            } catch {
+                print("Extracting ZIP archive has failed with error:\(error)")
+            }
+            let macosxUrl = directoryUrl.appendingPathComponent("__MACOSX")
+            if fileManager.fileExists(atPath: macosxUrl.path) {
+                self.remove(fileUrl: macosxUrl)
+            }
         }
     }
     static func create(directoryUrl: URL) {
-        if fileManager.fileExists(atPath: directoryUrl.path) {
-        } else {
-            do {
-                try fileManager.createDirectory(atPath: directoryUrl.path, withIntermediateDirectories: true)
-                print("Created directory:\(directoryUrl.path)")
-            } catch {
-                print("Creating director has failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: directoryUrl.path) {
+            } else {
+                do {
+                    try fileManager.createDirectory(atPath: directoryUrl.path, withIntermediateDirectories: true)
+                    print("Created directory:\(directoryUrl.path)")
+                } catch {
+                    print("Creating director has failed with error:\(error)")
+                }
             }
         }
     }
     static func create(targetUrl: URL, toZipUrl: URL) {
-        if fileManager.fileExists(atPath: toZipUrl.path) {
-        } else {
-            do {
-                try FileManager.default.zipItem(at: targetUrl, to: toZipUrl)
-                //try FileManager.default.zipItem(at: targetUrl, to: toZipUrl, compressionMethod: .deflate)
-                print("Created ZIP archive:\(toZipUrl)")
-            } catch {
-                print("Creating ZIP archive has failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: toZipUrl.path) {
+            } else {
+                do {
+                    try FileManager.default.zipItem(at: targetUrl, to: toZipUrl)
+                    //try FileManager.default.zipItem(at: targetUrl, to: toZipUrl, compressionMethod: .deflate)
+                    print("Created ZIP archive:\(toZipUrl)")
+                } catch {
+                    print("Creating ZIP archive has failed with error:\(error)")
+                }
             }
         }
     }
     static func rename(atFileUrl: URL, toFileUrl: URL) {
-        if fileManager.fileExists(atPath: toFileUrl.path) {
-        } else {
-            do {
-                try fileManager.moveItem(atPath: atFileUrl.path, toPath: toFileUrl.path)
-                print("Renamed jpg file")
-            } catch {
-                print("Rename of jpg file failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: toFileUrl.path) {
+            } else {
+                do {
+                    try fileManager.moveItem(atPath: atFileUrl.path, toPath: toFileUrl.path)
+                    print("Renamed jpg file")
+                } catch {
+                    print("Rename of jpg file failed with error:\(error)")
+                }
             }
         }
     }
     static func copy(atFileUrl: URL, toFileUrl: URL) {
-        if fileManager.fileExists(atPath: toFileUrl.path) {
-        } else {
-            do {
-                try fileManager.copyItem(atPath: atFileUrl.path, toPath: toFileUrl.path)
-                print("Copied jpg file")
-            } catch {
-                print("Copy of jpg file failed with error:\(error)")
+        autoreleasepool {
+            if fileManager.fileExists(atPath: toFileUrl.path) {
+            } else {
+                do {
+                    try fileManager.copyItem(atPath: atFileUrl.path, toPath: toFileUrl.path)
+                    print("Copied jpg file")
+                } catch {
+                    print("Copy of jpg file failed with error:\(error)")
+                }
             }
         }
     }

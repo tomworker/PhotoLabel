@@ -34,7 +34,6 @@ struct EachTabView: View {
     @State var isWorkSpaceMode = false
     @State var isDuplicateMode = false
     @State var isEditSubCategory = false
-    let sheetId = 2
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
@@ -123,13 +122,13 @@ struct EachTabView: View {
                                 }
                                 .fullScreenCover(isPresented: $showPhotoCapture) {
                                     if  UIDevice.current.userInterfaceIdiom == .phone {
-                                        PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, sheetId: sheetId, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                        PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                     } else {
-                                        ImagePickerView(sheetId: sheetId, sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                        ImagePickerView(sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                     }
                                 }
                                 .fullScreenCover(isPresented: $showPhotoLibrary2) {
-                                    PhotoLibraryImagePickerView(sheetId: sheetId, showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
+                                    PhotoLibraryImagePickerView(showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl)
                                 }
                                 if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
                                     let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)

@@ -12,7 +12,6 @@ struct PhotoCaptureView: View {
     @StateObject var sensor = MotionSensor()
     @Binding var showPhotoCapture: Bool
     let caLayer: CALayer
-    let sheetId: Int
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
@@ -329,24 +328,15 @@ struct PhotoCaptureView: View {
                 var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                 let duplicateSpaceImageFileName = plistImageFileName
                 do {
-                    switch sheetId {
-                    case 1:
-                        try jpgImageData!.write(to: workSpaceJpgUrl, options: .atomic)
-                        workSpace.insert(WorkSpaceImageFile(imageFile: workSpaceImageFileName, subDirectory: ""), at: workSpace.count)
-                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                    case 2:
-                        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-                            ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-                            plistJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
-                        }
-                        try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                    default:
-                        print("SheetId have failed to be found:\(sheetId)")
+                    if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+                        ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
+                        plistJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
                     }
+                    try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
+                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
+                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+                    ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                 } catch {
                     print("Writing Jpg file failed with error:\(error)")
                 }
