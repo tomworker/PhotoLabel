@@ -21,7 +21,7 @@ struct ContentView: View {
     @State var showCategorySelector1: [Bool]
     @State var showCategorySelector2: [Bool]
     @State var showConfig = false
-    @State var isRemove = false
+    @State var isRemove: [Bool]
     @State var isCancelLoad = false
     @State var cancelLoadMessage = ""
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -241,7 +241,7 @@ struct ContentView: View {
                             }
                             .swipeActions {
                                 Button(role: .destructive) {
-                                    isRemove = true;
+                                    isRemove[item] = true;
                                 } label : {
                                     Label("Remove", systemImage: "trash")
                                 }
@@ -254,7 +254,7 @@ struct ContentView: View {
                                 }
                                 .tint(.blue)
                             }
-                            .alert(isPresented: $isRemove) {
+                            .alert(isPresented: $isRemove[item]) {
                                 Alert(title: Text("Really remove it?"),
                                       primaryButton: .cancel(Text("Cancel")),
                                       secondaryButton: .destructive(Text("Remove"), action: {
@@ -289,6 +289,7 @@ struct ContentView: View {
             showPlistEditor2 = Array(repeating: false, count: documentDirectoryFiles.count)
             showCategorySelector1 = Array(repeating: false, count: documentDirectoryFiles.count)
             showCategorySelector2 = Array(repeating: false, count: documentDirectoryFiles.count)
+            isRemove = Array(repeating: false, count: documentDirectoryFiles.count)
         } catch {
             print(error)
         }
