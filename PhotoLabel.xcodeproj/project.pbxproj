@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		9830C6DB2A4EC844004971E5 /* ConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9830C6DA2A4EC844004971E5 /* ConfigView.swift */; };
-		983E70D62A8F3C7D003D525A /* CheckBoxMatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */; };
 		985296112A7209460052AC45 /* ImageTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985296102A7209460052AC45 /* ImageTabView.swift */; };
 		9869A7162AB466920058ED73 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7152AB466920058ED73 /* PhotoCaptureView.swift */; };
 		9869A7182AB466EC0058ED73 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7172AB466EC0058ED73 /* CameraView.swift */; };
@@ -35,7 +34,6 @@
 
 /* Begin PBXFileReference section */
 		9830C6DA2A4EC844004971E5 /* ConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigView.swift; sourceTree = "<group>"; };
-		983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxMatrixView.swift; sourceTree = "<group>"; };
 		985296102A7209460052AC45 /* ImageTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageTabView.swift; sourceTree = "<group>"; };
 		9869A7152AB466920058ED73 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
 		9869A7172AB466EC0058ED73 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
@@ -106,7 +104,6 @@
 				9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */,
 				9896971D2A35FF2300EE3599 /* ImageView.swift */,
 				985296102A7209460052AC45 /* ImageTabView.swift */,
-				983E70D52A8F3C7D003D525A /* CheckBoxMatrixView.swift */,
 				98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */,
 				9896971B2A35FEFB00EE3599 /* FinalReportView.swift */,
 				989697232A35FF9800EE3599 /* PlistCreatorView.swift */,
@@ -220,7 +217,6 @@
 				9896972A2A36000200EE3599 /* PlistEditorSubView.swift in Sources */,
 				9869A7182AB466EC0058ED73 /* CameraView.swift in Sources */,
 				9869A71C2AB467870058ED73 /* MotionSensor.swift in Sources */,
-				983E70D62A8F3C7D003D525A /* CheckBoxMatrixView.swift in Sources */,
 				98C753782A35F14400648C02 /* ContentView.swift in Sources */,
 				9830C6DB2A4EC844004971E5 /* ConfigView.swift in Sources */,
 				9869A7162AB466920058ED73 /* PhotoCaptureView.swift in Sources */,
