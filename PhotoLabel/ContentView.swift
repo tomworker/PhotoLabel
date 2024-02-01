@@ -678,33 +678,45 @@ class CategoryManager {
             return mainCategorys
         }
     }
-    static func reorderItems(image: ImageFileId, indexs: [String], imageSpace: inout [ImageFile]) {
+    static func reorderItems(imageKey: Int, indexs: [String], imageSpace: inout [ImageFile]) {
         autoreleasepool {
-            let moveToIndex = image.id
+            let moveToIndex = imageKey
             let targetIndex = Int(indexs.first!)!
             let lastIndex = imageSpace.count - 1
             var imageSpace2: [ImageFile] = []
             if moveToIndex <= targetIndex {
                 if moveToIndex != 0 {
-                    imageSpace2 += imageSpace[0...moveToIndex - 1]
+                    imageSpace2 += imageSpace[0..<moveToIndex]
                 }
                 imageSpace2 += imageSpace[targetIndex...targetIndex]
                 if moveToIndex != targetIndex {
-                    imageSpace2 += imageSpace[moveToIndex...targetIndex - 1]
+                    imageSpace2 += imageSpace[moveToIndex..<targetIndex]
                 }
                 if targetIndex != lastIndex {
                     imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
                 }
             }
-            if moveToIndex > targetIndex {
-                if targetIndex != 0 {
-                    imageSpace2 += imageSpace[0...targetIndex - 1]
-                }
-                if moveToIndex != targetIndex + 1 {
-                    imageSpace2 += imageSpace[targetIndex + 1...moveToIndex - 1]
-                }
+            if moveToIndex > lastIndex {
+                imageSpace2 += imageSpace[0..<targetIndex]
+                imageSpace2 += imageSpace[targetIndex + 1..<moveToIndex]
                 imageSpace2 += imageSpace[targetIndex...targetIndex]
-                imageSpace2 += imageSpace[moveToIndex...lastIndex]
+            } else {
+                if moveToIndex > targetIndex {
+                    if targetIndex != 0 {
+                        imageSpace2 += imageSpace[0..<targetIndex]
+                    }
+                    if moveToIndex != targetIndex + 1 {
+                        imageSpace2 += imageSpace[targetIndex + 1..<moveToIndex]
+                        imageSpace2 += imageSpace[targetIndex...targetIndex]
+                        imageSpace2 += imageSpace[moveToIndex...lastIndex]
+                    } else {
+                        imageSpace2 += imageSpace[targetIndex + 1...targetIndex + 1]
+                        imageSpace2 += imageSpace[targetIndex...targetIndex]
+                        if moveToIndex < lastIndex {
+                            imageSpace2 += imageSpace[moveToIndex + 1...lastIndex]
+                        }
+                    }
+                }
             }
             imageSpace = imageSpace2
         }
