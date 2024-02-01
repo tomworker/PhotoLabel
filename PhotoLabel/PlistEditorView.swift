@@ -236,7 +236,7 @@ struct PlistEditorView: View {
                             Text(subFolderModes[item] == 1 ? "S" : "")
                                 .frame(width: 10)
                             Text(String(item + 1))
-                                .frame(width: 25)
+                                .frame(width: 32)
                             TextField("Category", text: $mainCategoryStrings[item])
                         }
                     }
@@ -258,144 +258,155 @@ struct PlistEditorView: View {
         }
     }
     private func subFolderMode() {
-        var place1 = selectedIndex[0]
-        if place1 == -1 {
-            place1 = selectedIndex[1]
-        }
-        if subFolderModes[place1] == 1 {
-            subFolderModes[place1] = 0
-        } else {
-            subFolderModes[place1] = 1
+        autoreleasepool {
+            var place1 = selectedIndex[0]
+            if place1 == -1 {
+                place1 = selectedIndex[1]
+            }
+            if subFolderModes[place1] == 1 {
+                subFolderModes[place1] = 0
+            } else {
+                subFolderModes[place1] = 1
+            }
         }
     }
     private func copyPlist() {
-        let place1 = selectedIndex[0]
-        let place2 = selectedIndex[1]
-        if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
-            mainCategoryStrings.insert("", at: place2)
-            subFolderModes.insert(0, at: place2)
-            subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place2)
-            countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place2)
-            imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
-            if place1 < place2 {
-                mainCategoryStrings[place2] = mainCategoryStrings[place1]
-                subFolderModes[place2] = subFolderModes[place1]
-                subCategoryStrings[place2] = subCategoryStrings[place1]
-            } else {
-                mainCategoryStrings[place2] = mainCategoryStrings[place1 + 1]
-                subFolderModes[place2] = subFolderModes[place1 + 1]
-                subCategoryStrings[place2] = subCategoryStrings[place1 + 1]
+        autoreleasepool {
+            let place1 = selectedIndex[0]
+            let place2 = selectedIndex[1]
+            if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+                mainCategoryStrings.insert("", at: place2)
+                subFolderModes.insert(0, at: place2)
+                subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place2)
+                countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place2)
+                imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
+                if place1 < place2 {
+                    mainCategoryStrings[place2] = mainCategoryStrings[place1]
+                    subFolderModes[place2] = subFolderModes[place1]
+                    subCategoryStrings[place2] = subCategoryStrings[place1]
+                } else {
+                    mainCategoryStrings[place2] = mainCategoryStrings[place1 + 1]
+                    subFolderModes[place2] = subFolderModes[place1 + 1]
+                    subCategoryStrings[place2] = subCategoryStrings[place1 + 1]
+                }
             }
         }
     }
     private func insertBlankPlist() {
-        var place1 = selectedIndex[0]
-        if place1 == -1 {
-            place1 = selectedIndex[1]
-        }
-        if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
-            mainCategoryStrings.insert("", at: place1)
-            subFolderModes.insert(0, at: place1)
-            subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
-            countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
-            imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
+        autoreleasepool {
+            var place1 = selectedIndex[0]
+            if place1 == -1 {
+                place1 = selectedIndex[1]
+            }
+            if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+                mainCategoryStrings.insert("", at: place1)
+                subFolderModes.insert(0, at: place1)
+                subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
+                countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
+                imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
+            }
         }
     }
     private func changePlacePlist() {
-        var place1 = selectedIndex[0]
-        var place2 = selectedIndex[1]
-        if place1 > place2 {
-            place1 = selectedIndex[1]
-            place2 = selectedIndex[0]
-        }
-        var tempMainCategoryString = ""
-        var tempSubFolderModes = 0
-        var tempSubCategoryStrings: [String] = []
-        var tempCountStoredImages: [Int] = []
-        var tempImageFiles: [[String]] = []
-        for i in 0..<mainCategoryStrings.count {
-            if i == place1 {
-                tempMainCategoryString = mainCategoryStrings[place1]
-                tempSubFolderModes = subFolderModes[place1]
-                for j in 0..<subCategoryStrings[place1].count {
-                    tempSubCategoryStrings.append(subCategoryStrings[place1][j])
-                    tempCountStoredImages.append(countStoredImages[place1][j])
-                    tempImageFiles.append([])
-                    for k in 0..<imageFiles[place1][j].count {
-                        tempImageFiles[j].append(imageFiles[place1][j][k])
+        autoreleasepool {
+            var place1 = selectedIndex[0]
+            var place2 = selectedIndex[1]
+            if place1 > place2 {
+                place1 = selectedIndex[1]
+                place2 = selectedIndex[0]
+            }
+            var tempMainCategoryString = ""
+            var tempSubFolderModes = 0
+            var tempSubCategoryStrings: [String] = []
+            var tempCountStoredImages: [Int] = []
+            var tempImageFiles: [[String]] = []
+            for i in 0..<mainCategoryStrings.count {
+                if i == place1 {
+                    tempMainCategoryString = mainCategoryStrings[place1]
+                    tempSubFolderModes = subFolderModes[place1]
+                    for j in 0..<subCategoryStrings[place1].count {
+                        tempSubCategoryStrings.append(subCategoryStrings[place1][j])
+                        tempCountStoredImages.append(countStoredImages[place1][j])
+                        tempImageFiles.append([])
+                        for k in 0..<imageFiles[place1][j].count {
+                            tempImageFiles[j].append(imageFiles[place1][j][k])
+                        }
                     }
                 }
-            }
-            if i == place2 {
-                mainCategoryStrings[place1] = mainCategoryStrings[place2]
-                mainCategoryStrings[place2] = tempMainCategoryString
-                tempMainCategoryString = ""
-                subFolderModes[place1] = subFolderModes[place2]
-                subFolderModes[place2] = tempSubFolderModes
-                tempSubFolderModes = 0
-                for j in 0..<subCategoryStrings[place2].count {
-                    subCategoryStrings[place1][j] = subCategoryStrings[place2][j]
-                    subCategoryStrings[place2][j] = tempSubCategoryStrings[j]
-                    countStoredImages[place1][j] = countStoredImages[place2][j]
-                    countStoredImages[place2][j] = tempCountStoredImages[j]
-                    for k in 0..<imageFiles[place2][j].count {
-                        imageFiles[place1][j][k] = imageFiles[place2][j][k]
-                        imageFiles[place2][j][k] = tempImageFiles[j][k]
+                if i == place2 {
+                    mainCategoryStrings[place1] = mainCategoryStrings[place2]
+                    mainCategoryStrings[place2] = tempMainCategoryString
+                    tempMainCategoryString = ""
+                    subFolderModes[place1] = subFolderModes[place2]
+                    subFolderModes[place2] = tempSubFolderModes
+                    tempSubFolderModes = 0
+                    for j in 0..<subCategoryStrings[place2].count {
+                        subCategoryStrings[place1][j] = subCategoryStrings[place2][j]
+                        subCategoryStrings[place2][j] = tempSubCategoryStrings[j]
+                        countStoredImages[place1][j] = countStoredImages[place2][j]
+                        countStoredImages[place2][j] = tempCountStoredImages[j]
+                        for k in 0..<imageFiles[place2][j].count {
+                            imageFiles[place1][j][k] = imageFiles[place2][j][k]
+                            imageFiles[place2][j][k] = tempImageFiles[j][k]
+                        }
                     }
+                    break
                 }
             }
         }
     }
     private func savePlist(isRename: Bool, isCopy: Bool) {
-        plistName = ZipManager.replaceString(targetString: plistName)
-        if isRename == true && plistName == initialPlistName {
-            return
-        }
-        let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
-        var tempSubCategorys: [SubCategory] = []
-        var tempImageFiles: [ImageFile] = []
-        mainCategorys = []
-        for i in 0..<mainCategoryStrings.count {
-            if mainCategoryStrings[i] != "" {
-                tempSubCategorys = []
-                for j in 0..<subCategoryStrings[i].count {
-                    if subCategoryStrings[i][j] != "" {
-                        tempImageFiles = []
-                        for k in 0..<imageFiles[i][j].count {
-                            if imageFiles[i][j][k] != "" {
-                                tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
-                            }
-                        }
-                        if subCategoryStrings2[i][j] == "" {
-                            subCategoryStrings2[i][j] = "=-,-,-"
-                        }
-                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + ":" + subCategoryStrings2[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
-                    }
-                }
-                if mainCategoryStrings2[i] == "" {
-                    mainCategoryStrings2[i] = "=,,"
-                }
-                mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i] + ":" + mainCategoryStrings2[i], items: tempSubCategorys, subFolderMode: subFolderModes[i]))
+        autoreleasepool {
+            plistName = ZipManager.replaceString(targetString: plistName)
+            if isRename == true && plistName == initialPlistName {
+                return
             }
-        }
-        CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
-        showPlistEditor = false
-        if isRename {
-            let atZipName = initialPlistName + ".zip"
-            let atZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(atZipName)
-            let toZipName = plistName + ".zip"
-            let toZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(toZipName)
-            if isCopy {
-                if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
-                    ZipManager.copyZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+            let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
+            var tempSubCategorys: [SubCategory] = []
+            var tempImageFiles: [ImageFile] = []
+            mainCategorys = []
+            for i in 0..<mainCategoryStrings.count {
+                if mainCategoryStrings[i] != "" {
+                    tempSubCategorys = []
+                    for j in 0..<subCategoryStrings[i].count {
+                        if subCategoryStrings[i][j] != "" {
+                            tempImageFiles = []
+                            for k in 0..<imageFiles[i][j].count {
+                                if imageFiles[i][j][k] != "" {
+                                    tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
+                                }
+                            }
+                            if subCategoryStrings2[i][j] == "" {
+                                subCategoryStrings2[i][j] = "=-,-,-"
+                            }
+                            tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + ":" + subCategoryStrings2[i][j], countStoredImages: countStoredImages[i][j], images: tempImageFiles))
+                        }
+                    }
+                    if mainCategoryStrings2[i] == "" {
+                        mainCategoryStrings2[i] = "=,,"
+                    }
+                    mainCategorys.append(MainCategory(mainCategory: mainCategoryStrings[i] + ":" + mainCategoryStrings2[i], items: tempSubCategorys, subFolderMode: subFolderModes[i]))
                 }
-            } else {
-                if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
-                    ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+            }
+            CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
+            showPlistEditor = false
+            if isRename {
+                let atZipName = initialPlistName + ".zip"
+                let atZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(atZipName)
+                let toZipName = plistName + ".zip"
+                let toZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(toZipName)
+                if isCopy {
+                    if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
+                        ZipManager.copyZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                    }
+                } else {
+                    if ZipManager.fileManager.fileExists(atPath: atZipUrl.path) {
+                        ZipManager.renameZip(atZipUrl: atZipUrl, toZipUrl: toZipUrl)
+                    }
+                    let oldPlistName = initialPlistName + ".plist"
+                    let oldPlistUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(oldPlistName)
+                    ZipManager.remove(fileUrl: oldPlistUrl)
                 }
-                let oldPlistName = initialPlistName + ".plist"
-                let oldPlistUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(oldPlistName)
-                ZipManager.remove(fileUrl: oldPlistUrl)
             }
         }
     }

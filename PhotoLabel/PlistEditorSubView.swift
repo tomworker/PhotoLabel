@@ -78,7 +78,7 @@ struct PlistEditorSubView: View {
                             
                         }
                         Text(String(item + 1))
-                            .frame(width: 25)
+                            .frame(width: 32)
                         TextField("Details", text: $subCategoryStrings2[item])
                             .frame(maxWidth: .infinity)
                             .keyboardType(.default)
@@ -86,13 +86,13 @@ struct PlistEditorSubView: View {
                             .frame(width: 25)
                             .keyboardType(.numberPad)
                     }
-                    .onChange(of: subCategoryStrings2[item]) { newValue in
+                    .onChange(of: subCategoryStrings2[item]) {
                         if subCategoryStrings2[item] != "" && countStoredImagesString[item] == "" {
                             countStoredImagesString[item] = "0"
                         }
                         subCategoryStrings[item] = subCategoryStrings2[item]
                     }
-                    .onChange(of: countStoredImagesString[item]) { newValue in
+                    .onChange(of: countStoredImagesString[item]) {
                         if let countStoredImagesInt = Int(countStoredImagesString[item]) {
                             countStoredImages[item] = countStoredImagesInt
                         }
@@ -111,44 +111,48 @@ struct PlistEditorSubView: View {
         }
     }
     private func insertBlankPlist() {
-        var place1 = selectedIndex[0]
-        if place1 == -1 {
-            place1 = selectedIndex[1]
-        }
-        if subCategoryStrings2[ConfigManager.maxNumberOfSubCategory - 1] == "" {
-            subCategoryStrings2.insert("", at: place1)
-            countStoredImagesString.insert("0", at: place1)
-            imageFiles.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
+        autoreleasepool {
+            var place1 = selectedIndex[0]
+            if place1 == -1 {
+                place1 = selectedIndex[1]
+            }
+            if subCategoryStrings2[ConfigManager.maxNumberOfSubCategory - 1] == "" {
+                subCategoryStrings2.insert("", at: place1)
+                countStoredImagesString.insert("0", at: place1)
+                imageFiles.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
+            }
         }
     }
     private func changePlacePlist() {
-        var place1 = selectedIndex[0]
-        var place2 = selectedIndex[1]
-        if place1 > place2 {
-            place1 = selectedIndex[1]
-            place2 = selectedIndex[0]
-        }
-        var tempSubCategoryString2 = ""
-        var tempCountStoredImagesString = "0"
-        var tempImageFiles: [String] = []
-        for i in 0..<subCategoryStrings2.count {
-            if i == place1 {
-                tempSubCategoryString2 = subCategoryStrings2[place1]
-                tempCountStoredImagesString = countStoredImagesString[place1]
-                for j in 0..<imageFiles[place1].count {
-                    tempImageFiles.append(imageFiles[place1][j])
-                }
+        autoreleasepool {
+            var place1 = selectedIndex[0]
+            var place2 = selectedIndex[1]
+            if place1 > place2 {
+                place1 = selectedIndex[1]
+                place2 = selectedIndex[0]
             }
-            if i == place2 {
-                subCategoryStrings2[place1] = subCategoryStrings2[place2]
-                subCategoryStrings2[place2] = tempSubCategoryString2
-                tempSubCategoryString2 = ""
-                countStoredImagesString[place1] = countStoredImagesString[place2]
-                countStoredImagesString[place2] = tempCountStoredImagesString
-                tempCountStoredImagesString = "0"
-                for j in 0..<imageFiles[place2].count {
-                    imageFiles[place1][j] = imageFiles[place2][j]
-                    imageFiles[place2][j] = tempImageFiles[j]
+            var tempSubCategoryString2 = ""
+            var tempCountStoredImagesString = "0"
+            var tempImageFiles: [String] = []
+            for i in 0..<subCategoryStrings2.count {
+                if i == place1 {
+                    tempSubCategoryString2 = subCategoryStrings2[place1]
+                    tempCountStoredImagesString = countStoredImagesString[place1]
+                    for j in 0..<imageFiles[place1].count {
+                        tempImageFiles.append(imageFiles[place1][j])
+                    }
+                }
+                if i == place2 {
+                    subCategoryStrings2[place1] = subCategoryStrings2[place2]
+                    subCategoryStrings2[place2] = tempSubCategoryString2
+                    tempSubCategoryString2 = ""
+                    countStoredImagesString[place1] = countStoredImagesString[place2]
+                    countStoredImagesString[place2] = tempCountStoredImagesString
+                    tempCountStoredImagesString = "0"
+                    for j in 0..<imageFiles[place2].count {
+                        imageFiles[place1][j] = imageFiles[place2][j]
+                        imageFiles[place2][j] = tempImageFiles[j]
+                    }
                 }
             }
         }

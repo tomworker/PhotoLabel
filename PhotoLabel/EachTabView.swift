@@ -159,58 +159,6 @@ struct EachTabView: View {
                                             
                                         })
                                 }
-                                if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages == 0 {
-                                    LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
-                                        ZStack{
-                                            Text("Take photo\n        or\nMove here")
-                                                .frame(width: CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), height: CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
-                                                .foregroundColor(.white)
-                                                .background(.gray.opacity((0.3)))
-                                                .cornerRadius(10)
-                                                .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted3, index: 0, isTargetedIndex: 0))
-                                                .dropDestination(for: String.self) { indexs, location in
-                                                    let arr: [String] = indexs.first!.components(separatedBy: ":")
-                                                    var indexs1: [String] = []
-                                                    indexs1.append(arr[0])
-                                                    var indexs2: [String] = []
-                                                    indexs2.append(arr[1])
-                                                    var indexs3: [String] = []
-                                                    indexs3.append(arr[2])
-                                                    if indexs3.first! == "2" {
-                                                        if let originalImage = UIImage(contentsOfFile: duplicateSpace[Int(indexs1.first!)!].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].subCategoryName)).appendingPathComponent(indexs2.first!).path : tempDirectoryUrl.appendingPathComponent(indexs2.first!).path) {
-                                                            let dateFormatter = DateFormatter()
-                                                            dateFormatter.dateFormat = "yyyyMMddHHmmss"
-                                                            let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
-                                                            let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                                                            var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
-                                                            if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-                                                                duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(duplicateSpaceImageFileName)
-                                                                ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-                                                            }
-                                                            do {
-                                                                try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                                                                ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex)
-                                                                ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                            } catch {
-                                                                print("Writing Jpg file failed with error:\(error)")
-                                                            }
-                                                        }
-                                                    } else if indexs3.first! == "1" {
-                                                        var duplicateSpaceImageFileName = URL(string: indexs2[0])!.lastPathComponent
-                                                        duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                        duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory) , at: duplicateSpace.count)
-                                                        ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
-                                                        ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                    }
-                                                    return true
-                                                } isTargeted: { isTargeted in
-                                                    self.isTargeted3 = isTargeted
-                                                }
-                                        }
-                                    }
-                                    
-                                }
                                 LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                     ForEach(CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)) { imageFileId in
                                         if let uiimage = UIImage(contentsOfFile: imageFileId.imageFile.imageFile) {
@@ -302,7 +250,7 @@ struct EachTabView: View {
                                                     ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 } else if indexs3.first! == "0" {
-                                                    CategoryManager.reorderItems(image: imageFileId, indexs: indexs1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
+                                                    CategoryManager.reorderItems(imageKey: imageFileId.id, indexs: indexs1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
                                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                 }
                                                 return true
@@ -314,6 +262,56 @@ struct EachTabView: View {
                                                 ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory))
                                             }
                                         }
+                                    }
+                                    ZStack{
+                                        Text("Take photo\n        or\nMove here")
+                                            .frame(width: CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), height: CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
+                                            .foregroundColor(.white)
+                                            .background(.gray.opacity((0.3)))
+                                            .cornerRadius(10)
+                                            .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted3, index: 0, isTargetedIndex: 0))
+                                            .dropDestination(for: String.self) { indexs, location in
+                                                let arr: [String] = indexs.first!.components(separatedBy: ":")
+                                                var indexs1: [String] = []
+                                                indexs1.append(arr[0])
+                                                var indexs2: [String] = []
+                                                indexs2.append(arr[1])
+                                                var indexs3: [String] = []
+                                                indexs3.append(arr[2])
+                                                if indexs3.first! == "2" {
+                                                    if let originalImage = UIImage(contentsOfFile: duplicateSpace[Int(indexs1.first!)!].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].subCategoryName)).appendingPathComponent(indexs2.first!).path : tempDirectoryUrl.appendingPathComponent(indexs2.first!).path) {
+                                                        let dateFormatter = DateFormatter()
+                                                        dateFormatter.dateFormat = "yyyyMMddHHmmss"
+                                                        let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
+                                                        let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
+                                                        var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
+                                                        if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
+                                                            duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(duplicateSpaceImageFileName)
+                                                            ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
+                                                        }
+                                                        do {
+                                                            try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
+                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
+                                                            ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex)
+                                                            ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                        } catch {
+                                                            print("Writing Jpg file failed with error:\(error)")
+                                                        }
+                                                    }
+                                                } else if indexs3.first! == "1" {
+                                                    var duplicateSpaceImageFileName = URL(string: indexs2[0])!.lastPathComponent
+                                                    duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
+                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory) , at: duplicateSpace.count)
+                                                    ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
+                                                    ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                } else if indexs3.first! == "0" {
+                                                    CategoryManager.reorderItems(imageKey: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count, indexs: indexs1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images)
+                                                    ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                }
+                                                return true
+                                            } isTargeted: { isTargeted in
+                                                self.isTargeted3 = isTargeted
+                                            }
                                     }
                                 }
                             }

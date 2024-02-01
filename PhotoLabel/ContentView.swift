@@ -15,13 +15,11 @@ struct ContentView: View {
     @State var duplicateSpace: [DuplicateImageFile] = []
     @State private var fileUrl: URL?
     @State var showPlistCreator = false
-    @State var showPlistEditor1: [Bool]
-    @State var showPlistEditor2: [Bool]
+    @State var showPlistEditor: [Bool]
     @State private var showDocumentPicker = false
-    @State var showCategorySelector1: [Bool]
-    @State var showCategorySelector2: [Bool]
+    @State var showCategorySelector: [Bool]
     @State var showConfig = false
-    @State var isRemove = false
+    @State var isRemove: [Bool]
     @State var isCancelLoad = false
     @State var cancelLoadMessage = ""
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -183,7 +181,7 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            .onChange(of: showPlistCreator || isChangeFlag) { newValue in
+            .onChange(of: showPlistCreator || isChangeFlag) {
                 showPlistList()
             }
             .onAppear {
@@ -232,21 +230,21 @@ struct ContentView: View {
                         if documentDirectoryFiles[item].suffix(6) == ".plist" {
                             let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
                             Button {
-                                loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector1[item])
+                                loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                             } label: {
                                 Text(documentDirectoryFiles[item])
                             }
-                            .onChange(of: showPlistEditor1[item]) { newValue in
+                            .onChange(of: showPlistEditor[item]) {
                                 showPlistListEdit()
                             }
                             .swipeActions {
                                 Button(role: .destructive) {
-                                    isRemove = true;
+                                    isRemove[item] = true;
                                 } label : {
                                     Label("Remove", systemImage: "trash")
                                 }
                                 Button {
-                                    showPlistEditor1[item] = true
+                                    showPlistEditor[item] = true
                                     plistName = documentDirectoryFiles[item]
                                     plistName = plistName.replacingOccurrences(of: ".plist", with: "")
                                 } label : {
@@ -254,7 +252,7 @@ struct ContentView: View {
                                 }
                                 .tint(.blue)
                             }
-                            .alert(isPresented: $isRemove) {
+                            .alert(isPresented: $isRemove[item]) {
                                 Alert(title: Text("Really remove it?"),
                                       primaryButton: .cancel(Text("Cancel")),
                                       secondaryButton: .destructive(Text("Remove"), action: {
@@ -265,13 +263,13 @@ struct ContentView: View {
                                     isChangeFlag.toggle()
                                 }))
                             }
-                            .fullScreenCover(isPresented: $showCategorySelector1[item]) {
+                            .fullScreenCover(isPresented: $showCategorySelector[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector1[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent)
+                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent)
                             }
-                            .fullScreenCover(isPresented: $showPlistEditor1[item]) {
+                            .fullScreenCover(isPresented: $showPlistEditor[item]) {
                                 let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                PlistEditorView(showPlistEditor: $showPlistEditor1[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
                             }
                         }
                     }
@@ -285,10 +283,9 @@ struct ContentView: View {
         ZipManager.create(directoryUrl: tempDirectoryUrl)
         do {
             documentDirectoryFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: documentDirectoryUrl.path)
-            showPlistEditor1 = Array(repeating: false, count: documentDirectoryFiles.count)
-            showPlistEditor2 = Array(repeating: false, count: documentDirectoryFiles.count)
-            showCategorySelector1 = Array(repeating: false, count: documentDirectoryFiles.count)
-            showCategorySelector2 = Array(repeating: false, count: documentDirectoryFiles.count)
+            showPlistEditor = Array(repeating: false, count: documentDirectoryFiles.count)
+            showCategorySelector = Array(repeating: false, count: documentDirectoryFiles.count)
+            isRemove = Array(repeating: false, count: documentDirectoryFiles.count)
         } catch {
             print(error)
         }
@@ -298,10 +295,7 @@ struct ContentView: View {
         ZipManager.create(directoryUrl: tempDirectoryUrl)
         do {
             documentDirectoryFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: documentDirectoryUrl.path)
-            //showPlistEditor1 = Array(repeating: false, count: documentDirectoryFiles.count)
-            //showPlistEditor2 = Array(repeating: false, count: documentDirectoryFiles.count)
-            showCategorySelector1 = Array(repeating: false, count: documentDirectoryFiles.count)
-            showCategorySelector2 = Array(repeating: false, count: documentDirectoryFiles.count)
+            showCategorySelector = Array(repeating: false, count: documentDirectoryFiles.count)
         } catch {
             print(error)
         }
@@ -684,33 +678,45 @@ class CategoryManager {
             return mainCategorys
         }
     }
-    static func reorderItems(image: ImageFileId, indexs: [String], imageSpace: inout [ImageFile]) {
+    static func reorderItems(imageKey: Int, indexs: [String], imageSpace: inout [ImageFile]) {
         autoreleasepool {
-            let moveToIndex = image.id
+            let moveToIndex = imageKey
             let targetIndex = Int(indexs.first!)!
             let lastIndex = imageSpace.count - 1
             var imageSpace2: [ImageFile] = []
             if moveToIndex <= targetIndex {
                 if moveToIndex != 0 {
-                    imageSpace2 += imageSpace[0...moveToIndex - 1]
+                    imageSpace2 += imageSpace[0..<moveToIndex]
                 }
                 imageSpace2 += imageSpace[targetIndex...targetIndex]
                 if moveToIndex != targetIndex {
-                    imageSpace2 += imageSpace[moveToIndex...targetIndex - 1]
+                    imageSpace2 += imageSpace[moveToIndex..<targetIndex]
                 }
                 if targetIndex != lastIndex {
                     imageSpace2 += imageSpace[targetIndex + 1...lastIndex]
                 }
             }
-            if moveToIndex > targetIndex {
-                if targetIndex != 0 {
-                    imageSpace2 += imageSpace[0...targetIndex - 1]
-                }
-                if moveToIndex != targetIndex + 1 {
-                    imageSpace2 += imageSpace[targetIndex + 1...moveToIndex - 1]
-                }
+            if moveToIndex > lastIndex {
+                imageSpace2 += imageSpace[0..<targetIndex]
+                imageSpace2 += imageSpace[targetIndex + 1..<moveToIndex]
                 imageSpace2 += imageSpace[targetIndex...targetIndex]
-                imageSpace2 += imageSpace[moveToIndex...lastIndex]
+            } else {
+                if moveToIndex > targetIndex {
+                    if targetIndex != 0 {
+                        imageSpace2 += imageSpace[0..<targetIndex]
+                    }
+                    if moveToIndex != targetIndex + 1 {
+                        imageSpace2 += imageSpace[targetIndex + 1..<moveToIndex]
+                        imageSpace2 += imageSpace[targetIndex...targetIndex]
+                        imageSpace2 += imageSpace[moveToIndex...lastIndex]
+                    } else {
+                        imageSpace2 += imageSpace[targetIndex + 1...targetIndex + 1]
+                        imageSpace2 += imageSpace[targetIndex...targetIndex]
+                        if moveToIndex < lastIndex {
+                            imageSpace2 += imageSpace[moveToIndex + 1...lastIndex]
+                        }
+                    }
+                }
             }
             imageSpace = imageSpace2
         }

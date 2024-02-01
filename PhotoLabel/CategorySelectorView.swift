@@ -41,7 +41,6 @@ struct CategorySelectorView: View {
     @State var isTargetedIndex = -1
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    let sheetId = 1
 
     var body: some View {
         ScrollView {
@@ -73,22 +72,6 @@ struct CategorySelectorView: View {
                         .fullScreenCover(isPresented: $showCheckBox) {
                             CheckBoxView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox)
                         }
-                        /*
-                        Button {
-                            showCheckBoxMatrix = true
-                        } label: {
-                            HStack {
-                                Text("Matrix")
-                            }
-                            .frame(width: 70, height: 30)
-                            .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                        }
-                        .fullScreenCover(isPresented: $showCheckBoxMatrix) {
-                            CheckBoxMatrixView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, showCheckBoxMatrix: $showCheckBoxMatrix, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl)
-                        }
-                         */
                         Button {
                             showFinalReport = true
                         } label: {

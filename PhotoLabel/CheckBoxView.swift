@@ -183,7 +183,7 @@ struct CheckBoxView: View {
                                                                     .frame(width: uiimage.size.width > uiimage.size.height ? imageWidth : imageHeight, height: imageHeight)
                                                                     .cornerRadius(10)
                                                                     //Recovery code for onTapGesture problem
-                                                                    .onChange(of: showImageView) { newValue in }
+                                                                    .onChange(of: showImageView) { }
                                                                     //Above code goes well for some reason.
                                                                     .onTapGesture(count: 1) {
                                                                         showImageView = true

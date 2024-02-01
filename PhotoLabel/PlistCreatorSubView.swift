@@ -22,7 +22,7 @@ struct PlistCreatorSubView: View {
                             .frame(maxWidth: .infinity)
                             .keyboardType(.default)
                     }
-                    .onChange(of: subCategoryStrings2[item]) { newValue in
+                    .onChange(of: subCategoryStrings2[item]) {
                         subCategoryStrings[item] = subCategoryStrings2[item]
                     }
                 }
