@@ -392,7 +392,7 @@ struct EachTabView: View {
                                                 var indexs3: [String] = []
                                                 indexs3.append(arr[2])
                                                 if indexs3.first! == "2" {
-                                                    CategoryManager.reorderItems(image: CategoryManager.convertIdentifiable(duplicateImageFiles: duplicateSpace)[index], indexs: indexs1, duplicateSpace: &duplicateSpace)
+                                                    CategoryManager.reorderItems(imageKey: index, indexs: indexs1, duplicateSpace: &duplicateSpace)
                                                 }
                                                 return true
                                             } isTargeted: { isTargeted in
@@ -475,7 +475,7 @@ struct EachTabView: View {
                                                 var indexs3: [String] = []
                                                 indexs3.append(arr[2])
                                                 if indexs3.first! == "1" {
-                                                    CategoryManager.reorderItems(image: workSpaceImageFileId, indexs: indexs1, workSpace: &workSpace)
+                                                    CategoryManager.reorderItems(imageKey: workSpaceImageFileId.id, indexs: indexs1, workSpace: &workSpace)
                                                 } else if indexs3.first! == "0"  {
                                                     ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace)
                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
