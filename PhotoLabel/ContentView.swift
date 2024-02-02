@@ -721,19 +721,19 @@ class CategoryManager {
             imageSpace = imageSpace2
         }
     }
-    static func reorderItems(image: WorkSpaceImageFileId, indexs: [String], workSpace: inout [WorkSpaceImageFile]) {
+    static func reorderItems(imageKey: Int, indexs: [String], workSpace: inout [WorkSpaceImageFile]) {
         autoreleasepool {
-            let moveToIndex = image.id
+            let moveToIndex = imageKey
             let targetIndex = Int(indexs.first!)!
             let lastIndex = workSpace.count - 1
             var workSpace2: [WorkSpaceImageFile] = []
             if moveToIndex <= targetIndex {
                 if moveToIndex != 0 {
-                    workSpace2 += workSpace[0...moveToIndex - 1]
+                    workSpace2 += workSpace[0..<moveToIndex]
                 }
                 workSpace2 += workSpace[targetIndex...targetIndex]
                 if moveToIndex != targetIndex {
-                    workSpace2 += workSpace[moveToIndex...targetIndex - 1]
+                    workSpace2 += workSpace[moveToIndex..<targetIndex]
                 }
                 if targetIndex != lastIndex {
                     workSpace2 += workSpace[targetIndex + 1...lastIndex]
@@ -741,30 +741,36 @@ class CategoryManager {
             }
             if moveToIndex > targetIndex {
                 if targetIndex != 0 {
-                    workSpace2 += workSpace[0...targetIndex - 1]
+                    workSpace2 += workSpace[0..<targetIndex]
                 }
                 if moveToIndex != targetIndex + 1 {
-                    workSpace2 += workSpace[targetIndex + 1...moveToIndex - 1]
+                    workSpace2 += workSpace[targetIndex + 1..<moveToIndex]
+                    workSpace2 += workSpace[targetIndex...targetIndex]
+                    workSpace2 += workSpace[moveToIndex...lastIndex]
+                } else {
+                    workSpace2 += workSpace[targetIndex + 1...targetIndex + 1]
+                    workSpace2 += workSpace[targetIndex...targetIndex]
+                    if moveToIndex < lastIndex {
+                        workSpace2 += workSpace[moveToIndex + 1...lastIndex]
+                    }
                 }
-                workSpace2 += workSpace[targetIndex...targetIndex]
-                workSpace2 += workSpace[moveToIndex...lastIndex]
             }
             workSpace = workSpace2
         }
     }
-    static func reorderItems(image: DuplicateImageFileId, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
+    static func reorderItems(imageKey: Int, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
         autoreleasepool {
-            let moveToIndex = image.id
+            let moveToIndex = imageKey
             let targetIndex = Int(indexs.first!)!
             let lastIndex = duplicateSpace.count - 1
             var duplicateSpace2: [DuplicateImageFile] = []
             if moveToIndex <= targetIndex {
                 if moveToIndex != 0 {
-                    duplicateSpace2 += duplicateSpace[0...moveToIndex - 1]
+                    duplicateSpace2 += duplicateSpace[0..<moveToIndex]
                 }
                 duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
                 if moveToIndex != targetIndex {
-                    duplicateSpace2 += duplicateSpace[moveToIndex...targetIndex - 1]
+                    duplicateSpace2 += duplicateSpace[moveToIndex..<targetIndex]
                 }
                 if targetIndex != lastIndex {
                     duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
@@ -772,13 +778,19 @@ class CategoryManager {
             }
             if moveToIndex > targetIndex {
                 if targetIndex != 0 {
-                    duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
+                    duplicateSpace2 += duplicateSpace[0..<targetIndex]
                 }
                 if moveToIndex != targetIndex + 1 {
-                    duplicateSpace2 += duplicateSpace[targetIndex + 1...moveToIndex - 1]
+                    duplicateSpace2 += duplicateSpace[targetIndex + 1..<moveToIndex]
+                    duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+                    duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
+                } else {
+                    duplicateSpace2 += duplicateSpace[targetIndex + 1...targetIndex + 1]
+                    duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
+                    if moveToIndex < lastIndex {
+                        duplicateSpace2 += duplicateSpace[moveToIndex + 1...lastIndex]
+                    }
                 }
-                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-                duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
             }
             duplicateSpace = duplicateSpace2
         }
