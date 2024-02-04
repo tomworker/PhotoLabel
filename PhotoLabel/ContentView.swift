@@ -607,6 +607,23 @@ class CategoryManager {
             }
         }
     }
+    static func isLocatedWithinArea(originy: CGFloat, id: Int, lowerLoadLimit: Int, upperLoadLimit: Int) -> Bool {
+        autoreleasepool {
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                if originy > 150 - (ceil(Double(id / ConfigManager.iPadImageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.iPadImageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                if originy > 150 - (ceil(Double(id / ConfigManager.imageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.imageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+    }
     static func convertIdentifiable(workSpaceImageFiles: [WorkSpaceImageFile]) -> [WorkSpaceImageFileId] {
         autoreleasepool {
             var workSpaceImageFileIds: [WorkSpaceImageFileId] = []
