@@ -320,7 +320,6 @@ struct PlistEditorView: View {
             var tempSubCategoryStrings: [String] = []
             var tempCountStoredImages: [Int] = []
             var tempImageFiles: [[String]] = []
-            //for i in 0..<mainCategoryStrings.count {
             for i in mainCategoryStrings.indices {
                 if i == place1 {
                     tempMainCategoryString = mainCategoryStrings[place1]
