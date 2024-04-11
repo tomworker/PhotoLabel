@@ -320,18 +320,14 @@ struct PlistEditorView: View {
             var tempSubCategoryStrings: [String] = []
             var tempCountStoredImages: [Int] = []
             var tempImageFiles: [[String]] = []
-            for i in 0..<mainCategoryStrings.count {
+            //for i in 0..<mainCategoryStrings.count {
+            for i in mainCategoryStrings.indices {
                 if i == place1 {
                     tempMainCategoryString = mainCategoryStrings[place1]
                     tempSubFolderModes = subFolderModes[place1]
-                    for j in 0..<subCategoryStrings[place1].count {
-                        tempSubCategoryStrings.append(subCategoryStrings[place1][j])
-                        tempCountStoredImages.append(countStoredImages[place1][j])
-                        tempImageFiles.append([])
-                        for k in 0..<imageFiles[place1][j].count {
-                            tempImageFiles[j].append(imageFiles[place1][j][k])
-                        }
-                    }
+                    tempSubCategoryStrings = subCategoryStrings[place1]
+                    tempCountStoredImages = countStoredImages[place1]
+                    tempImageFiles = imageFiles[place1]
                 }
                 if i == place2 {
                     mainCategoryStrings[place1] = mainCategoryStrings[place2]
@@ -340,16 +336,12 @@ struct PlistEditorView: View {
                     subFolderModes[place1] = subFolderModes[place2]
                     subFolderModes[place2] = tempSubFolderModes
                     tempSubFolderModes = 0
-                    for j in 0..<subCategoryStrings[place2].count {
-                        subCategoryStrings[place1][j] = subCategoryStrings[place2][j]
-                        subCategoryStrings[place2][j] = tempSubCategoryStrings[j]
-                        countStoredImages[place1][j] = countStoredImages[place2][j]
-                        countStoredImages[place2][j] = tempCountStoredImages[j]
-                        for k in 0..<imageFiles[place2][j].count {
-                            imageFiles[place1][j][k] = imageFiles[place2][j][k]
-                            imageFiles[place2][j][k] = tempImageFiles[j][k]
-                        }
-                    }
+                    subCategoryStrings[place1] = subCategoryStrings[place2]
+                    subCategoryStrings[place2] = tempSubCategoryStrings
+                    countStoredImages[place1] = countStoredImages[place2]
+                    countStoredImages[place2] = tempCountStoredImages
+                    imageFiles[place1] = imageFiles[place2]
+                    imageFiles[place2] = tempImageFiles
                     break
                 }
             }
