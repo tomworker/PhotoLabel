@@ -7,7 +7,7 @@ to categorize the photo taken by dragging and dropping it on each button.
 to view all the categorized photos together with detailed information labels by pressing the final report button.
 ## Articles
 
-Comming soon! 
+Comming soon!!! 
 Please check back.
 
 ## License
