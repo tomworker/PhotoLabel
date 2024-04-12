@@ -13,6 +13,7 @@
 		9869A7182AB466EC0058ED73 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7172AB466EC0058ED73 /* CameraView.swift */; };
 		9869A71A2AB467290058ED73 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A7192AB467290058ED73 /* PhotoCapture.swift */; };
 		9869A71C2AB467870058ED73 /* MotionSensor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9869A71B2AB467870058ED73 /* MotionSensor.swift */; };
+		98715DEF2BC9559900A7AEB3 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 98715DEE2BC9559900A7AEB3 /* PrivacyInfo.xcprivacy */; };
 		9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */; };
 		989697182A35FE3800EE3599 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 989697172A35FE3800EE3599 /* ZIPFoundation */; };
 		9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697192A35FEB700EE3599 /* CategorySelectorView.swift */; };
@@ -39,6 +40,7 @@
 		9869A7172AB466EC0058ED73 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		9869A7192AB467290058ED73 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
 		9869A71B2AB467870058ED73 /* MotionSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionSensor.swift; sourceTree = "<group>"; };
+		98715DEE2BC9559900A7AEB3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9894BC532A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryImagePickerView.swift; sourceTree = "<group>"; };
 		989697152A35FC6000EE3599 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		989697192A35FEB700EE3599 /* CategorySelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectorView.swift; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 		98C753692A35F14400648C02 = {
 			isa = PBXGroup;
 			children = (
+				98715DEE2BC9559900A7AEB3 /* PrivacyInfo.xcprivacy */,
 				98C753742A35F14400648C02 /* PhotoLabel */,
 				98C753732A35F14400648C02 /* Products */,
 			);
@@ -189,6 +192,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				98715DEF2BC9559900A7AEB3 /* PrivacyInfo.xcprivacy in Resources */,
 				98C7537D2A35F14500648C02 /* Preview Assets.xcassets in Resources */,
 				98C7537A2A35F14500648C02 /* Assets.xcassets in Resources */,
 			);
