@@ -16,7 +16,6 @@ struct ImageStockerTabView: View {
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
-    //@State var selectedTag = 2
     
     var body: some View {
         TabView(selection: $targetSubCategoryIndex[1]) {
