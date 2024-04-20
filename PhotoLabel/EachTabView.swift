@@ -258,9 +258,10 @@ struct EachTabView: View {
                                 .fixedSize()
                                 .tint(.brown.opacity(0.8))
                                 HStack {
-                                    Text("Move to Workspace: ")
+                                    Text("Move to Workspace/Stocker: ")
                                     Image(systemName: "square.and.arrow.up")
                                         .rotationEffect(Angle(degrees: 180))
+                                    Image(systemName: "square.and.arrow.up")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
@@ -270,8 +271,7 @@ struct EachTabView: View {
                                     .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                     .foregroundColor(.white)
                                 HStack {
-                                    Text("Move to Stocker (drag & drop): ")
-                                    Image(systemName: "square.and.arrow.up")
+                                    Text("Swap images (long press & tap target): ")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
