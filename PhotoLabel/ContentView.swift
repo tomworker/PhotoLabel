@@ -415,7 +415,7 @@ struct ContentView: View {
                         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).appendingPathComponent(initialMainCategorys[i].items[j].images[k].imageFile)
                         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
                     }
-                    duplicateSpace.append(DuplicateImageFile(imageFile: ImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile), subFolderMode: initialMainCategorys[i].subFolderMode, mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
+                    duplicateSpace.append(DuplicateImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile, subFolderMode: initialMainCategorys[i].subFolderMode, mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
                 }
             }
         }
@@ -460,7 +460,7 @@ struct WorkSpaceImageFile: Equatable {
     let subDirectory: String
 }
 struct DuplicateImageFile: Equatable {
-    let imageFile: ImageFile
+    let imageFile: String
     let subFolderMode: Int
     let mainCategoryName: String
     let subCategoryName: String
@@ -858,7 +858,7 @@ class ZipManager {
             let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFile)
             ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
-            duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
+            duplicateSpace.removeAll(where: {$0.imageFile == targetImageFile})
             workSpace.append(WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: ""))
             print("Removed from plist:\(targetImageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1

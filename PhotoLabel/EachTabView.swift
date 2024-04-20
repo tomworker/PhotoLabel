@@ -177,7 +177,7 @@ struct EachTabView: View {
                                                             let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageFile
                                                             ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
                                                             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.removeAll(where: { $0 == ImageFile(imageFile: targetImageFile)})
-                                                            duplicateSpace.removeAll(where: {$0.imageFile == ImageFile(imageFile: targetImageFile)})
+                                                            duplicateSpace.removeAll(where: {$0.imageFile == targetImageFile})
                                                             print("Removed from plist:\(targetImageFile)")
                                                             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
@@ -280,7 +280,7 @@ struct EachTabView: View {
                             if isDuplicateMode {
                                 LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
                                     ForEach(duplicateSpace.indices, id: \.self) { duplicateSpaceImageFileIndex in
-                                        if let uiimage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path) {
+                                        if let uiimage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path) {
                                             ZStack {
                                                 //Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.3))
                                                 Image(uiImage: uiimage.resize(targetSize: CGSize(width: 200, height: 200)))
@@ -304,7 +304,7 @@ struct EachTabView: View {
                                                     }
                                                     if isWorkSpaceMode == true {
                                                         Button {
-                                                            if let originalImage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path) {
+                                                            if let originalImage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path) {
                                                                 let dateFormatter = DateFormatter()
                                                                 dateFormatter.dateFormat = "yyyyMMddHHmmss"
                                                                 let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
@@ -316,7 +316,7 @@ struct EachTabView: View {
                                                                 }
                                                                 do {
                                                                     try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
+                                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                                                                     ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex)
                                                                     ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                                 } catch {
@@ -339,9 +339,9 @@ struct EachTabView: View {
                                             .onTapGesture(count: 1) {
                                                 showImageView = true
                                                 if duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 {
-                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path
+                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
                                                 } else {
-                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile.imageFile).path
+                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
                                                 }
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
@@ -389,7 +389,7 @@ struct EachTabView: View {
                                                             indexs1.append(String(workSpaceImageFileIndex))
                                                             var duplicateSpaceImageFileName = workSpace[workSpaceImageFileIndex].imageFile
                                                             duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: ImageFile(imageFile: duplicateSpaceImageFileName), subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
+                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                                                             ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace)
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                         } label: {
@@ -407,7 +407,7 @@ struct EachTabView: View {
                                             }
                                             .onTapGesture(count: 1) {
                                                 showImageView = true
-                                                self.targetImageFile = workSpace[workSpaceImageFileIndex].imageFile
+                                                self.targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
                                                 ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile)
