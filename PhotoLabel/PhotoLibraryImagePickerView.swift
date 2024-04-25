@@ -18,6 +18,7 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
     @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
+    @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     class Coordinator: NSObject, UINavigationControllerDelegate, PHPickerViewControllerDelegate {
@@ -51,6 +52,7 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                             try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                             self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: self.parent.duplicateSpace.count)
                             self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.count)
+                            self.parent.downSizeImages[self.parent.mainCategoryIndex][self.parent.subCategoryIndex].append(UIImage(contentsOfFile: self.parent.tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
                             self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].countStoredImages += 1
                         } catch {
                             print("Writing Jpg file failed with error:\(error)")

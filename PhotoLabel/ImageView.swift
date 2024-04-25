@@ -11,6 +11,10 @@ struct ImageView: View {
     @Binding var fileUrl: URL
     @Binding var showImageView: Bool
     let imageFile: String
+    let mainCategoryIndex: Int
+    let subCategoryIndex: Int
+    let imageFileIndex: Int
+    @Binding var downSizeImages: [[[UIImage]]]
     @State var lastValue: CGFloat = 1.0
     @State var scale: CGFloat = 1.0
     @State var location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
@@ -20,7 +24,7 @@ struct ImageView: View {
     @State var topEdge: CGFloat = 0
     @State var bottomEdge: CGFloat = UIScreen.main.bounds.height
     @State var aspectRatio: CGFloat = 1.0
-    
+
     var body: some View {
         let dragGesture = DragGesture()
             .onChanged { value in
@@ -108,6 +112,9 @@ struct ImageView: View {
                             let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2, isClockwise: true)
                             do {
                                 try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                if imageFileIndex != -1 {
+                                    downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                }
                                 ZipManager.saveZip(fileUrl: fileUrl)
                                 showImageView = false
                             } catch {
@@ -127,6 +134,9 @@ struct ImageView: View {
                             let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2, isClockwise: false)
                             do {
                                 try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                if imageFileIndex != -1 {
+                                    downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                }
                                 ZipManager.saveZip(fileUrl: fileUrl)
                                 showImageView = false
                             } catch {

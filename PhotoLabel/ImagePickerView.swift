@@ -16,6 +16,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
     @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
+    @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
@@ -41,6 +42,7 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                     parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: parent.duplicateSpace.count)
                     parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.count)
+                    parent.downSizeImages[parent.mainCategoryIndex][parent.subCategoryIndex].append(UIImage(contentsOfFile: parent.tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
                     parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].countStoredImages += 1
                     ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                 } catch {
