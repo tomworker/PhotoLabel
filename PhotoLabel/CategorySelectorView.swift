@@ -15,6 +15,7 @@ struct CategorySelectorView: View {
     @Binding var duplicateSpace: [DuplicateImageFile]
     @State var fileUrl: URL
     @State var plistCategoryName: String
+    @State var downSizeImages: [[[UIImage]]]
     @State var showPhotoCapture = false
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
@@ -70,7 +71,7 @@ struct CategorySelectorView: View {
                             .cornerRadius(10)
                         }
                         .fullScreenCover(isPresented: $showCheckBox) {
-                            CheckBoxView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox)
+                            CheckBoxView(photoCapture: photoCapture, workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox, downSizeImages: $downSizeImages)
                         }
                         Button {
                             showFinalReport = true
@@ -85,7 +86,7 @@ struct CategorySelectorView: View {
                             .padding(.trailing)
                         }
                         .fullScreenCover(isPresented: $showFinalReport) {
-                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds)
+                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
                         }
                     }
                 }
@@ -204,49 +205,10 @@ struct CategorySelectorView: View {
                                                     .frame(maxWidth: .infinity, minHeight: 50)
                                                     .background(subCategoryId.isTargeted ? LinearGradient(gradient: Gradient(colors: [.orange]), startPoint: .topLeading, endPoint: .bottomTrailing) : subCategoryId.id == targetSubCategoryIndex[1] ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                                     .foregroundColor(.white)
-                                                    .dropDestination(for: String.self) { indexs, location in
-                                                        let arr: [String] = indexs.first!.components(separatedBy: ":")
-                                                        var indexs1: [String] = []
-                                                        indexs1.append(arr[0])
-                                                        var indexs2: [String] = []
-                                                        indexs2.append(arr[1])
-                                                        var indexs3: [String] = []
-                                                        indexs3.append(arr[2])
-                                                        if indexs3.first! == "2" {
-                                                            if let originalImage = UIImage(contentsOfFile: duplicateSpace[Int(indexs1.first!)!].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[Int(indexs1.first!)!].subCategoryName)).appendingPathComponent(indexs2.first!).path : tempDirectoryUrl.appendingPathComponent(indexs2.first!).path) {
-                                                                let dateFormatter = DateFormatter()
-                                                                dateFormatter.dateFormat = "yyyyMMddHHmmssS"
-                                                                let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
-                                                                let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                                                                var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
-                                                                if mainCategoryIds[targetMainCategoryIndex].subFolderMode == 1 {
-                                                                    duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory)).appendingPathComponent(duplicateSpaceImageFileName)
-                                                                    ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory)))
-                                                                }
-                                                                do {
-                                                                    try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
-                                                                    ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id)
-                                                                    ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                                } catch {
-                                                                    print("Writing Jpg file failed with error:\(error)")
-                                                                }
-                                                            }
-                                                        } else if indexs3.first! == "1" {
-                                                            var duplicateSpaceImageFileName = URL(string: indexs2.first!)!.lastPathComponent
-                                                            duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory) , at: duplicateSpace.count)
-                                                            ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, workSpace: &workSpace)
-                                                            ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                        }
-                                                        return true
-                                                    } isTargeted: { isTargeted in
-                                                        mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].isTargeted = isTargeted
-                                                    }
                                             }
                                         }
                                         .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex)
+                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
                                         }
                                     }
                                 }

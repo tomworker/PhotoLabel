@@ -11,12 +11,16 @@ struct ImageTabView: View {
     @Binding var fileUrl: URL
     @Binding var showImageView: Bool
     @State var targetImageFileIndex: Int
-    let imageFileIds: [ImageFileId]
+    let images: [ImageFile]
+    let mainCategoryIndex: Int
+    let subCategoryIndex: Int
+    @Binding var downSizeImages: [[[UIImage]]]
+    let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
         TabView(selection: $targetImageFileIndex) {
-            ForEach(imageFileIds.indices, id: \.self) { index in
-                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: imageFileIds[index].imageFile.imageFile).tag(index)
+            ForEach(images.indices, id: \.self) { index in
+                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: tempDirectoryUrl.path + "/" + images[index].imageFile, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, imageFileIndex: index, downSizeImages: $downSizeImages).tag(index)
             }
         }
         .tabViewStyle(PageTabViewStyle())

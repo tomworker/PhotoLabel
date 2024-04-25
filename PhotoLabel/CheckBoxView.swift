@@ -16,6 +16,7 @@ struct CheckBoxView: View {
     @Binding var fileUrl: URL
     @Binding var targetMainCategoryIndex: Int
     @Binding var showCheckBox: Bool
+    @Binding var downSizeImages: [[[UIImage]]]
     @State var mainCategory = ""
     @State var mainCategory2: [String] = Array(repeating: "", count: 3)
     @State var subCategory = ""
@@ -167,6 +168,9 @@ struct CheckBoxView: View {
                                                 .foregroundColor(.white)
                                                 .background(.gray.opacity((0.3)))
                                                 .cornerRadius(10)
+                                                //Recovery code for onLongPressGesture problem
+                                                .onChange(of: showImageStocker) { }
+                                                //Above code goes well for some reason.
                                                 .onLongPressGesture {
                                                     showImageStocker = true
                                                     targetSubCategoryIndex = subCategoryId.id
@@ -177,7 +181,7 @@ struct CheckBoxView: View {
                                                     if index <= 1 {
                                                         if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + subCategoryId.images[index].imageFile) {
                                                             if originy > CGFloat(150) - (CGFloat(subCategoryId.id + lowerLoadLimit) * (imageHeight + 25)) && originy < CGFloat(150) - (CGFloat(subCategoryId.id - upperLoadLimit) * (imageHeight + 25)) {
-                                                                Image(uiImage: ImageManager.downSize(uiimage: uiimage, scale: 0.1))
+                                                                Image(uiImage: downSizeImages[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex][subCategoryId.id][index])
                                                                     .resizable()
                                                                     .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                                                     .frame(width: uiimage.size.width > uiimage.size.height ? imageWidth : imageHeight, height: imageHeight)
@@ -190,6 +194,9 @@ struct CheckBoxView: View {
                                                                         targetSubCategoryIndex = subCategoryId.id
                                                                         targetImageFileIndex = index
                                                                     }
+                                                                    //Recovery code for onLongPressGesture problem
+                                                                    .onChange(of: showImageStocker) { }
+                                                                    //Above code goes well for some reason.
                                                                     .onLongPressGesture {
                                                                         showImageStocker = true
                                                                         targetSubCategoryIndex = subCategoryId.id
@@ -210,10 +217,10 @@ struct CheckBoxView: View {
                                             }
                                         }
                                         .fullScreenCover(isPresented: $showImageView) {
-                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, imageFileIds: CategoryManager.convertIdentifiable(imageFiles: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, subFolderMode: mainCategoryIds[targetMainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[targetMainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].subCategory))
+                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages)
                                         }
                                         .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2)
+                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
                                         }
                                     }
                                     Spacer()

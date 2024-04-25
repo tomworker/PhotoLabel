@@ -18,6 +18,7 @@ struct PhotoCaptureView: View {
     @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
+    @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     @State var photoOrientation = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
     @State var photoOrientationAtShot = UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight ? "H" : "V"
@@ -335,6 +336,7 @@ struct PhotoCaptureView: View {
                     try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                     duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
                     mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+                    downSizeImages[mainCategoryIndex][subCategoryIndex].append(UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
                     mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                 } catch {
