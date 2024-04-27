@@ -424,11 +424,20 @@ struct ContentView: View {
 }
 struct ImageFile: Decodable, Encodable, Equatable {
     let imageFile: String
+    var imageInfo: String = ""
+}
+struct OldImageFile: Decodable, Encodable, Equatable {
+    let imageFile: String
 }
 struct SubCategory: Decodable, Encodable {
     let subCategory: String
     var countStoredImages: Int
     var images: [ImageFile]
+}
+struct OldSubCategory: Decodable, Encodable {
+    let subCategory: String
+    var countStoredImages: Int
+    var images: [OldImageFile]
 }
 struct MainCategory: Decodable, Encodable {
     let mainCategory: String
@@ -437,7 +446,8 @@ struct MainCategory: Decodable, Encodable {
 }
 struct OldMainCategory: Decodable, Encodable {
     let mainCategory: String
-    let items: [SubCategory]
+    let items: [OldSubCategory]
+    let subFolderMode: Int
 }
 struct SubCategoryId: Identifiable {
     var id: Int
@@ -542,10 +552,7 @@ class CategoryManager {
                 do {
                     let data = try Data.init(contentsOf: fileUrl)
                     let oldMainCategorys = try decoder.decode([OldMainCategory].self, from: data)
-                    var mainCategorys: [MainCategory] = []
-                    for i in 0..<oldMainCategorys.count {
-                        mainCategorys.append(MainCategory(mainCategory: oldMainCategorys[i].mainCategory, items: oldMainCategorys[i].items, subFolderMode: 0))
-                    }
+                    let mainCategorys = oldMainCategorys.map{MainCategory(mainCategory: $0.mainCategory, items: $0.items.map{SubCategory(subCategory: $0.subCategory, countStoredImages: $0.countStoredImages, images: $0.images.map{ImageFile(imageFile: $0.imageFile, imageInfo: "")})}, subFolderMode: $0.subFolderMode)}
                     return mainCategorys
                 } catch {
                     print(error)

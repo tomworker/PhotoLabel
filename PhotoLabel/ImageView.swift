@@ -15,6 +15,7 @@ struct ImageView: View {
     let subCategoryIndex: Int
     let imageFileIndex: Int
     @Binding var downSizeImages: [[[UIImage]]]
+    @Binding var mainCategoryIds: [MainCategoryId]
     @State var lastValue: CGFloat = 1.0
     @State var scale: CGFloat = 1.0
     @State var location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
@@ -24,6 +25,7 @@ struct ImageView: View {
     @State var topEdge: CGFloat = 0
     @State var bottomEdge: CGFloat = UIScreen.main.bounds.height
     @State var aspectRatio: CGFloat = 1.0
+    @State var isEditImageInfo = false
 
     var body: some View {
         let dragGesture = DragGesture()
@@ -104,53 +106,114 @@ struct ImageView: View {
                         }
                 }
             }
+            if mainCategoryIds.count != 0 {
+                Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
+                    .foregroundColor(.white.opacity(0.5))
+                    .background(.black.opacity(0.5))
+            }
             VStack {
                 HStack {
+                    if mainCategoryIds.count != 0 {
+                        Button {
+                            isEditImageInfo = true
+                        } label: {
+                            Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                                .frame(width: 30, height: 30)
+                                .background(.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.vertical)
+                                .padding(.leading)
+                        }
+                        .alert("", isPresented: $isEditImageInfo, actions: {
+                            let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo
+                            TextField("Image info", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
+                            Button("Edit", action: {
+                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                            })
+                            Button("Cancel", role: .cancel, action: {mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = initialValue})
+                        }, message: {
+                            
+                        })
+                        Spacer()
+                        Button {
+                            
+                        } label: {
+                            Image(systemName: "qrcode.viewfinder")
+                                .frame(width: 30, height: 30)
+                                .background(.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.vertical)
+                        }
+                        Spacer()
+                        Button {
+                            
+                        } label: {
+                            ZStack {
+                                Image(systemName: "viewfinder")
+                                    .frame(width: 30, height: 30)
+                                    .background(.gray)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                                    .padding(.vertical)
+                                Image(systemName: "textformat")
+                                    .font(.system(size: 10))
+                                    .frame(width: 30, height: 30)
+                                    .background(.clear)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                                    .padding(.vertical)
+                            }
+                        }
+                        Spacer()
+                        Button {
+                            if let uiimage = UIImage(contentsOfFile: imageFile) {
+                                let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2, isClockwise: true)
+                                do {
+                                    try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                    if imageFileIndex != -1 {
+                                        downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                    }
+                                    ZipManager.saveZip(fileUrl: fileUrl)
+                                    showImageView = false
+                                } catch {
+                                    print(error)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "rotate.right")
+                                .frame(width: 30, height: 30)
+                                .background(.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.vertical)
+                        }
+                        Spacer()
+                        Button {
+                            if let uiimage = UIImage(contentsOfFile: imageFile) {
+                                let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2, isClockwise: false)
+                                do {
+                                    try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
+                                    if imageFileIndex != -1 {
+                                        downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                    }
+                                    ZipManager.saveZip(fileUrl: fileUrl)
+                                    showImageView = false
+                                } catch {
+                                    print(error)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "rotate.left")
+                                .frame(width: 30, height: 30)
+                                .background(.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .padding(.vertical)
+                        }
+                    }
                     Spacer()
-                    Button {
-                        if let uiimage = UIImage(contentsOfFile: imageFile) {
-                            let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2, isClockwise: true)
-                            do {
-                                try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
-                                if imageFileIndex != -1 {
-                                    downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
-                                }
-                                ZipManager.saveZip(fileUrl: fileUrl)
-                                showImageView = false
-                            } catch {
-                                print(error)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "rotate.right")
-                            .frame(width: 30, height: 30)
-                            .background(.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding()
-                    }
-                    Button {
-                        if let uiimage = UIImage(contentsOfFile: imageFile) {
-                            let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2, isClockwise: false)
-                            do {
-                                try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
-                                if imageFileIndex != -1 {
-                                    downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
-                                }
-                                ZipManager.saveZip(fileUrl: fileUrl)
-                                showImageView = false
-                            } catch {
-                                print(error)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "rotate.left")
-                            .frame(width: 30, height: 30)
-                            .background(.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding()
-                    }
                     Button {
                         showImageView = false
                     } label: {
@@ -159,7 +222,8 @@ struct ImageView: View {
                             .background(.orange)
                             .foregroundColor(.white)
                             .cornerRadius(10)
-                            .padding()
+                            .padding(.vertical)
+                            .padding(.trailing)
                     }
                 }
                 .background(.black.opacity(0.3))
