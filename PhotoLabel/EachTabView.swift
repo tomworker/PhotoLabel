@@ -228,7 +228,7 @@ struct EachTabView: View {
                                                 self.isTargetedIndex1 = imageFileIndex
                                             }
                                             .fullScreenCover(isPresented: $showImageView2) {
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, images: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, downSizeImages: $downSizeImages)
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, targetImageFileIndex: self.targetImageFileIndex, images: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                             }
                                         }
                                     }
@@ -345,7 +345,7 @@ struct EachTabView: View {
                                                 }
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]))
+                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]))
                                             }
                                         }
                                     }
@@ -409,7 +409,7 @@ struct EachTabView: View {
                                                 self.targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]))
+                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]))
                                             }
                                         }
                                     }
