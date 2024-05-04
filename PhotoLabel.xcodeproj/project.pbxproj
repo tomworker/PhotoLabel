@@ -31,6 +31,7 @@
 		98C7537A2A35F14500648C02 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C753792A35F14500648C02 /* Assets.xcassets */; };
 		98C7537D2A35F14500648C02 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C7537C2A35F14500648C02 /* Preview Assets.xcassets */; };
 		98DE84EE2B1B1076007FD173 /* CheckBoxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */; };
+		98F15D572BE5AE50007E5783 /* AppVersionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98F15D562BE5AE50007E5783 /* AppVersionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 		98C753792A35F14500648C02 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98C7537C2A35F14500648C02 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		98DE84ED2B1B1076007FD173 /* CheckBoxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBoxView.swift; sourceTree = "<group>"; };
+		98F15D562BE5AE50007E5783 /* AppVersionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 				989697152A35FC6000EE3599 /* Info.plist */,
 				98C753752A35F14400648C02 /* PhotoLabelApp.swift */,
 				98C753772A35F14400648C02 /* ContentView.swift */,
+				98F15D562BE5AE50007E5783 /* AppVersionView.swift */,
 				989697192A35FEB700EE3599 /* CategorySelectorView.swift */,
 				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
 				989697212A35FF7200EE3599 /* EachTabView.swift */,
@@ -207,6 +210,7 @@
 			files = (
 				989697242A35FF9800EE3599 /* PlistCreatorView.swift in Sources */,
 				989697202A35FF5000EE3599 /* ImageStockerTabView.swift in Sources */,
+				98F15D572BE5AE50007E5783 /* AppVersionView.swift in Sources */,
 				9896971E2A35FF2300EE3599 /* ImageView.swift in Sources */,
 				9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */,
 				985296112A7209460052AC45 /* ImageTabView.swift in Sources */,

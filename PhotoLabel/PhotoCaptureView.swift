@@ -25,6 +25,7 @@ struct PhotoCaptureView: View {
     @State var sliderVal = 0.5
     @State var isNoAnimation = false
     @State var isSelectFlashMode = false
+    @State var capturedQRData = ""
     let deviceWidth = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
     let deviceHeight = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
     private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
@@ -127,6 +128,36 @@ struct PhotoCaptureView: View {
                                 Spacer()
                             }
                         }
+                    }
+                    Button {
+                        capturedQRData = ""
+                    } label: {
+                        VStack {
+                            Text(capturedQRData == "" ? "" : "Captured into Image info! (or tap to clear)")
+                                .foregroundColor(.white)
+                                .background(.blue.opacity(0.3))
+                            Text(capturedQRData)
+                                .foregroundColor(.white)
+                                .background(.blue.opacity(0.3))
+                        }
+                    }
+                    ForEach(photoCapture.isDetectQR.indices, id: \.self) { index in
+                        ZStack {
+                            Button {
+                                capturedQRData = photoCapture.QRData[index]
+                            } label: {
+                                Text("")
+                                    .frame(width: photoCapture.QRFrame[index].width, height: photoCapture.QRFrame[index].height)
+                                    .border(capturedQRData == photoCapture.QRData[index] ? .blue : .green, width: 1)
+                                    .foregroundColor(.black)
+                                    .background(capturedQRData == photoCapture.QRData[index] ? .blue.opacity(0.1) : .green.opacity(0.1))
+                            }
+                            Text(photoCapture.QRData[index])
+                                .font(.system(.caption2))
+                                .foregroundColor(.black)
+                                .background(capturedQRData == photoCapture.QRData[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
+                        }
+                        .position(CGPoint(x: photoCapture.QRFrame[index].minX + photoCapture.QRFrame[index].width / 2, y: photoCapture.QRFrame[index].minY + photoCapture.QRFrame[index].height / 2))
                     }
                 }
                 VStack {
@@ -323,8 +354,6 @@ struct PhotoCaptureView: View {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                 let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
-                let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
-                let workSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
                 let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                 var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                 let duplicateSpaceImageFileName = plistImageFileName
@@ -335,7 +364,7 @@ struct PhotoCaptureView: View {
                     }
                     try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                     duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
+                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName, imageInfo: capturedQRData), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
                     downSizeImages[mainCategoryIndex][subCategoryIndex].append(UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
                     mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
