@@ -345,7 +345,7 @@ struct EachTabView: View {
                                                 }
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]))
+                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true))
                                             }
                                         }
                                     }
@@ -409,7 +409,7 @@ struct EachTabView: View {
                                                 self.targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]))
+                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: -1, imageFileIndex: -1, downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true))
                                             }
                                         }
                                     }

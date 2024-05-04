@@ -48,7 +48,7 @@ struct PlistEditorSubView: View {
             }
         }
         List {
-            Section(header: Text("Input Photo Label ") + Text("Details").font(.title)) {
+            Section(header: Text("Input Photo Label ") + Text("Detail").font(.title)) {
                 ForEach(0..<ConfigManager.maxNumberOfSubCategory, id: \.self) { item in
                     HStack {
                         VStack {
@@ -79,7 +79,7 @@ struct PlistEditorSubView: View {
                         }
                         Text(String(item + 1))
                             .frame(width: 32)
-                        TextField("Details", text: $subCategoryStrings2[item])
+                        TextField("Detail", text: $subCategoryStrings2[item])
                             .frame(maxWidth: .infinity)
                             .keyboardType(.default)
                         TextField("0", text: $countStoredImagesString[item])

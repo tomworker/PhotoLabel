@@ -35,6 +35,9 @@ class PhotoCapture: NSObject, ObservableObject {
     var flashMode = "auto"
     var isFlipCameraDevice = false
     var isProcedureRunning = false
+    @Published var QRData: [String] = []
+    @Published var QRFrame: [CGRect] = []
+    @Published var isDetectQR: [Bool] = []
 
     override init() {
         super.init()
@@ -53,6 +56,11 @@ class PhotoCapture: NSObject, ObservableObject {
         captureSession.beginConfiguration()
         guard let deviceInput = try? AVCaptureDeviceInput(device: device!), captureSession.canAddInput(deviceInput) else { return }
         captureSession.addInput(deviceInput)
+        let captureMetadataOutput = AVCaptureMetadataOutput()
+        guard captureSession.canAddOutput(captureMetadataOutput) else { return }
+        captureSession.addOutput(captureMetadataOutput)
+        captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+        captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
         guard captureSession.canAddOutput(dataOutput) else { return }
         captureSession.addOutput(dataOutput)
         captureSession.sessionPreset = AVCaptureSession.Preset.photo
@@ -376,5 +384,18 @@ extension PhotoCapture: AVCapturePhotoCaptureDelegate {
         if let imageData = photo.fileDataRepresentation(), let uiImage = UIImage(data: imageData) {
             image = uiImage
         }
+    }
+}
+extension PhotoCapture: AVCaptureMetadataOutputObjectsDelegate {
+    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        if metadataObjects.count == 0 {
+            isDetectQR = []
+            QRData = []
+            QRFrame = []
+            return
+        }
+        isDetectQR = metadataObjects.map{$0 == $0}
+        QRData = (metadataObjects as! [AVMetadataMachineReadableCodeObject]).map{$0.stringValue!}
+        QRFrame = (metadataObjects as! [AVMetadataMachineReadableCodeObject]).map{(videoPreviewLayer.transformedMetadataObject(for: $0) as! AVMetadataMachineReadableCodeObject).bounds}
     }
 }

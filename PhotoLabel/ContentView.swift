@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var showDocumentPicker = false
     @State var showCategorySelector: [Bool]
     @State var showConfig = false
+    @State var showAppVersion = false
     @State var isRemove: [Bool]
     @State var isCancelLoad = false
     @State var cancelLoadMessage = ""
@@ -33,6 +34,7 @@ struct ContentView: View {
     
     var body: some View {
         Button {
+            showAppVersion = true
         } label: {
             VStack(spacing: 0) {
                 HStack {
@@ -156,6 +158,9 @@ struct ContentView: View {
                     .padding(.trailing)
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showAppVersion) {
+            AppVersionView(showAppVersion: $showAppVersion)
         }
         HStack {
             Button {
@@ -505,8 +510,8 @@ class ConfigManager {
     static var mainRowNumber = 3
     static var subRowNumber = 3
     static var maxNumberOfMainCategory = 99
-    static var maxNumberOfSubCategory = 99
-    static var maxNumberOfImageFile = 99
+    static var maxNumberOfSubCategory = 999
+    static var maxNumberOfImageFile = 999
     static var iPadCheckBoxMatrixColumnWidth = 90
     static var checkBoxMatrixColumnWidth = 60
     static let initialIPadMainColumnNumber = 6
@@ -520,8 +525,8 @@ class ConfigManager {
     static let initialMainRowNumber = 3
     static let initialSubRowNumber = 3
     static let initialMaxNumberOfMainCategory = 99
-    static let initialMaxNumberOfSubCategory = 99
-    static let initialMaxNumberOfImageFile = 99
+    static let initialMaxNumberOfSubCategory = 999
+    static let initialMaxNumberOfImageFile = 999
     static let initialIPadCheckBoxMatrixColumnWidth = 90
     static let initialCheckBoxMatrixColumnWidth = 60
 }
