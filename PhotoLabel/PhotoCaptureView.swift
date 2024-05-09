@@ -144,7 +144,15 @@ struct PhotoCaptureView: View {
                     ForEach(photoCapture.isDetectQR.indices, id: \.self) { index in
                         ZStack {
                             Button {
-                                capturedQRData = photoCapture.QRData[index]
+                                if capturedQRData == "" {
+                                    capturedQRData = photoCapture.QRData[index] + ","
+                                } else {
+                                    if capturedQRData == photoCapture.QRData[index] + "," {
+                                        capturedQRData = ""
+                                    } else {
+                                        capturedQRData = photoCapture.QRData[index] + ","
+                                    }
+                                }
                             } label: {
                                 Text("")
                                     .frame(width: photoCapture.QRFrame[index].width, height: photoCapture.QRFrame[index].height)
