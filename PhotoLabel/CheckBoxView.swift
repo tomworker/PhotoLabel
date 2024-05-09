@@ -217,10 +217,10 @@ struct CheckBoxView: View {
                                             }
                                         }
                                         .fullScreenCover(isPresented: $showImageView) {
-                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: _targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                         }
                                         .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
+                                            ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
                                         }
                                     }
                                     Spacer()

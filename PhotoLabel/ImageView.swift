@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import Vision
+import VisionKit
 
 struct ImageView: View {
     @Binding var fileUrl: URL
@@ -17,7 +19,8 @@ struct ImageView: View {
     @Binding var downSizeImages: [[[UIImage]]]
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var isDetectQRMode: Bool
-    @Binding var isShowMenuIcon:Bool
+    @Binding var isShowMenuIcon: Bool
+    @Binding var isDetectTextMode: Bool
     @State var lastValue: CGFloat = 1.0
     @State var scale: CGFloat = 1.0
     @State var location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
@@ -28,6 +31,8 @@ struct ImageView: View {
     @State var bottomEdge: CGFloat = UIScreen.main.bounds.height
     @State var aspectRatio: CGFloat = 1.0
     @State var isEditImageInfo = false
+    @State var recognizedTexts: [String] = []
+    @StateObject var qrCapture = QRCapture()
 
     var body: some View {
         let dragGesture = DragGesture()
@@ -106,37 +111,73 @@ struct ImageView: View {
                         .onTapGesture(count: 2) {
                             self.scale = self.scale * 2
                         }
-                    if isDetectQRMode == true {
-                        if let features = detectQRCode(uiimage) as? [CIQRCodeFeature], !features.isEmpty {
-                            ForEach(features.indices, id: \.self) { index in
-                                ZStack {
-                                    Button {
-                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = features[index].messageString!
-                                        ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                    } label: {
-                                        Text("")
-                                            .frame(width: features[index].bounds.width * UIScreen.main.bounds.width / uiimage.size.width, height: features[index].bounds.height * UIScreen.main.bounds.width / uiimage.size.width)
-                                            .border(features[index].messageString! == mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo ? .blue :.green, width: 1)
+                    if isShowMenuIcon == true {
+                        if mainCategoryIds.count != 0 {
+                            Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
+                                .foregroundColor(.white.opacity(0.5))
+                                .background(.black.opacity(0.5))
+                        }
+                        if isDetectQRMode == true {
+                            if let features = detectQRCode(uiimage) as? [CIQRCodeFeature], !features.isEmpty {
+                                ForEach(features.indices, id: \.self) { index in
+                                    ZStack {
+                                        Button {
+                                            qrCapture.isRecognizedQRs[index].toggle()
+                                            if qrCapture.isRecognizedQRs[index] == true {
+                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += features[index].messageString! + ","
+                                            } else {
+                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: features[index].messageString! + ",", with: "")
+                                            }
+                                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        } label: {
+                                            Text("")
+                                                .frame(width: features[index].bounds.width * UIScreen.main.bounds.width / uiimage.size.width, height: features[index].bounds.height * UIScreen.main.bounds.width / uiimage.size.width)
+                                                .border(qrCapture.isRecognizedQRs[index] ? .blue :.green, width: 1)
+                                                .foregroundColor(.black)
+                                                .background(qrCapture.isRecognizedQRs[index] ? .blue.opacity(0.1) : .green.opacity(0.1))
+                                        }
+                                        Text(features[index].messageString!)
+                                            .font(.system(.caption2))
+                                            .background(qrCapture.isRecognizedQRs[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
                                             .foregroundColor(.black)
-                                            .background(features[index].messageString! == mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo ? .blue.opacity(0.1) : .green.opacity(0.1))
                                     }
-                                    Text(features[index].messageString!)
-                                        .font(.system(.caption2))
-                                        .background(features[index].messageString! == mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo ? .blue.opacity(0.3) : .green.opacity(0.3))
-                                        .foregroundColor(.black)
+                                    .position(x: uiimage.imageOrientation == .right ? CGFloat((features[index].bounds.minY + features[index].bounds.width / 2) * UIScreen.main.bounds.width / uiimage.size.width) : CGFloat((features[index].bounds.minX + (features[index].bounds.width / 2)) * UIScreen.main.bounds.width / uiimage.size.width), y: uiimage.imageOrientation == .right ? CGFloat((features[index].bounds.minX + features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width + (UIScreen.main.bounds.height - uiimage.size.height * UIScreen.main.bounds.width / uiimage.size.width) / 2 : CGFloat(UIScreen.main.bounds.height - (features[index].bounds.minY + (features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width - ((UIScreen.main.bounds.height / 2) - (uiimage.size.height / 2) * UIScreen.main.bounds.width / uiimage.size.width)))
+                                    //.position(x: CGFloat((features[index].bounds.minY + features[index].bounds.width / 2) * UIScreen.main.bounds.width / uiimage.size.width), y: CGFloat((features[index].bounds.minX + features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width + (UIScreen.main.bounds.height - uiimage.size.height * UIScreen.main.bounds.width / uiimage.size.width) / 2)
+                                    //.position(x: CGFloat((features[index].bounds.minX + (features[index].bounds.width / 2)) * UIScreen.main.bounds.width / uiimage.size.width), y: CGFloat(UIScreen.main.bounds.height - (features[index].bounds.minY + (features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width - ((UIScreen.main.bounds.height / 2) - (uiimage.size.height / 2) * UIScreen.main.bounds.width / uiimage.size.width)))
                                 }
-                                .position(x: CGFloat((features[index].bounds.minY + features[index].bounds.width / 2) * UIScreen.main.bounds.width / uiimage.size.width), y: CGFloat((features[index].bounds.minX + features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width + (UIScreen.main.bounds.height - uiimage.size.height * UIScreen.main.bounds.width / uiimage.size.width) / 2)
+                            }
+                        }
+                        if isDetectTextMode == true {
+                            let recognizedTexts = recognizeTextInImage(uiimage)
+                            ScrollView {
+                                VStack(spacing: 0) {
+                                }
+                                .frame(height: 80)
+                                VStack(spacing: 0) {
+                                    ForEach(recognizedTexts.indices, id: \.self) { index in
+                                        Button {
+                                            qrCapture.isRecognizedTexts[index].toggle()
+                                            if qrCapture.isRecognizedTexts[index] == true {
+                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += recognizedTexts[index] + ","
+                                            } else {
+                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: recognizedTexts[index] + ",", with: "")
+                                            }
+                                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                        } label: {
+                                            Text(recognizedTexts[index])
+                                                .frame(width: UIScreen.main.bounds.width, height: 25)
+                                                .border(qrCapture.isRecognizedTexts[index] ? .blue : .green, width: 1)
+                                                .foregroundColor(.white)
+                                                .background(qrCapture.isRecognizedTexts[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
             if isShowMenuIcon == true {
-                if mainCategoryIds.count != 0 {
-                    Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
-                        .foregroundColor(.white.opacity(0.5))
-                        .background(.black.opacity(0.5))
-                }
                 VStack {
                     HStack {
                         if mainCategoryIds.count != 0 {
@@ -148,7 +189,6 @@ struct ImageView: View {
                                     .background(.gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
-                                    .padding(.vertical)
                                     .padding(.leading)
                             }
                             .alert("Image Information", isPresented: $isEditImageInfo, actions: {
@@ -178,15 +218,15 @@ struct ImageView: View {
                                     .background(isDetectQRMode == true ? .blue : .gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
-                                    .padding(.vertical)
                             }
                             Spacer()
                             Button {
+                                isDetectTextMode.toggle()
                             } label: {
                                 ZStack {
                                     Image(systemName: "viewfinder")
                                         .frame(width: 30, height: 30)
-                                        .background(.gray)
+                                        .background(isDetectTextMode == true ? .blue : .gray)
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
                                         .padding(.vertical)
@@ -196,7 +236,6 @@ struct ImageView: View {
                                         .background(.clear)
                                         .foregroundColor(.white)
                                         .cornerRadius(10)
-                                        .padding(.vertical)
                                 }
                             }
                             Spacer()
@@ -220,7 +259,6 @@ struct ImageView: View {
                                     .background(.gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
-                                    .padding(.vertical)
                             }
                             Spacer()
                             Button {
@@ -243,7 +281,6 @@ struct ImageView: View {
                                     .background(.gray)
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
-                                    .padding(.vertical)
                             }
                         }
                         Spacer()
@@ -255,7 +292,6 @@ struct ImageView: View {
                                 .background(.orange)
                                 .foregroundColor(.white)
                                 .cornerRadius(10)
-                                .padding(.vertical)
                                 .padding(.trailing)
                         }
                     }
@@ -270,6 +306,8 @@ struct ImageView: View {
     }
     private func rotateImage(_ image: UIImage, radians: CGFloat, isClockwise: Bool) -> UIImage {
         autoreleasepool {
+            recognizedTexts = []
+            qrCapture.isRecognizedTexts = []
             if image.imageOrientation == .up {
                 let rotatedSize = CGRect(origin: .zero, size: image.size)
                     .applying(CGAffineTransform(rotationAngle: radians))
@@ -320,19 +358,65 @@ struct ImageView: View {
         }
     }
     private func detectQRCode(_ image: UIImage?) -> [CIFeature]? {
-        if let image = image, let ciImage = CIImage.init(image: image) {
-            var options: [String: Any]
-            let context = CIContext()
-            options = [CIDetectorAccuracy: CIDetectorAccuracyHigh]
-            let qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: options)
-            if ciImage.properties.keys.contains((kCGImagePropertyOrientation as String)) {
-                options = [CIDetectorImageOrientation: ciImage.properties[(kCGImagePropertyOrientation as String)] ?? 1]
-            } else {
-                options = [CIDetectorImageOrientation: 1]
+        autoreleasepool {
+            if let image = image, let ciImage = CIImage.init(image: image) {
+                var options: [String: Any]
+                let context = CIContext()
+                options = [CIDetectorAccuracy: CIDetectorAccuracyHigh]
+                let qrDetector = CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: options)
+                if ciImage.properties.keys.contains((kCGImagePropertyOrientation as String)) {
+                    options = [CIDetectorImageOrientation: ciImage.properties[(kCGImagePropertyOrientation as String)] ?? 1]
+                } else {
+                    options = [CIDetectorImageOrientation: 1]
+                }
+                let features = qrDetector?.features(in: ciImage, options: options)
+                if let features = features, features.count > 0 {
+                    qrCapture.isRecognizedQRs = Array(repeating: false, count: features.count)
+                    for i in features.indices {
+                        if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: (features as! [CIQRCodeFeature])[i].messageString!) {
+                            qrCapture.isRecognizedQRs[i] = true
+                        } else {
+                            qrCapture.isRecognizedQRs[i] = false
+                        }
+                    }
+                }
+                return features
             }
-            let features = qrDetector?.features(in: ciImage, options: options)
-            return features
+            return nil
         }
-        return nil
     }
+    private func recognizeTextInImage(_ image: UIImage) -> [String] {
+        autoreleasepool {
+            guard let cgImage = image.cgImage else { return [] }
+            let request = VNRecognizeTextRequest { (request, error) in
+                guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
+                if qrCapture.isRecognizedTexts.count == 0 {
+                    qrCapture.isRecognizedTexts = Array(repeating: false, count: observations.count)
+                }
+                recognizedTexts = observations.compactMap{ $0.topCandidates(1).first?.string }
+                for i in recognizedTexts.indices {
+                    if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: recognizedTexts[i]) {
+                        qrCapture.isRecognizedTexts[i] = true
+                    } else {
+                        qrCapture.isRecognizedTexts[i] = false
+                    }
+                }
+            }
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["ja-JP"]
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try handler.perform([request])
+                } catch {
+                    print(error)
+                }
+            }
+            return recognizedTexts
+        }
+    }
+}
+class QRCapture: NSObject, ObservableObject {
+    var isRecognizedQRs: [Bool] = []
+    var isRecognizedTexts: [Bool] = []
 }
