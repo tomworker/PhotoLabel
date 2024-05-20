@@ -122,13 +122,22 @@ struct ImageView: View {
                                 ForEach(features.indices, id: \.self) { index in
                                     ZStack {
                                         Button {
-                                            qrCapture.isRecognizedQRs[index].toggle()
-                                            if qrCapture.isRecognizedQRs[index] == true {
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += features[index].messageString! + ","
-                                            } else {
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: features[index].messageString! + ",", with: "")
+                                            autoreleasepool {
+                                                qrCapture.isRecognizedQRs[index].toggle()
+                                                if qrCapture.isRecognizedQRs[index] == true {
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + features[index].messageString! + ","
+                                                    } else {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += features[index].messageString! + ","
+                                                    }
+                                                } else {
+                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: "," + features[index].messageString! + ",", with: ",")
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "," {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = ""
+                                                    }
+                                                }
+                                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
-                                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                         } label: {
                                             Text("")
                                                 .frame(width: features[index].bounds.width * UIScreen.main.bounds.width / uiimage.size.width, height: features[index].bounds.height * UIScreen.main.bounds.width / uiimage.size.width)
@@ -151,18 +160,32 @@ struct ImageView: View {
                             let recognizedTexts = recognizeTextInImage(uiimage)
                             ScrollView {
                                 VStack(spacing: 0) {
-                                }
-                                .frame(height: 80)
-                                VStack(spacing: 0) {
+                                    Spacer(minLength: 80)
                                     ForEach(recognizedTexts.indices, id: \.self) { index in
                                         Button {
-                                            qrCapture.isRecognizedTexts[index].toggle()
-                                            if qrCapture.isRecognizedTexts[index] == true {
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += recognizedTexts[index] + ","
-                                            } else {
-                                                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: recognizedTexts[index] + ",", with: "")
+                                            autoreleasepool {
+                                                qrCapture.isRecognizedTexts[index].toggle()
+                                                if qrCapture.isRecognizedTexts[index] == true {
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + recognizedTexts[index] + ","
+                                                    } else {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += recognizedTexts[index] + ","
+                                                    }
+                                                } else {
+                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: "," + recognizedTexts[index] + ",", with: ",")
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "," {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = ""
+                                                    }
+                                                }
+                                                for i in recognizedTexts.indices {
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
+                                                        qrCapture.isRecognizedTexts[i] = true
+                                                    } else {
+                                                        qrCapture.isRecognizedTexts[i] = false
+                                                    }
+                                                }
+                                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                             }
-                                            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                         } label: {
                                             Text(recognizedTexts[index])
                                                 .frame(width: UIScreen.main.bounds.width, height: 25)
@@ -171,6 +194,7 @@ struct ImageView: View {
                                                 .background(qrCapture.isRecognizedTexts[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
                                         }
                                     }
+                                    Spacer(minLength: 80)
                                 }
                             }
                         }
@@ -373,7 +397,7 @@ struct ImageView: View {
                 if let features = features, features.count > 0 {
                     qrCapture.isRecognizedQRs = Array(repeating: false, count: features.count)
                     for i in features.indices {
-                        if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: (features as! [CIQRCodeFeature])[i].messageString!) {
+                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + (features as! [CIQRCodeFeature])[i].messageString! + ",") != nil {
                             qrCapture.isRecognizedQRs[i] = true
                         } else {
                             qrCapture.isRecognizedQRs[i] = false
@@ -395,7 +419,7 @@ struct ImageView: View {
                 }
                 recognizedTexts = observations.compactMap{ $0.topCandidates(1).first?.string }
                 for i in recognizedTexts.indices {
-                    if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: recognizedTexts[i]) {
+                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
                         qrCapture.isRecognizedTexts[i] = true
                     } else {
                         qrCapture.isRecognizedTexts[i] = false
