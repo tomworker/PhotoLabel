@@ -57,10 +57,11 @@ class PhotoCapture: NSObject, ObservableObject {
         guard let deviceInput = try? AVCaptureDeviceInput(device: device!), captureSession.canAddInput(deviceInput) else { return }
         captureSession.addInput(deviceInput)
         let captureMetadataOutput = AVCaptureMetadataOutput()
-        guard captureSession.canAddOutput(captureMetadataOutput) else { return }
-        captureSession.addOutput(captureMetadataOutput)
-        captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-        captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
+        if captureSession.canAddOutput(captureMetadataOutput) {
+            captureSession.addOutput(captureMetadataOutput)
+            captureMetadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+            captureMetadataOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
+        }
         guard captureSession.canAddOutput(dataOutput) else { return }
         captureSession.addOutput(dataOutput)
         captureSession.sessionPreset = AVCaptureSession.Preset.photo
