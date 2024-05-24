@@ -36,8 +36,9 @@ struct PhotoCaptureView: View {
                 .background(.clear)
                 .onAppear {
                     AppDelegate.orientationLock = .portrait
-                    guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
-                    window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                    if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
+                        window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                    }
                 }
         } else if AppDelegate.orientationLock == .portrait && isNoAnimation == false {
             ZStack {
@@ -51,8 +52,9 @@ struct PhotoCaptureView: View {
                     }
                     .onAppear {
                         print(deviceWidth, " : ", deviceHeight)
-                        guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
-                        window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                        if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
+                            window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+                        }
                     }
                     .onReceive(timer) { _ in
                         photoCapture.setUserAccelaration(xAcc: Double(sensor.xAcc)!, yAcc: Double(sensor.yAcc)!, zAcc: Double(sensor.zAcc)!)
@@ -393,10 +395,11 @@ struct PhotoCaptureView: View {
         }
         photoCapture.reset(zoomReset: true)
         AppDelegate.orientationLock = .allButUpsideDown
-        guard let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first else { return }
-        window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
         DispatchQueue.global(qos: .background).async {
             ZipManager.saveZip(fileUrl: fileUrl)
+        }
+        if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
+            window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
         }
     }
 }
