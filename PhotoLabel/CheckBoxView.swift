@@ -29,7 +29,6 @@ struct CheckBoxView: View {
     @State var targetImageFileIndex = 0
     @State var showImageView = false
     @State var showImageStocker = false
-    @State var isToggleCheckBox = false
     @State var isEditCheckItem: [Bool] = Array(repeating: false, count: 3)
     @State var isEditCheckInfo: [Bool] = Array(repeating: false, count: ConfigManager.maxNumberOfSubCategory)
     @State var isClear = false
@@ -40,6 +39,9 @@ struct CheckBoxView: View {
     let lowerLoadLimit = UIDevice.current.userInterfaceIdiom == .pad ? 10 : 6
     let upperLoadLimit = UIDevice.current.userInterfaceIdiom == .pad ? 16 : 8
     @State var originy = 150.0
+    @State var countImageHeight = 0
+    let correctionValue = UIDevice.current.userInterfaceIdiom == .pad ? pow(((UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) * CGFloat(0.15) + 25), 1.92) / pow(10, 2) - 75.2 : pow(((UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(4) + 25), 1.9) / pow(10, 2) - 64.9
+    let correctionValue2 = UIScreen.main.bounds.height
     
     var body: some View {
         VStack(spacing: 0) {
@@ -104,7 +106,7 @@ struct CheckBoxView: View {
                         Spacer()
                     }
                 }
-                .frame(width: initialOriginx * 1.4, height: 25)
+                .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? initialOriginx * 2.4 : initialOriginx * 1.4, height: 25)
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
                         ForEach(mainCategory2.indices, id: \.self) { index in
@@ -146,174 +148,168 @@ struct CheckBoxView: View {
                 HStack(spacing: 0) {
                     VStack(spacing: 0) {
                         ForEach(mainCategoryIds[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex].items) { subCategoryId in
-                            HStack(alignment: .top, spacing: 0) {
-                                VStack(alignment: .center, spacing: 0) {
-                                    HStack(spacing: 0) {
-                                        if let range = subCategoryId.subCategory.range(of: ":=") {
-                                            let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
-                                            Text(subCategoryId.subCategory[...idx])
+                            if originy >= CGFloat(150) - (CGFloat(subCategoryId.id + lowerLoadLimit) * (imageHeight + 25)) && originy <= CGFloat(150) - (CGFloat(subCategoryId.id - upperLoadLimit) * (imageHeight + 25)) {
+                                HStack(alignment: .top, spacing: 0) {
+                                    VStack(alignment: .center, spacing: 0) {
+                                        HStack(spacing: 0) {
+                                            if let range = subCategoryId.subCategory.range(of: ":=") {
+                                                let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                                Text(subCategoryId.subCategory[...idx])
+                                            }
+                                            Spacer()
+                                        }
+                                        .background(targetSubCategoryIndex == subCategoryId.id ? Color(.cyan) : (subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
+                                        .frame(height: 25)
+                                        ScrollView(.horizontal) {
+                                            HStack(spacing: 0) {
+                                                if subCategoryId.countStoredImages == 0 {
+                                                    VStack(alignment: .center, spacing: 0) {
+                                                        Text("Take photo")
+                                                        Text("Long press here")
+                                                    }
+                                                    .frame(width: imageWidth, height: imageHeight)
+                                                    .foregroundColor(.white)
+                                                    .background(.gray.opacity((0.3)))
+                                                    .cornerRadius(10)
+                                                    //Recovery code for onLongPressGesture problem
+                                                    .onChange(of: showImageStocker) { }
+                                                    //Above code goes well for some reason.
+                                                    .onTapGesture { }
+                                                    .onLongPressGesture {
+                                                        showImageStocker = true
+                                                        targetSubCategoryIndex = subCategoryId.id
+                                                        targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
+                                                    }
+                                                } else {
+                                                    ForEach(subCategoryId.images.indices, id: \.self) { index in
+                                                        if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + subCategoryId.images[index].imageFile) {
+                                                            Image(uiImage: downSizeImages[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex][subCategoryId.id][index])
+                                                                .resizable()
+                                                                .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                                                .frame(width: uiimage.size.width > uiimage.size.height ? imageWidth : imageHeight, height: imageHeight)
+                                                                .cornerRadius(10)
+                                                                //Recovery code for onTapGesture problem
+                                                                .onChange(of: showImageView) { }
+                                                                //Above code goes well for some reason.
+                                                                .onTapGesture(count: 1) {
+                                                                    showImageView = true
+                                                                    targetSubCategoryIndex = subCategoryId.id
+                                                                    targetImageFileIndex = index
+                                                                }
+                                                                //Recovery code for onLongPressGesture problem
+                                                                .onChange(of: showImageStocker) { }
+                                                                //Above code goes well for some reason.
+                                                                .onLongPressGesture {
+                                                                    showImageStocker = true
+                                                                    targetSubCategoryIndex = subCategoryId.id
+                                                                    targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
+                                                                }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            .fullScreenCover(isPresented: $showImageView) {
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: _targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                            }
+                                            .fullScreenCover(isPresented: $showImageStocker) {
+                                                ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
+                                            }
                                         }
                                         Spacer()
                                     }
-                                    .background((subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
-                                    .frame(height: 25)
-                                    ScrollView(.horizontal) {
-                                        HStack(spacing: 0) {
-                                            if subCategoryId.countStoredImages == 0 {
-                                                VStack(alignment: .center, spacing: 0) {
-                                                    Text("Take photo")
-                                                    Text("Long press here")
-                                                }
-                                                .frame(width: imageWidth, height: imageHeight)
-                                                .foregroundColor(.white)
-                                                .background(.gray.opacity((0.3)))
-                                                .cornerRadius(10)
-                                                //Recovery code for onLongPressGesture problem
-                                                .onChange(of: showImageStocker) { }
-                                                //Above code goes well for some reason.
-                                                .onLongPressGesture {
-                                                    showImageStocker = true
-                                                    targetSubCategoryIndex = subCategoryId.id
-                                                    targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
-                                                }
-                                            } else {
-                                                ForEach(subCategoryId.images.indices, id: \.self) { index in
-                                                    if index <= 1 {
-                                                        if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + subCategoryId.images[index].imageFile) {
-                                                            if originy > CGFloat(150) - (CGFloat(subCategoryId.id + lowerLoadLimit) * (imageHeight + 25)) && originy < CGFloat(150) - (CGFloat(subCategoryId.id - upperLoadLimit) * (imageHeight + 25)) {
-                                                                Image(uiImage: downSizeImages[targetMainCategoryIndex == -1 ? 0 : targetMainCategoryIndex][subCategoryId.id][index])
-                                                                    .resizable()
-                                                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                                                    .frame(width: uiimage.size.width > uiimage.size.height ? imageWidth : imageHeight, height: imageHeight)
-                                                                    .cornerRadius(10)
-                                                                    //Recovery code for onTapGesture problem
-                                                                    .onChange(of: showImageView) { }
-                                                                    //Above code goes well for some reason.
-                                                                    .onTapGesture(count: 1) {
-                                                                        showImageView = true
-                                                                        targetSubCategoryIndex = subCategoryId.id
-                                                                        targetImageFileIndex = index
+                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? initialOriginx * 2.4 : initialOriginx * 1.4)
+                                    ForEach(mainCategory2.indices, id: \.self) { index in
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            VStack(alignment: .center, spacing: 0) {
+                                                HStack(spacing: 0) {
+                                                    Spacer()
+                                                    VStack(spacing: 0) {
+                                                        if let range = subCategoryId.subCategory.range(of: ":=") {
+                                                            let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: 2)
+                                                            let array = subCategoryId.subCategory[idx...].components(separatedBy: ",")
+                                                            let checkInfo = String(array[index][array[index].startIndex])
+                                                            let idx2 = array[index].index(array[index].startIndex,offsetBy: 1)
+                                                            let remarks = String(array[index][idx2...])
+                                                            ZStack {
+                                                                Image(systemName: checkInfo == "*" ? "checkmark.circle.fill" : "circle")
+                                                                    .foregroundColor(.blue)
+                                                                    .offset(y: 8)
+                                                                Circle()
+                                                                    .foregroundColor(.gray.opacity(0.1))
+                                                                    .frame(width: 35, height: 35)
+                                                                    .offset(y: 8)
+                                                                    .onTapGesture {
+                                                                        toggleCheckBox(mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, subCategory: subCategoryId.subCategory, checkInfos: array, index: index)
                                                                     }
-                                                                    //Recovery code for onLongPressGesture problem
-                                                                    .onChange(of: showImageStocker) { }
-                                                                    //Above code goes well for some reason.
-                                                                    .onLongPressGesture {
-                                                                        showImageStocker = true
-                                                                        targetSubCategoryIndex = subCategoryId.id
-                                                                        targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
-                                                                    }
-                                                            } else {
-                                                                VStack(alignment: .center, spacing: 0) {
-                                                                    Text("Now loading...")
-                                                                }
-                                                                .frame(width: imageWidth, height: imageHeight)
-                                                                .foregroundColor(.white)
-                                                                .background(.gray.opacity((0.3)))
-                                                                .cornerRadius(10)
                                                             }
+                                                            .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: 45)
+                                                            VStack(spacing: 0) {
+                                                                if remarks == "" {
+                                                                    Image(systemName: "rectangle.and.pencil.and.ellipsis")
+                                                                        .frame(width: 30, height: 30)
+                                                                        .background(.black.opacity(0.3))
+                                                                        .foregroundColor(.white.opacity(0.3))
+                                                                        .cornerRadius(10)
+                                                                        .onTapGesture { }
+                                                                        .onLongPressGesture {
+                                                                            isEditCheckInfo[subCategoryId.id] = true
+                                                                            let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                                                            subCategory = String(subCategoryId.subCategory[...idx3])
+                                                                            subCategory2[subCategoryId.id] = array
+                                                                            for i in 0..<3 {
+                                                                                subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
+                                                                                let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
+                                                                                subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
+                                                                            }
+                                                                            targetCheckInfoIndex = index
+                                                                        }
+                                                                } else {
+                                                                    Text(remarks)
+                                                                        .onTapGesture { }
+                                                                        .onLongPressGesture {
+                                                                            isEditCheckInfo[subCategoryId.id] = true
+                                                                            let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
+                                                                            subCategory = String(subCategoryId.subCategory[...idx3])
+                                                                            subCategory2[subCategoryId.id] = array
+                                                                            for i in 0..<3 {
+                                                                                subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
+                                                                                let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
+                                                                                subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
+                                                                            }
+                                                                            targetCheckInfoIndex = index
+                                                                        }
+                                                                }
+                                                            }
+                                                            .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight - 20)
+                                                            .alert("", isPresented: $isEditCheckInfo[subCategoryId.id], actions: {
+                                                                let initialValue = subCategory2[subCategoryId.id][targetCheckInfoIndex]
+                                                                TextField("Remarks", text: $subCategory4[subCategoryId.id][targetCheckInfoIndex])
+                                                                Button("Edit", action: {
+                                                                    subCategory2[subCategoryId.id][targetCheckInfoIndex] = subCategory3[subCategoryId.id][targetCheckInfoIndex] + subCategory4[subCategoryId.id][targetCheckInfoIndex]
+                                                                    mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory = subCategory + ":=" + subCategory2[subCategoryId.id][0] + "," + subCategory2[subCategoryId.id][1] + "," + subCategory2[subCategoryId.id][2]
+                                                                    ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                                })
+                                                                Button("Cancel", role: .cancel, action: {subCategory2[subCategoryId.id][targetCheckInfoIndex] = initialValue})
+                                                            }, message: {
+                                                                
+                                                            })
                                                         }
                                                     }
+                                                    Spacer()
                                                 }
                                             }
+                                            .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight + 25)
                                         }
-                                        .fullScreenCover(isPresented: $showImageView) {
-                                            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: _targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
-                                        }
-                                        .fullScreenCover(isPresented: $showImageStocker) {
-                                            ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
-                                        }
+                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth))
+                                        .background((subCategoryId.id + index) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
+                                        .offset(y: 2)
                                     }
                                     Spacer()
                                 }
-                                .frame(width: initialOriginx * 1.4)
-                                ForEach(mainCategory2.indices, id: \.self) { index in
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        VStack(alignment: .center, spacing: 0) {
-                                            HStack(spacing: 0) {
-                                                Spacer()
-                                                VStack(spacing: 0) {
-                                                    if let range = subCategoryId.subCategory.range(of: ":=") {
-                                                        let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: 2)
-                                                        let array = subCategoryId.subCategory[idx...].components(separatedBy: ",")
-                                                        let checkInfo = String(array[index][array[index].startIndex])
-                                                        let idx2 = array[index].index(array[index].startIndex,offsetBy: 1)
-                                                        let remarks = String(array[index][idx2...])
-                                                        ZStack {
-                                                            Image(systemName: checkInfo == "*" ? "checkmark.circle.fill" : "circle")
-                                                                .foregroundColor(.blue)
-                                                                .offset(y: 8)
-                                                            Circle()
-                                                                .foregroundColor(.gray.opacity(0.1))
-                                                                .frame(width: 35, height: 35)
-                                                                .offset(y: 8)
-                                                                .onTapGesture {
-                                                                    isToggleCheckBox = true
-                                                                    toggleCheckBox(mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: subCategoryId.id, subCategory: subCategoryId.subCategory, checkInfos: array, index: index)
-                                                                }
-                                                        }
-                                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: 45)
-                                                        VStack(spacing: 0) {
-                                                            if remarks == "" {
-                                                                Image(systemName: "rectangle.and.pencil.and.ellipsis")
-                                                                    .frame(width: 30, height: 30)
-                                                                    .background(.black.opacity(0.3))
-                                                                    .foregroundColor(.white.opacity(0.3))
-                                                                    .cornerRadius(10)
-                                                                    .onLongPressGesture {
-                                                                        isEditCheckInfo[subCategoryId.id] = true
-                                                                        let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
-                                                                        subCategory = String(subCategoryId.subCategory[...idx3])
-                                                                        subCategory2[subCategoryId.id] = array
-                                                                        for i in 0..<3 {
-                                                                            subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
-                                                                            let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
-                                                                            subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
-                                                                        }
-                                                                        targetCheckInfoIndex = index
-                                                                    }
-                                                            } else {
-                                                                Text(remarks)
-                                                                    .onLongPressGesture {
-                                                                        isEditCheckInfo[subCategoryId.id] = true
-                                                                        let idx3 = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
-                                                                        subCategory = String(subCategoryId.subCategory[...idx3])
-                                                                        subCategory2[subCategoryId.id] = array
-                                                                        for i in 0..<3 {
-                                                                            subCategory3[subCategoryId.id][i] = String(array[i][array[i].startIndex])
-                                                                            let idx4 = array[i].index(array[i].startIndex, offsetBy: 1)
-                                                                            subCategory4[subCategoryId.id][i] = String(array[i][idx4...])
-                                                                        }
-                                                                        targetCheckInfoIndex = index
-                                                                    }
-                                                            }
-                                                        }
-                                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight - 20)
-                                                        .alert("", isPresented: $isEditCheckInfo[subCategoryId.id], actions: {
-                                                            let initialValue = subCategory2[subCategoryId.id][targetCheckInfoIndex]
-                                                            TextField("Remarks", text: $subCategory4[subCategoryId.id][targetCheckInfoIndex])
-                                                            Button("Edit", action: {
-                                                                subCategory2[subCategoryId.id][targetCheckInfoIndex] = subCategory3[subCategoryId.id][targetCheckInfoIndex] + subCategory4[subCategoryId.id][targetCheckInfoIndex]
-                                                                mainCategoryIds[targetMainCategoryIndex].items[subCategoryId.id].subCategory = subCategory + ":=" + subCategory2[subCategoryId.id][0] + "," + subCategory2[subCategoryId.id][1] + "," + subCategory2[subCategoryId.id][2]
-                                                                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                            })
-                                                            Button("Cancel", role: .cancel, action: {subCategory2[subCategoryId.id][targetCheckInfoIndex] = initialValue})
-                                                        }, message: {
-                                                            
-                                                        })
-                                                    }
-                                                }
-                                                Spacer()
-                                            }
-                                        }
-                                        .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth), height: imageHeight + 25)
-                                    }
-                                    .frame(width: CGFloat(UIDevice.current.userInterfaceIdiom == .pad ? ConfigManager.iPadCheckBoxMatrixColumnWidth : ConfigManager.checkBoxMatrixColumnWidth))
-                                    .background((subCategoryId.id + index) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
-                                    .offset(y: 2)
-                                }
-                                Spacer()
+                                .frame(height: imageHeight + 25)
+                            } else {
+                                Spacer(minLength: 100)
                             }
-                            .frame(height: imageHeight + 25)
                         }
                         Spacer()
                     }
@@ -322,9 +318,12 @@ struct CheckBoxView: View {
                 .background(GeometryReader { proxy -> Color in
                     DispatchQueue.main.async {
                         let positiony = proxy.frame(in: .named("")).origin.y
-                        if fabs(originy - positiony) > UIScreen.main.bounds.height || isToggleCheckBox == true {
-                            originy = positiony
-                            isToggleCheckBox = false
+                        if -(-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight) + positiony) >= imageHeight {
+                            countImageHeight += 1
+                            originy = 150 - (imageHeight + 25 + correctionValue) * 0.5 * CGFloat(countImageHeight)
+                        } else if (-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight) + positiony) >= imageHeight {
+                            countImageHeight -= 1
+                            originy = 150 - (imageHeight + 25 + correctionValue) * 0.5 * CGFloat(countImageHeight)
                         }
                     }
                     return Color.clear
