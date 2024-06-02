@@ -41,7 +41,6 @@ struct CheckBoxView: View {
     @State var originy = 150.0
     @State var countImageHeight = 0
     let correctionValue = UIDevice.current.userInterfaceIdiom == .pad ? pow(((UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) * CGFloat(0.15) + 25), 1.92) / pow(10, 2) - 75.2 : pow(((UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(4) + 25), 1.9) / pow(10, 2) - 64.9
-    let correctionValue2 = UIScreen.main.bounds.height
     
     var body: some View {
         VStack(spacing: 0) {
