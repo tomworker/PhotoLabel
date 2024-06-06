@@ -38,8 +38,6 @@ struct CategorySelectorView: View {
     @State var mainScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadMainColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadMainColumnNumber)), spacing: 5), count: ConfigManager.iPadMainColumnNumber)
     @State var subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) / CGFloat(ConfigManager.subColumnNumber)), spacing: 5), count: ConfigManager.subColumnNumber)
     @State var subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadSubColumnNumber)), spacing: 5), count: ConfigManager.iPadSubColumnNumber)
-    @State var isTargeted = false
-    @State var isTargetedIndex = -1
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
@@ -166,7 +164,7 @@ struct CategorySelectorView: View {
                                         let idx = mainCategoryId.mainCategory.index(range.lowerBound, offsetBy: -1)
                                         Text(mainCategoryId.mainCategory[...idx])
                                             .frame(maxWidth: .infinity, minHeight: 50)
-                                            .background(mainCategoryId.id == targetMainCategoryIndex ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                            .background(mainCategoryId.id == targetMainCategoryIndex ? .cyan : .blue)
                                             .foregroundColor(.white)
                                     }
                                 }
@@ -203,7 +201,7 @@ struct CategorySelectorView: View {
                                                 let idx = subCategoryId.subCategory.index(range.lowerBound, offsetBy: -1)
                                                 Text(subCategoryId.subCategory[...idx] + "\n(\(subCategoryId.countStoredImages))")
                                                     .frame(maxWidth: .infinity, minHeight: 50)
-                                                    .background(subCategoryId.isTargeted ? LinearGradient(gradient: Gradient(colors: [.orange]), startPoint: .topLeading, endPoint: .bottomTrailing) : subCategoryId.id == targetSubCategoryIndex[1] ? LinearGradient(gradient: Gradient(colors: [.cyan]), startPoint: .topLeading, endPoint: .bottomTrailing) : LinearGradient(gradient: Gradient(colors: [.blue]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                                                    .background(subCategoryId.id == targetSubCategoryIndex[1] ? .cyan : .blue)
                                                     .foregroundColor(.white)
                                             }
                                         }
