@@ -113,7 +113,7 @@ struct ImageView: View {
                         }
                     if isShowMenuIcon == true {
                         if mainCategoryIds.count != 0 {
-                            Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
+                            Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" ? "" : mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n")[mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").startIndex, offsetBy: 1)...mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").endIndex, offsetBy: -2)])
                                 .foregroundColor(.white.opacity(0.5))
                                 .background(.black.opacity(0.5))
                         }
@@ -219,6 +219,12 @@ struct ImageView: View {
                                 let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo
                                 TextField("Image info", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
                                 Button("Edit", action: {
+                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.prefix(1) != "," {
+                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo
+                                    }
+                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.suffix(1) != "," {
+                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += ","
+                                    }
                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                 })
                                 Button("Clear", action: {
