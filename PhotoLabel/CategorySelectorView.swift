@@ -84,7 +84,7 @@ struct CategorySelectorView: View {
                             .padding(.trailing)
                         }
                         .fullScreenCover(isPresented: $showFinalReport) {
-                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
+                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
                         }
                     }
                 }

@@ -46,7 +46,8 @@ struct CheckBoxView: View {
         VStack(spacing: 0) {
             ZStack {
                 VStack(spacing: 0) {
-                    Text("CheckSheet")
+                    Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))
+                    //Text("CheckSheet")
                         .bold()
                 }
                 HStack(spacing: 0) {

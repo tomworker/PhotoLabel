@@ -10,6 +10,7 @@ import SwiftUI
 struct FinalReportView: View {
     @Binding var fileUrl: URL
     @Binding var showFinalReport: Bool
+    @Binding var plistCategoryName: String
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var downSizeImages: [[[UIImage]]]
     @State var targetMainCategoryIndex = -1
@@ -22,7 +23,8 @@ struct FinalReportView: View {
 
     var body: some View {
         ZStack {
-            Text("Final Report")
+            Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))
+            //Text("Final Report")
                 .bold()
             HStack {
                 Spacer()
