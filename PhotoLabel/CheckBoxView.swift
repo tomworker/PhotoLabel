@@ -28,6 +28,7 @@ struct CheckBoxView: View {
     @State var targetCheckInfoIndex = 0
     @State var targetImageFileIndex = 0
     @State var showImageView = false
+    @State var showImageView3 = false
     @State var showImageStocker = false
     @State var isEditCheckItem: [Bool] = Array(repeating: false, count: 3)
     @State var isEditCheckInfo: [Bool] = Array(repeating: false, count: ConfigManager.maxNumberOfSubCategory)
@@ -46,7 +47,7 @@ struct CheckBoxView: View {
         VStack(spacing: 0) {
             ZStack {
                 VStack(spacing: 0) {
-                    Text("CheckSheet")
+                    Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))
                         .bold()
                 }
                 HStack(spacing: 0) {
@@ -208,7 +209,11 @@ struct CheckBoxView: View {
                                                 }
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: _targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                            }
+                                            .fullScreenCover(isPresented: $showImageView3) {
+                                                VStack { } //dummy
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                             }
                                             .fullScreenCover(isPresented: $showImageStocker) {
                                                 ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)

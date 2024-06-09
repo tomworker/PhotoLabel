@@ -84,7 +84,7 @@ struct CategorySelectorView: View {
                             .padding(.trailing)
                         }
                         .fullScreenCover(isPresented: $showFinalReport) {
-                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
+                            FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
                         }
                     }
                 }
@@ -139,7 +139,11 @@ struct CategorySelectorView: View {
                         LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? mainScrollColumns2 : mainScrollColumns1, spacing: 5) {
                             ForEach(mainCategoryIds) { mainCategoryId in
                                 Button {
-                                    showSubCategory = true
+                                    if targetMainCategoryIndex == mainCategoryId.id {
+                                        showSubCategory.toggle()
+                                    } else {
+                                        showSubCategory = true
+                                    }
                                     targetMainCategoryIndex = mainCategoryId.id
                                     targetSubCategoryIndex[1] = -1
                                     if UIDevice.current.userInterfaceIdiom == .pad {
