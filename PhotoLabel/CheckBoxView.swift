@@ -23,8 +23,7 @@ struct CheckBoxView: View {
     @State var subCategory2: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
     @State var subCategory3: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
     @State var subCategory4: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: ConfigManager.maxNumberOfSubCategory)
-    @State var targetSubCategoryIndex = -1
-    @State var targetSubCategoryIndex2: [Int] = [-1, -1]
+    @State var targetSubCategoryIndex: [Int] = [-1, -1]
     @State var targetCheckInfoIndex = 0
     @State var targetImageFileIndex = 0
     @State var showImageView = false
@@ -158,7 +157,7 @@ struct CheckBoxView: View {
                                             }
                                             Spacer()
                                         }
-                                        .background(targetSubCategoryIndex == subCategoryId.id ? Color(.cyan) : (subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
+                                        .background(targetSubCategoryIndex[1] == subCategoryId.id ? Color(.cyan) : (subCategoryId.id) % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
                                         .frame(height: 25)
                                         ScrollView(.horizontal) {
                                             HStack(spacing: 0) {
@@ -177,8 +176,7 @@ struct CheckBoxView: View {
                                                     .onTapGesture { }
                                                     .onLongPressGesture {
                                                         showImageStocker = true
-                                                        targetSubCategoryIndex = subCategoryId.id
-                                                        targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
+                                                        targetSubCategoryIndex = [targetMainCategoryIndex, subCategoryId.id]
                                                     }
                                                 } else {
                                                     ForEach(subCategoryId.images.indices, id: \.self) { index in
@@ -193,7 +191,7 @@ struct CheckBoxView: View {
                                                                 //Above code goes well for some reason.
                                                                 .onTapGesture(count: 1) {
                                                                     showImageView = true
-                                                                    targetSubCategoryIndex = subCategoryId.id
+                                                                    targetSubCategoryIndex[1] = subCategoryId.id
                                                                     targetImageFileIndex = index
                                                                 }
                                                                 //Recovery code for onLongPressGesture problem
@@ -201,22 +199,21 @@ struct CheckBoxView: View {
                                                                 //Above code goes well for some reason.
                                                                 .onLongPressGesture {
                                                                     showImageStocker = true
-                                                                    targetSubCategoryIndex = subCategoryId.id
-                                                                    targetSubCategoryIndex2 = [targetMainCategoryIndex, targetSubCategoryIndex]
+                                                                    targetSubCategoryIndex = [targetMainCategoryIndex, subCategoryId.id]
                                                                 }
                                                         }
                                                     }
                                                 }
                                             }
                                             .fullScreenCover(isPresented: $showImageView) {
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                             }
                                             .fullScreenCover(isPresented: $showImageView3) {
                                                 VStack { } //dummy
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                             }
                                             .fullScreenCover(isPresented: $showImageStocker) {
-                                                ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex2, downSizeImages: $downSizeImages)
+                                                ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
                                             }
                                         }
                                         Spacer()
