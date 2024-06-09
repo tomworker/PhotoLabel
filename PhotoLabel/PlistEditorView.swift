@@ -19,6 +19,7 @@ struct PlistEditorView: View {
     @State var subCategoryStrings2: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
+    @State var imageInfos: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
     @State var mainCategorys: [MainCategory] = []
     @State var isRename = false
     @State var isCopy = false
@@ -146,6 +147,7 @@ struct PlistEditorView: View {
                             break
                         }
                         imageFiles[i][j][k] = mainCategorys[i].items[j].images[k].imageFile
+                        imageInfos[i][j][k] = mainCategorys[i].items[j].images[k].imageInfo
                     }
                 }
             }
@@ -231,7 +233,6 @@ struct PlistEditorView: View {
                                         }
                                     }
                                 }
-                                
                             }
                             Text(subFolderModes[item] == 1 ? "S" : "")
                                 .frame(width: 10)
@@ -246,7 +247,7 @@ struct PlistEditorView: View {
                 List {
                     Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
                         ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
-                            NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item], imageFiles: $imageFiles[item])) {
+                            NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item], imageFiles: $imageFiles[item], imageInfos: $imageInfos[item])) {
                                 Text(mainCategoryStrings[item])
                             }
                         }
@@ -280,6 +281,7 @@ struct PlistEditorView: View {
                 subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place2)
                 countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place2)
                 imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
+                imageInfos.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
                 if place1 < place2 {
                     mainCategoryStrings[place2] = mainCategoryStrings[place1]
                     subFolderModes[place2] = subFolderModes[place1]
@@ -304,6 +306,7 @@ struct PlistEditorView: View {
                 subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
                 countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
                 imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
+                imageInfos.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
             }
         }
     }
@@ -320,6 +323,7 @@ struct PlistEditorView: View {
             var tempSubCategoryStrings: [String] = []
             var tempCountStoredImages: [Int] = []
             var tempImageFiles: [[String]] = []
+            var tempImageInfos: [[String]] = []
             for i in mainCategoryStrings.indices {
                 if i == place1 {
                     tempMainCategoryString = mainCategoryStrings[place1]
@@ -327,6 +331,7 @@ struct PlistEditorView: View {
                     tempSubCategoryStrings = subCategoryStrings[place1]
                     tempCountStoredImages = countStoredImages[place1]
                     tempImageFiles = imageFiles[place1]
+                    tempImageInfos = imageInfos[place1]
                 }
                 if i == place2 {
                     mainCategoryStrings[place1] = mainCategoryStrings[place2]
@@ -341,6 +346,8 @@ struct PlistEditorView: View {
                     countStoredImages[place2] = tempCountStoredImages
                     imageFiles[place1] = imageFiles[place2]
                     imageFiles[place2] = tempImageFiles
+                    imageInfos[place1] = imageInfos[place2]
+                    imageInfos[place2] = tempImageInfos
                     break
                 }
             }
@@ -364,7 +371,7 @@ struct PlistEditorView: View {
                             tempImageFiles = []
                             for k in 0..<imageFiles[i][j].count {
                                 if imageFiles[i][j][k] != "" {
-                                    tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k]))
+                                    tempImageFiles.append(ImageFile(imageFile: imageFiles[i][j][k], imageInfo: imageInfos[i][j][k]))
                                 }
                             }
                             if subCategoryStrings2[i][j] == "" {

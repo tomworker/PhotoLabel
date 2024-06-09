@@ -13,6 +13,7 @@ struct PlistEditorSubView: View {
     @Binding var countStoredImages: [Int]
     @State var countStoredImagesString: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
     @Binding var imageFiles: [[String]]
+    @Binding var imageInfos: [[String]]
     @State var selectedIndex: [Int] = [-1, -1]
 
     var body: some View {
@@ -119,7 +120,10 @@ struct PlistEditorSubView: View {
             if subCategoryStrings2[ConfigManager.maxNumberOfSubCategory - 1] == "" {
                 subCategoryStrings2.insert("", at: place1)
                 countStoredImagesString.insert("0", at: place1)
+                subCategoryStrings.insert("", at: place1)
+                countStoredImages.insert(0, at: place1)
                 imageFiles.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
+                imageInfos.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
             }
         }
     }
@@ -134,12 +138,14 @@ struct PlistEditorSubView: View {
             var tempSubCategoryString2 = ""
             var tempCountStoredImagesString = "0"
             var tempImageFiles: [String] = []
+            var tempImageInfos: [String] = []
             for i in 0..<subCategoryStrings2.count {
                 if i == place1 {
                     tempSubCategoryString2 = subCategoryStrings2[place1]
                     tempCountStoredImagesString = countStoredImagesString[place1]
                     for j in 0..<imageFiles[place1].count {
                         tempImageFiles.append(imageFiles[place1][j])
+                        tempImageInfos.append(imageInfos[place1][j])
                     }
                 }
                 if i == place2 {
@@ -152,6 +158,8 @@ struct PlistEditorSubView: View {
                     for j in 0..<imageFiles[place2].count {
                         imageFiles[place1][j] = imageFiles[place2][j]
                         imageFiles[place2][j] = tempImageFiles[j]
+                        imageInfos[place1][j] = imageInfos[place2][j]
+                        imageInfos[place2][j] = tempImageInfos[j]
                     }
                 }
             }
