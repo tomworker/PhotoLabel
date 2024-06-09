@@ -17,6 +17,7 @@ struct FinalReportView: View {
     @State var targetSubCategoryIndex = -1
     @State var targetImageFileIndex = -1
     @State var showImageView = false
+    @State var showImageView3 = false
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
     var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
@@ -24,7 +25,6 @@ struct FinalReportView: View {
     var body: some View {
         ZStack {
             Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))
-            //Text("Final Report")
                 .bold()
             HStack {
                 Spacer()
@@ -80,14 +80,18 @@ struct FinalReportView: View {
                                         self.targetSubCategoryIndex = subCategoryIndex
                                         self.targetImageFileIndex = imageFileIndex
                                     }
-                                    .fullScreenCover(isPresented: $showImageView) {
-                                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, targetImageFileIndex: self._targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
-                                    }
                             }
                         }
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showImageView) {
+            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+        }
+        .fullScreenCover(isPresented: $showImageView3) {
+            VStack { } //dummmy
+            ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetMainCategoryIndex].items[targetSubCategoryIndex].images, mainCategoryIndex: targetMainCategoryIndex, subCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
         }
     }
 }

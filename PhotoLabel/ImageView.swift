@@ -12,10 +12,11 @@ import VisionKit
 struct ImageView: View {
     @Binding var fileUrl: URL
     @Binding var showImageView: Bool
+    @Binding var showImageView3: Bool
     let imageFile: String
     let mainCategoryIndex: Int
-    let subCategoryIndex: Int
-    let imageFileIndex: Int
+    @Binding var subCategoryIndex: Int
+    @Binding var targetImageFileIndex: Int
     @Binding var downSizeImages: [[[UIImage]]]
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var isDetectQRMode: Bool
@@ -33,6 +34,10 @@ struct ImageView: View {
     @State var isEditImageInfo = false
     @State var recognizedTexts: [String] = []
     @StateObject var qrCapture = QRCapture()
+    let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
+    //@GestureState var magnifyBy = 1.0
+    //@State var magnifyBy2 = 1.0
+    //@State var deltaM = 0.0
 
     var body: some View {
         let dragGesture = DragGesture()
@@ -60,6 +65,25 @@ struct ImageView: View {
                 self.endLocation.x = self.location.x
                 self.endLocation.y = self.location.y
             }
+        /*
+        let magnifyGesture = MagnifyGesture()
+            .updating($magnifyBy) { value, gestureState, transaction in
+                gestureState = value.magnification
+                if magnifyBy == 1.0 {
+                    deltaM = magnifyBy2
+                } else {
+                    scale = value.magnification * deltaM
+                }
+            }
+            .onEnded { value in
+                if value.magnification > 1.0 {
+                    scale = value.magnification * deltaM
+                } else {
+                    scale = 1.0
+                    location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
+                }
+            }
+         */
         let magnificationGesture = MagnificationGesture()
             .onChanged { value in
                 let delta = value / self.lastValue
@@ -108,15 +132,16 @@ struct ImageView: View {
                         .position(location)
                         .gesture(self.scale != 1 ? dragGesture : nil)
                         .gesture(magnificationGesture)
+                        //.gesture(magnifyGesture)
                         .onTapGesture(count: 2) {
                             self.scale = self.scale * 2
                         }
                     if isShowMenuIcon == true {
                         if mainCategoryIds.count != 0, isEditImageInfo == false {
-                            if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.count <= 2 {
+                            if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.count <= 2 {
                                  //none
                             } else {
-                                Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n")[mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").startIndex, offsetBy: 1)...mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").endIndex, offsetBy: -2)])
+                                Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n")[mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").startIndex, offsetBy: 1)...mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").index(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: ",", with: "\n").endIndex, offsetBy: -2)])
                                     .foregroundColor(.white.opacity(0.5))
                                     .background(.black.opacity(0.5))
                             }
@@ -129,15 +154,15 @@ struct ImageView: View {
                                             autoreleasepool {
                                                 qrCapture.isRecognizedQRs[index].toggle()
                                                 if qrCapture.isRecognizedQRs[index] == true {
-                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + features[index].messageString! + ","
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo == "" {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = "," + features[index].messageString! + ","
                                                     } else {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += features[index].messageString! + ","
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo += features[index].messageString! + ","
                                                     }
                                                 } else {
-                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: "," + features[index].messageString! + ",", with: ",")
-                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "," {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = ""
+                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: "," + features[index].messageString! + ",", with: ",")
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo == "," {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = ""
                                                     }
                                                 }
                                                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
@@ -170,19 +195,19 @@ struct ImageView: View {
                                             autoreleasepool {
                                                 qrCapture.isRecognizedTexts[index].toggle()
                                                 if qrCapture.isRecognizedTexts[index] == true {
-                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + recognizedTexts[index] + ","
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo == "" {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = "," + recognizedTexts[index] + ","
                                                     } else {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += recognizedTexts[index] + ","
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo += recognizedTexts[index] + ","
                                                     }
                                                 } else {
-                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.replacingOccurrences(of: "," + recognizedTexts[index] + ",", with: ",")
-                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "," {
-                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = ""
+                                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.replacingOccurrences(of: "," + recognizedTexts[index] + ",", with: ",")
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo == "," {
+                                                        mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = ""
                                                     }
                                                 }
                                                 for i in recognizedTexts.indices {
-                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
+                                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
                                                         qrCapture.isRecognizedTexts[i] = true
                                                     } else {
                                                         qrCapture.isRecognizedTexts[i] = false
@@ -220,27 +245,27 @@ struct ImageView: View {
                                     .padding(.leading)
                             }
                             .alert("Image Information", isPresented: $isEditImageInfo, actions: {
-                                let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo
-                                TextField("Image info", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo)
+                                let initialValue = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo
+                                TextField("Image info", text: $mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo)
                                 Button("Edit", action: {
-                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo == "" {
+                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo == "" {
                                         //none
                                     } else {
-                                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.prefix(1) != "," {
-                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = "," + mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo
+                                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.prefix(1) != "," {
+                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = "," + mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo
                                         }
-                                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.suffix(1) != "," {
-                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo += ","
+                                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.suffix(1) != "," {
+                                            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo += ","
                                         }
                                     }
                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                 })
                                 Button("Clear", action: {
-                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = ""
+                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = ""
                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                 })
                                 Button("Cancel", role: .cancel, action: {
-                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo = initialValue
+                                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo = initialValue
                                 })
                             }, message: {
                                 
@@ -282,8 +307,8 @@ struct ImageView: View {
                                     let uiimage2 = rotateImage(uiimage, radians: CGFloat.pi / 2, isClockwise: true)
                                     do {
                                         try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
-                                        if imageFileIndex != -1 {
-                                            downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                        if targetImageFileIndex != -1 {
+                                            downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
                                         }
                                         ZipManager.saveZip(fileUrl: fileUrl)
                                         showImageView = false
@@ -304,8 +329,8 @@ struct ImageView: View {
                                     let uiimage2 = rotateImage(uiimage, radians: -CGFloat.pi / 2, isClockwise: false)
                                     do {
                                         try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
-                                        if imageFileIndex != -1 {
-                                            downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                        if targetImageFileIndex != -1 {
+                                            downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
                                         }
                                         ZipManager.saveZip(fileUrl: fileUrl)
                                         showImageView = false
@@ -324,6 +349,7 @@ struct ImageView: View {
                         Spacer()
                         Button {
                             showImageView = false
+                            showImageView3 = false
                         } label: {
                             Image(systemName: "xmark")
                                 .frame(width: 30, height: 30)
@@ -335,6 +361,72 @@ struct ImageView: View {
                     }
                     .background(.black.opacity(0.3))
                     Spacer()
+                    if subCategoryIndex != -1 {
+                        VStack {
+                            ZStack {
+                                if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
+                                    let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)
+                                    Text(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory[...idx] + " (\(String(targetImageFileIndex + 1))/\(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages))")
+                                        .foregroundColor(.white)
+                                }
+                                HStack {
+                                    if subCategoryIndex > 0 {
+                                        Button {
+                                            let startIndex = subCategoryIndex - 1
+                                            for i in stride(from: startIndex, through: 0, by: -1) {
+                                                if mainCategoryIds[mainCategoryIndex].items[i].countStoredImages > 0 {
+                                                    subCategoryIndex = i
+                                                    targetImageFileIndex = 0
+                                                    showImageView.toggle()
+                                                    showImageView3 = !showImageView
+                                                    break
+                                                }
+                                            }
+                                        } label: {
+                                            HStack {
+                                                Text("Prev")
+                                                Image(systemName: "folder")
+                                            }
+                                            .frame(width: 80, height: 30)
+                                            .foregroundColor(.white)
+                                            .background(.gray)
+                                            .cornerRadius(10)
+                                            .padding(.leading)
+                                        }
+                                    }
+                                    Spacer()
+                                    if subCategoryIndex < mainCategoryIds[mainCategoryIndex].items.count - 1 {
+                                        Button {
+                                            let startIndex = subCategoryIndex + 1
+                                            for i in startIndex..<mainCategoryIds[mainCategoryIndex].items.count {
+                                                if mainCategoryIds[mainCategoryIndex].items[i].countStoredImages > 0 {
+                                                    subCategoryIndex = i
+                                                    targetImageFileIndex = 0
+                                                    showImageView.toggle()
+                                                    showImageView3 = !showImageView
+                                                    break
+                                                }
+                                            }
+                                        } label: {
+                                            HStack {
+                                                Text("Next")
+                                                Image(systemName: "folder")
+                                            }
+                                            .frame(width: 80, height: 30)
+                                            .foregroundColor(.white)
+                                            .background(.gray)
+                                            .cornerRadius(10)
+                                            .padding(.trailing)
+                                        }
+                                    }
+                                }
+                            }
+                            VStack {
+                            }
+                            .frame(height: 20)
+                        }
+                        .background(.black.opacity(0.3))
+                    }
                 }
             }
         }
@@ -411,7 +503,7 @@ struct ImageView: View {
                 if let features = features, features.count > 0 {
                     qrCapture.isRecognizedQRs = Array(repeating: false, count: features.count)
                     for i in features.indices {
-                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + (features as! [CIQRCodeFeature])[i].messageString! + ",") != nil {
+                        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.range(of: "," + (features as! [CIQRCodeFeature])[i].messageString! + ",") != nil {
                             qrCapture.isRecognizedQRs[i] = true
                         } else {
                             qrCapture.isRecognizedQRs[i] = false
@@ -433,7 +525,7 @@ struct ImageView: View {
                 }
                 recognizedTexts = observations.compactMap{ $0.topCandidates(1).first?.string }
                 for i in recognizedTexts.indices {
-                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
+                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[targetImageFileIndex].imageInfo.range(of: "," + recognizedTexts[i] + ",") != nil {
                         qrCapture.isRecognizedTexts[i] = true
                     } else {
                         qrCapture.isRecognizedTexts[i] = false
