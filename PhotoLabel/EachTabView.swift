@@ -16,6 +16,7 @@ struct EachTabView: View {
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
+    let tabSubCategoryIndex: Int
     @Binding var downSizeImages: [[[UIImage]]]
     @State var subCategory = ""
     @State var subCategory2 = ""
@@ -108,7 +109,7 @@ struct EachTabView: View {
             ScrollView {
                 ForEach(mainCategoryIds.indices, id: \.self) { mainCategoryIndex in
                     ForEach(mainCategoryIds[mainCategoryIndex].items.indices, id: \.self) { subCategoryIndex in
-                        if mainCategoryIndex == targetSubCategoryIndex[0] && subCategoryIndex == targetSubCategoryIndex[1] {
+                        if mainCategoryIndex == targetSubCategoryIndex[0] && subCategoryIndex == tabSubCategoryIndex {
                             VStack(spacing:5) {
                                 VStack {
                                     Text(plistCategoryName.replacingOccurrences(of: "_", with: " / "))

@@ -35,7 +35,7 @@ struct ImageStockerTabView: View {
     var body: some View {
         TabView(selection: $targetSubCategoryIndex[1]) {
             ForEach(mainCategoryIds[targetSubCategoryIndex[0]].items.indices, id: \.self) {subCategoryIndex in
-                EachTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages).tag(subCategoryIndex)
+                EachTabView(photoCapture: photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, tabSubCategoryIndex: subCategoryIndex, downSizeImages: $downSizeImages).tag(subCategoryIndex)
             }
         }
         .tabViewStyle(PageTabViewStyle())

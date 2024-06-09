@@ -38,7 +38,7 @@ struct ImageTabView: View {
     var body: some View {
         TabView(selection: $targetImageFileIndex) {
             ForEach(images.indices, id: \.self) { index in
-                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, imageFile: tempDirectoryUrl.path + "/" + images[targetImageFileIndex].imageFile, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: $subCategoryIndex, targetImageFileIndex: $targetImageFileIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds, isDetectQRMode: $isDetectQRMode, isShowMenuIcon: $isShowMenuIcon, isDetectTextMode: $isDetectTextMode).tag(index)
+                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, imageFile: tempDirectoryUrl.path + "/" + images[index].imageFile, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: $subCategoryIndex, targetImageFileIndex: $targetImageFileIndex, downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds, isDetectQRMode: $isDetectQRMode, isShowMenuIcon: $isShowMenuIcon, isDetectTextMode: $isDetectTextMode).tag(index)
             }
         }
         .tabViewStyle(PageTabViewStyle())
