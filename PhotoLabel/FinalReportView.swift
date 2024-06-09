@@ -66,20 +66,28 @@ struct FinalReportView: View {
                     LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? columns2 : columns1) {
                         ForEach(mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.indices, id: \.self) { imageFileIndex in
                             if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageFile) {
-                                Image(uiImage: downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex])
-                                    .resizable()
-                                    .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
-                                    .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
-                                    .cornerRadius(10)
-                                //Recovery code for onTapGesture problem
-                                    .onChange(of: showImageView) { }
-                                //Above code goes well for some reason.
-                                    .onTapGesture(count: 1) {
-                                        showImageView = true
-                                        self.targetMainCategoryIndex = mainCategoryIndex
-                                        self.targetSubCategoryIndex = subCategoryIndex
-                                        self.targetImageFileIndex = imageFileIndex
+                                ZStack {
+                                    Image(uiImage: downSizeImages[mainCategoryIndex][subCategoryIndex][imageFileIndex])
+                                        .resizable()
+                                        .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
+                                        .frame(width: UIDevice.current.userInterfaceIdiom == .pad ? uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber) * 0.75 : uiimage.size.width > uiimage.size.height ? (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) : (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber) * 0.75)
+                                        .cornerRadius(10)
+                                    //Recovery code for onTapGesture problem
+                                        .onChange(of: showImageView) { }
+                                    //Above code goes well for some reason.
+                                        .onTapGesture(count: 1) {
+                                            showImageView = true
+                                            self.targetMainCategoryIndex = mainCategoryIndex
+                                            self.targetSubCategoryIndex = subCategoryIndex
+                                            self.targetImageFileIndex = imageFileIndex
+                                        }
+                                    if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo != "" {
+                                        Text("with image info")
+                                            .font(.caption2)
+                                            .foregroundColor(.white.opacity(0.5))
+                                            .background(.black.opacity(0.5))
                                     }
+                                }
                             }
                         }
                     }
