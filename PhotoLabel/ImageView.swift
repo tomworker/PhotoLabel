@@ -30,11 +30,12 @@ struct ImageView: View {
     @State var rightEdge: CGFloat = UIScreen.main.bounds.width
     @State var topEdge: CGFloat = 0
     @State var bottomEdge: CGFloat = UIScreen.main.bounds.height
-    @State var aspectRatio: CGFloat = 1.0
+    @State var aspectRatio: CGFloat = 4 / 3
     @State var isEditImageInfo = false
     @State var recognizedTexts: [String] = []
     @StateObject var qrCapture = QRCapture()
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
+    @State var croppedUiimage: UIImage? = nil
     //@GestureState var magnifyBy = 1.0
     //@State var magnifyBy2 = 1.0
     //@State var deltaM = 0.0
@@ -64,6 +65,10 @@ struct ImageView: View {
                 }
                 self.endLocation.x = self.location.x
                 self.endLocation.y = self.location.y
+                if let uiimage = UIImage(contentsOfFile: imageFile) {
+                    let rect = CGRect(x: uiimage.size.height * (1 - (1 / self.scale)) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * (1 - (1 / self.scale)) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: uiimage.size.height / self.scale, height: uiimage.size.width / self.scale)
+                    self.croppedUiimage = uiimage.crop(to: rect)
+                }
             }
         /*
         let magnifyGesture = MagnifyGesture()
@@ -118,6 +123,16 @@ struct ImageView: View {
                     self.endLocation.x = self.location.x
                     self.endLocation.y = self.location.y
                     self.lastValue = 1.0
+                }
+                if self.scale != 1.0 {
+                    if let uiimage = UIImage(contentsOfFile: imageFile) {
+                        let rect = CGRect(x: uiimage.size.height * (1 - (1 / self.scale)) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * (1 - (1 / self.scale)) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: uiimage.size.height / self.scale, height: uiimage.size.width / self.scale)
+                        self.croppedUiimage = uiimage.crop(to: rect)
+                    }
+                } else {
+                    if let uiimage = UIImage(contentsOfFile: imageFile) {
+                        self.croppedUiimage = uiimage
+                    }
                 }
             }
         ZStack {
@@ -186,7 +201,7 @@ struct ImageView: View {
                             }
                         }
                         if isDetectTextMode == true {
-                            let recognizedTexts = recognizeTextInImage(uiimage)
+                            let recognizedTexts = recognizeTextInImage((scale == 1.0 ? uiimage : croppedUiimage) ?? uiimage)
                             ScrollView {
                                 VStack(spacing: 0) {
                                     Spacer(minLength: 80)
@@ -231,8 +246,8 @@ struct ImageView: View {
                 }
             }
             if isShowMenuIcon == true {
-                VStack {
-                    HStack {
+                VStack(spacing: 0) {
+                    HStack(spacing: 0) {
                         if mainCategoryIds.count != 0 {
                             Button {
                                 isEditImageInfo = true
@@ -359,6 +374,11 @@ struct ImageView: View {
                                 .padding(.trailing)
                         }
                     }
+                    .background(.black.opacity(0.3))
+                    HStack(spacing: 0) {
+                        Spacer()
+                    }
+                    .frame(height: 20)
                     .background(.black.opacity(0.3))
                     Spacer()
                     if subCategoryIndex != -1 {
@@ -520,7 +540,7 @@ struct ImageView: View {
             guard let cgImage = image.cgImage else { return [] }
             let request = VNRecognizeTextRequest { (request, error) in
                 guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
-                if qrCapture.isRecognizedTexts.count == 0 {
+                if qrCapture.isRecognizedTexts.count != observations.count {
                     qrCapture.isRecognizedTexts = Array(repeating: false, count: observations.count)
                 }
                 recognizedTexts = observations.compactMap{ $0.topCandidates(1).first?.string }
@@ -549,4 +569,11 @@ struct ImageView: View {
 class QRCapture: NSObject, ObservableObject {
     var isRecognizedQRs: [Bool] = []
     var isRecognizedTexts: [Bool] = []
+}
+extension UIImage {
+    func crop(to rect: CGRect) -> UIImage? {
+        let scaledRect = CGRect(x: rect.origin.x * self.scale, y: rect.origin.y * self.scale, width: rect.size.width * self.scale, height: rect.size.height * self.scale)
+        guard let cgImage = self.cgImage?.cropping(to: scaledRect) else { return nil }
+        return UIImage(cgImage: cgImage, scale: self.scale, orientation: self.imageOrientation)
+    }
 }
