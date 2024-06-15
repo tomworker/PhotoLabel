@@ -220,9 +220,7 @@ struct ImageView: View {
                                             .background(qrCapture.isRecognizedQRs[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
                                             .foregroundColor(.black)
                                     }
-                                    .position(x: uiimage.imageOrientation == .right ? CGFloat((features[index].bounds.minY + features[index].bounds.width / 2) * UIScreen.main.bounds.width / uiimage.size.width) : CGFloat((features[index].bounds.minX + (features[index].bounds.width / 2)) * UIScreen.main.bounds.width / uiimage.size.width), y: uiimage.imageOrientation == .right ? CGFloat((features[index].bounds.minX + features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width + (UIScreen.main.bounds.height - uiimage.size.height * UIScreen.main.bounds.width / uiimage.size.width) / 2 : CGFloat(UIScreen.main.bounds.height - (features[index].bounds.minY + (features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width - ((UIScreen.main.bounds.height / 2) - (uiimage.size.height / 2) * UIScreen.main.bounds.width / uiimage.size.width)))
-                                    //.position(x: CGFloat((features[index].bounds.minY + features[index].bounds.width / 2) * UIScreen.main.bounds.width / uiimage.size.width), y: CGFloat((features[index].bounds.minX + features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width + (UIScreen.main.bounds.height - uiimage.size.height * UIScreen.main.bounds.width / uiimage.size.width) / 2)
-                                    //.position(x: CGFloat((features[index].bounds.minX + (features[index].bounds.width / 2)) * UIScreen.main.bounds.width / uiimage.size.width), y: CGFloat(UIScreen.main.bounds.height - (features[index].bounds.minY + (features[index].bounds.height / 2)) * UIScreen.main.bounds.width / uiimage.size.width - ((UIScreen.main.bounds.height / 2) - (uiimage.size.height / 2) * UIScreen.main.bounds.width / uiimage.size.width)))
+                                    .position(x: detectQRCodePosition(axis: "x", uiimage: uiimage, features: features, index: index), y: detectQRCodePosition(axis: "y", uiimage: uiimage, features: features, index: index))
                                 }
                             }
                         }
@@ -559,6 +557,45 @@ struct ImageView: View {
                 return features
             }
             return nil
+        }
+    }
+    private func detectQRCodePosition(axis: String, uiimage: UIImage, features: [CIQRCodeFeature], index: Int) -> CGFloat {
+        autoreleasepool {
+            if axis == "x" {
+                if uiimage.imageOrientation == .right {
+                    let position = (features[index].bounds.minY + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width)
+                    return position
+                } else if uiimage.imageOrientation == .up {
+                    let position = (features[index].bounds.minX + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width)
+                    return position
+                } else if uiimage.imageOrientation == .left {
+                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minY + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width))
+                    return position
+                } else if uiimage.imageOrientation == .down {
+                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minX + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width))
+                    return position
+                } else {
+                    return 0.0
+                }
+            } else if axis == "y" {
+                if uiimage.imageOrientation == .right {
+                    let position = UIScreen.main.bounds.height * 0.5 + ((features[index].bounds.minX + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    return position
+                } else if uiimage.imageOrientation == .up {
+                    let position = UIScreen.main.bounds.height * 0.5 - ((features[index].bounds.minY + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    return position
+                } else if uiimage.imageOrientation == .left {
+                    let position = UIScreen.main.bounds.height * 0.5 - ((features[index].bounds.minX + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    return position
+                } else if uiimage.imageOrientation == .down {
+                    let position = UIScreen.main.bounds.height * 0.5 + ((features[index].bounds.minY + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    return position
+                } else {
+                    return 0.0
+                }
+            } else {
+                return 0.0
+            }
         }
     }
     private func recognizeTextInImage(_ image: UIImage) -> [String] {
