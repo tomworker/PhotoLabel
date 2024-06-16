@@ -188,7 +188,7 @@ struct ImageView: View {
                             }
                         }
                         if isDetectQRMode == true {
-                            if let features = detectQRCode(uiimage) as? [CIQRCodeFeature], !features.isEmpty {
+                            if let features = detectQRCode((scale == 1.0 ? uiimage : croppedUiimage) ?? uiimage) as? [CIQRCodeFeature], !features.isEmpty {
                                 ForEach(features.indices, id: \.self) { index in
                                     ZStack {
                                         Button {
@@ -210,7 +210,7 @@ struct ImageView: View {
                                             }
                                         } label: {
                                             Text("")
-                                                .frame(width: features[index].bounds.width * UIScreen.main.bounds.width / uiimage.size.width, height: features[index].bounds.height * UIScreen.main.bounds.width / uiimage.size.width)
+                                                .frame(width: scale * features[index].bounds.width * (UIScreen.main.bounds.width / uiimage.size.width), height: scale * features[index].bounds.height * (UIScreen.main.bounds.width / uiimage.size.width))
                                                 .border(qrCapture.isRecognizedQRs[index] ? .blue :.green, width: 1)
                                                 .foregroundColor(.black)
                                                 .background(qrCapture.isRecognizedQRs[index] ? .blue.opacity(0.1) : .green.opacity(0.1))
@@ -220,7 +220,7 @@ struct ImageView: View {
                                             .background(qrCapture.isRecognizedQRs[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
                                             .foregroundColor(.black)
                                     }
-                                    .position(x: detectQRCodePosition(axis: "x", uiimage: uiimage, features: features, index: index), y: detectQRCodePosition(axis: "y", uiimage: uiimage, features: features, index: index))
+                                    .position(x: detectQRCodePosition(axis: "x", uiimage: uiimage, croppedUiimage: (scale == 1.0 ? uiimage : croppedUiimage) ?? uiimage, features: features, index: index), y: detectQRCodePosition(axis: "y", uiimage: uiimage, croppedUiimage: (scale == 1.0 ? uiimage : croppedUiimage) ?? uiimage, features: features, index: index))
                                 }
                             }
                         }
@@ -311,8 +311,6 @@ struct ImageView: View {
                             })
                             Spacer()
                             Button {
-                                scale = 1
-                                location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
                                 isDetectQRMode.toggle()
                             } label: {
                                 Image(systemName: "qrcode.viewfinder")
@@ -559,36 +557,42 @@ struct ImageView: View {
             return nil
         }
     }
-    private func detectQRCodePosition(axis: String, uiimage: UIImage, features: [CIQRCodeFeature], index: Int) -> CGFloat {
+    private func detectQRCodePosition(axis: String, uiimage: UIImage, croppedUiimage: UIImage, features: [CIQRCodeFeature], index: Int) -> CGFloat {
         autoreleasepool {
             if axis == "x" {
                 if uiimage.imageOrientation == .right {
-                    let position = (features[index].bounds.minY + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width)
+                    let position = (features[index].bounds.minY + features[index].bounds.width * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width)
                     return position
                 } else if uiimage.imageOrientation == .up {
-                    let position = (features[index].bounds.minX + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width)
+                    let position = (features[index].bounds.minX + features[index].bounds.width * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width)
                     return position
                 } else if uiimage.imageOrientation == .left {
-                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minY + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width))
+                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minY + features[index].bounds.width * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width))
                     return position
                 } else if uiimage.imageOrientation == .down {
-                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minX + features[index].bounds.width * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width))
+                    let position = UIScreen.main.bounds.width - ((features[index].bounds.minX + features[index].bounds.width * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width))
                     return position
                 } else {
                     return 0.0
                 }
             } else if axis == "y" {
+                var offset = 0.0
+                if (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * scale < UIScreen.main.bounds.width * aspectRatio {
+                    offset = endLocation.y - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * scale * 0.5
+                } else {
+                    offset = (endLocation.y - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * scale * 0.5 < UIScreen.main.bounds.height * 0.5 - UIScreen.main.bounds.width * aspectRatio * 0.5) ? (UIScreen.main.bounds.height - UIScreen.main.bounds.width * aspectRatio) * 0.5 : endLocation.y - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * scale * 0.5
+                }
                 if uiimage.imageOrientation == .right {
-                    let position = UIScreen.main.bounds.height * 0.5 + ((features[index].bounds.minX + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    let position = (features[index].bounds.minX + features[index].bounds.height * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width) + offset
                     return position
                 } else if uiimage.imageOrientation == .up {
-                    let position = UIScreen.main.bounds.height * 0.5 - ((features[index].bounds.minY + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    let position = (croppedUiimage.size.height - (features[index].bounds.minY + features[index].bounds.height * 0.5)) * scale * (UIScreen.main.bounds.width / uiimage.size.width) + offset
                     return position
                 } else if uiimage.imageOrientation == .left {
-                    let position = UIScreen.main.bounds.height * 0.5 - ((features[index].bounds.minX + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    let position = (croppedUiimage.size.height - (features[index].bounds.minX + features[index].bounds.height * 0.5)) * scale * (UIScreen.main.bounds.width / uiimage.size.width) + offset
                     return position
                 } else if uiimage.imageOrientation == .down {
-                    let position = UIScreen.main.bounds.height * 0.5 + ((features[index].bounds.minY + features[index].bounds.height * 0.5) * (UIScreen.main.bounds.width / uiimage.size.width) - uiimage.size.height * (UIScreen.main.bounds.width / uiimage.size.width) * 0.5)
+                    let position = (features[index].bounds.minY + features[index].bounds.height * 0.5) * scale * (UIScreen.main.bounds.width / uiimage.size.width) + offset
                     return position
                 } else {
                     return 0.0
