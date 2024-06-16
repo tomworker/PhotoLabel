@@ -30,9 +30,10 @@ struct EachTabView: View {
     @State var isTargeted3 = false
     @State var targetImageFile = ""
     @State var targetImageFileIndex = -1
-    @State var showImageView = false
     @State var showImageView2 = false
     @State var showImageView3 = false
+    @State var showImageView4 = false
+    @State var showImageView5 = false
     @State var isDeleteMode = false
     @State var isWorkSpaceMode = false
     @State var isDuplicateMode = false
@@ -67,6 +68,13 @@ struct EachTabView: View {
                             .cornerRadius(10)
                             .padding(.leading)
                     }
+                    .fullScreenCover(isPresented: $showImageView2) {
+                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetSubCategoryIndex[0]].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetSubCategoryIndex[0], subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                    }
+                    .fullScreenCover(isPresented: $showImageView3) {
+                        VStack { } //dummy
+                        ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetSubCategoryIndex[0]].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetSubCategoryIndex[0], subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
+                    }
                     Button {
                         showPhotoLibrary2.toggle()
                     } label: {
@@ -75,6 +83,12 @@ struct EachTabView: View {
                             .background(LinearGradient(gradient: Gradient(colors: [.brown]), startPoint: .topLeading, endPoint: .bottomTrailing))
                             .foregroundColor(.white)
                             .cornerRadius(10)
+                    }
+                    .fullScreenCover(isPresented: $showImageView4) {
+                        ImageView(fileUrl: $fileUrl, showImageView: $showImageView4, showImageView3: $showImageView3, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: .constant(-1), targetImageFileIndex: .constant(-1), downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true), isDetectTextMode: .constant(false))
+                    }
+                    .fullScreenCover(isPresented: $showImageView5) {
+                        ImageView(fileUrl: $fileUrl, showImageView: $showImageView5, showImageView3: $showImageView3, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: .constant(-1), targetImageFileIndex: .constant(-1), downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true), isDetectTextMode: .constant(false))
                     }
                     Spacer()
                     Toggle(isOn: $isDeleteMode) {
@@ -229,13 +243,6 @@ struct EachTabView: View {
                                                 self.isTargeted1 = true
                                                 self.isTargetedIndex1 = imageFileIndex
                                             }
-                                            .fullScreenCover(isPresented: $showImageView2) {
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetSubCategoryIndex[0]].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetSubCategoryIndex[0], subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
-                                            }
-                                            .fullScreenCover(isPresented: $showImageView3) {
-                                                VStack { } //dummy
-                                                ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView2, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetSubCategoryIndex[0]].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetSubCategoryIndex[0], subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
-                                            }
                                         }
                                     }
                                     ZStack{
@@ -342,16 +349,16 @@ struct EachTabView: View {
                                             .onTapGesture(count: 2) {
                                                 CategoryManager.moveItemFromLastToFirst(imageKey: duplicateSpaceImageFileIndex, duplicateSpace: &duplicateSpace)
                                             }
+                                            //Recovery code for onTapGesture problem
+                                            .onChange(of: showImageView4) { }
+                                            //Above code goes well for some reason.
                                             .onTapGesture(count: 1) {
-                                                showImageView = true
+                                                showImageView4 = true
                                                 if duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 {
                                                     self.targetImageFile = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
                                                 } else {
                                                     self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
                                                 }
-                                            }
-                                            .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: .constant(-1), targetImageFileIndex: .constant(-1), downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true), isDetectTextMode: .constant(false))
                                             }
                                         }
                                     }
@@ -411,14 +418,11 @@ struct EachTabView: View {
                                                 CategoryManager.moveItemFromLastToFirst(imageKey: workSpaceImageFileIndex, workSpace: &workSpace)
                                             }
                                             //Recovery code for onTapGesture problem
-                                            .onChange(of: showImageView) { }
+                                            .onChange(of: showImageView5) { }
                                             //Above code goes well for some reason.
                                             .onTapGesture(count: 1) {
-                                                showImageView = true
+                                                showImageView5 = true
                                                 targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
-                                            }
-                                            .fullScreenCover(isPresented: $showImageView) {
-                                                ImageView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, imageFile: targetImageFile, mainCategoryIndex: -1, subCategoryIndex: .constant(-1), targetImageFileIndex: .constant(-1), downSizeImages: .constant([]), mainCategoryIds: .constant([]), isDetectQRMode: .constant(false), isShowMenuIcon: .constant(true), isDetectTextMode: .constant(false))
                                             }
                                         }
                                     }
