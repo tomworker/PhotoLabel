@@ -237,7 +237,16 @@ struct ContentView: View {
                             Button {
                                 loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                             } label: {
-                                Text(documentDirectoryFiles[item])
+                                if documentDirectoryFiles[item].range(of: "InOutMgr") != nil {
+                                    if getIsToday(target: documentDirectoryFiles[item]) == true {
+                                        Text(documentDirectoryFiles[item])
+                                    } else {
+                                        Text(documentDirectoryFiles[item])
+                                            .foregroundColor(.red)
+                                    }
+                                } else {
+                                    Text(documentDirectoryFiles[item])
+                                }
                             }
                             .onChange(of: showPlistEditor[item]) {
                                 showPlistListEdit()
@@ -283,6 +292,16 @@ struct ContentView: View {
             }
             .listStyle(.sidebar)
             Spacer()
+        }
+    }
+    private func getIsToday(target: String) -> Bool {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyMMdd"
+        let strDate = dateFormatter.string(from: Date())
+        if target.range(of: strDate) != nil {
+            return true
+        } else {
+            return false
         }
     }
     private func showPlistList() {
