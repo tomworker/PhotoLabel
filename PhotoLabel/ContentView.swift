@@ -31,6 +31,8 @@ struct ContentView: View {
     @State var plistName = ""
     @State var targetRenameFile = ""
     @State var afterRenameFile = ""
+    @State var isPresentedProgressView = false
+    @State var targetItem = 0
     
     var body: some View {
         Button {
@@ -51,9 +53,9 @@ struct ContentView: View {
                                 }
                             }
                         }
-                            .frame(width: 99, height: 99)
-                            .background(.black)
-                            .cornerRadius(20)
+                        .frame(width: 99, height: 99)
+                        .background(.black)
+                        .cornerRadius(20)
                         Image(systemName: "camera").font(.system(size: 50))
                             .frame(width: 100, height: 79)
                             .foregroundColor(.white)
@@ -234,57 +236,70 @@ struct ContentView: View {
                     ForEach(documentDirectoryFiles.indices, id:\.self) { item in
                         if documentDirectoryFiles[item].suffix(6) == ".plist" {
                             let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
-                            Button {
-                                loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
-                            } label: {
-                                if documentDirectoryFiles[item].range(of: "InOutMgr") != nil {
-                                    if getIsToday(target: documentDirectoryFiles[item]) == true {
-                                        Text(documentDirectoryFiles[item])
+                            ZStack {
+                                Button {
+                                    photoCapture.interestTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                                        if showCategorySelector[item] == false {
+                                            isPresentedProgressView = true
+                                            targetItem = item
+                                        }
+                                    }
+                                    DispatchQueue.global(qos: .background).async {
+                                        loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
+                                    }
+                                } label: {
+                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil {
+                                        if getIsToday(target: documentDirectoryFiles[item]) == true {
+                                            Text(documentDirectoryFiles[item])
+                                        } else {
+                                            Text(documentDirectoryFiles[item])
+                                                .foregroundColor(.red)
+                                        }
                                     } else {
                                         Text(documentDirectoryFiles[item])
-                                            .foregroundColor(.red)
                                     }
-                                } else {
-                                    Text(documentDirectoryFiles[item])
                                 }
-                            }
-                            .onChange(of: showPlistEditor[item]) {
-                                showPlistListEdit()
-                            }
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    isRemove[item] = true;
-                                } label : {
-                                    Label("Remove", systemImage: "trash")
+                                .onChange(of: showPlistEditor[item]) {
+                                    showPlistListEdit()
                                 }
-                                Button {
-                                    showPlistEditor[item] = true
-                                    plistName = documentDirectoryFiles[item]
-                                    plistName = plistName.replacingOccurrences(of: ".plist", with: "")
-                                } label : {
-                                    Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
+                                .swipeActions {
+                                    Button(role: .destructive) {
+                                        isRemove[item] = true;
+                                    } label : {
+                                        Label("Remove", systemImage: "trash")
+                                    }
+                                    Button {
+                                        showPlistEditor[item] = true
+                                        plistName = documentDirectoryFiles[item]
+                                        plistName = plistName.replacingOccurrences(of: ".plist", with: "")
+                                    } label : {
+                                        Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
+                                    }
+                                    .tint(.blue)
                                 }
-                                .tint(.blue)
-                            }
-                            .alert(isPresented: $isRemove[item]) {
-                                Alert(title: Text("Really remove it?"),
-                                      primaryButton: .cancel(Text("Cancel")),
-                                      secondaryButton: .destructive(Text("Remove"), action: {
-                                    ZipManager.remove(fileUrl: targetPlistUrl)
-                                    let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
-                                    let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
-                                    ZipManager.remove(fileUrl: targetZipUrl)
-                                    isChangeFlag.toggle()
-                                }))
-                            }
-                            .fullScreenCover(isPresented: $showCategorySelector[item]) {
-                                let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                let downSizeImages = mainCategoryIds.map{$0.items.map{$0.images.map{UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + $0.imageFile)!.resize(targetSize: CGSize(width: 200, height: 200))}}}
-                                CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages)
-                            }
-                            .fullScreenCover(isPresented: $showPlistEditor[item]) {
-                                let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                .alert(isPresented: $isRemove[item]) {
+                                    Alert(title: Text("Really remove it?"),
+                                          primaryButton: .cancel(Text("Cancel")),
+                                          secondaryButton: .destructive(Text("Remove"), action: {
+                                        ZipManager.remove(fileUrl: targetPlistUrl)
+                                        let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
+                                        let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
+                                        ZipManager.remove(fileUrl: targetZipUrl)
+                                        isChangeFlag.toggle()
+                                    }))
+                                }
+                                .fullScreenCover(isPresented: $showCategorySelector[item]) {
+                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
+                                    let downSizeImages = mainCategoryIds.map{$0.items.map{$0.images.map{UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + $0.imageFile)!.resize(targetSize: CGSize(width: 200, height: 200))}}}
+                                    CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
+                                }
+                                .fullScreenCover(isPresented: $showPlistEditor[item]) {
+                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
+                                    PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                }
+                                if isPresentedProgressView, item == targetItem {
+                                    ProgressView()
+                                }
                             }
                         }
                     }

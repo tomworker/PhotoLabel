@@ -16,6 +16,7 @@ struct CategorySelectorView: View {
     @State var fileUrl: URL
     @State var plistCategoryName: String
     @State var downSizeImages: [[[UIImage]]]
+    @Binding var isPresentedProgressView: Bool
     @State var showPhotoCapture = false
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
@@ -109,6 +110,7 @@ struct CategorySelectorView: View {
                     }
                 }
                 .onAppear {
+                    isPresentedProgressView = false
                     if UIDevice.current.userInterfaceIdiom == .pad {
                         if mainCategoryIds.count > ConfigManager.iPadMainColumnNumber * ConfigManager.iPadMainRowNumber {
                             isMainScrollViewEnabled = true
