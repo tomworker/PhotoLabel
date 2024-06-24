@@ -238,13 +238,13 @@ struct ContentView: View {
                             let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
                             ZStack {
                                 Button {
-                                    photoCapture.interestTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
+                                    photoCapture.interestTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
                                         if showCategorySelector[item] == false {
                                             isPresentedProgressView = true
                                             targetItem = item
                                         }
                                     }
-                                    DispatchQueue.global(qos: .background).async {
+                                    DispatchQueue.global(qos: .userInteractive).async {
                                         loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                                     }
                                 } label: {

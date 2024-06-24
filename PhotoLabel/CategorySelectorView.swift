@@ -17,6 +17,7 @@ struct CategorySelectorView: View {
     @State var plistCategoryName: String
     @State var downSizeImages: [[[UIImage]]]
     @Binding var isPresentedProgressView: Bool
+    @State var isPresentedProgressView2 = false
     @State var showPhotoCapture = false
     @State var showPhotoLibrary = false
     @State var showImageStocker = false
@@ -136,42 +137,67 @@ struct CategorySelectorView: View {
                         }
                     }
                 }
+                .onChange(of: isPresentedProgressView2) {
+                    if isPresentedProgressView2 == true {
+                        DispatchQueue.global(qos: .userInteractive).async {
+                            showSubCategory = true
+                        }
+                    }
+                }
                 VStack {
                     ScrollView(.horizontal) {
                         LazyVGrid(columns: UIDevice.current.userInterfaceIdiom == .pad ? mainScrollColumns2 : mainScrollColumns1, spacing: 5) {
                             ForEach(mainCategoryIds) { mainCategoryId in
-                                Button {
-                                    if targetMainCategoryIndex == mainCategoryId.id {
-                                        showSubCategory.toggle()
-                                    } else {
-                                        showSubCategory = true
-                                    }
-                                    targetMainCategoryIndex = mainCategoryId.id
-                                    targetSubCategoryIndex[1] = -1
-                                    if UIDevice.current.userInterfaceIdiom == .pad {
-                                        if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.iPadSubColumnNumber * ConfigManager.iPadSubRowNumber {
-                                            isSubScrollViewEnabled = true
-                                            subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.iPadSubColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.iPadSubRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber)) / ConfigManager.iPadSubRowNumber + 1)
+                                ZStack {
+                                    Button {
+                                        if targetMainCategoryIndex == mainCategoryId.id {
+                                            if showSubCategory == true {
+                                                showSubCategory = false
+                                            } else {
+                                                if mainCategoryIds[mainCategoryId.id].items.count > 0 {
+                                                    isPresentedProgressView2 = true
+                                                } else {
+                                                    showSubCategory = true
+                                                }
+                                            }
                                         } else {
-                                            isSubScrollViewEnabled = false
-                                            subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadSubColumnNumber)), spacing: 5), count: ConfigManager.iPadSubColumnNumber)
+                                            showSubCategory = false
+                                            if mainCategoryIds[mainCategoryId.id].items.count > 0 {
+                                                isPresentedProgressView2 = true
+                                            } else {
+                                                showSubCategory = true
+                                            }
                                         }
-                                    } else {
-                                        if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.subColumnNumber * ConfigManager.subRowNumber {
-                                            isSubScrollViewEnabled = true
-                                            subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.subColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.subRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber)) / ConfigManager.subRowNumber + 1)
+                                        targetMainCategoryIndex = mainCategoryId.id
+                                        targetSubCategoryIndex[1] = -1
+                                        if UIDevice.current.userInterfaceIdiom == .pad {
+                                            if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.iPadSubColumnNumber * ConfigManager.iPadSubRowNumber {
+                                                isSubScrollViewEnabled = true
+                                                subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.iPadSubColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.iPadSubRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber)) / ConfigManager.iPadSubRowNumber + 1)
+                                            } else {
+                                                isSubScrollViewEnabled = false
+                                                subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadSubColumnNumber)), spacing: 5), count: ConfigManager.iPadSubColumnNumber)
+                                            }
                                         } else {
-                                            isSubScrollViewEnabled = false
-                                            subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) / CGFloat(ConfigManager.subColumnNumber)), spacing: 5), count: ConfigManager.subColumnNumber)
+                                            if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.subColumnNumber * ConfigManager.subRowNumber {
+                                                isSubScrollViewEnabled = true
+                                                subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.subColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.subRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber)) / ConfigManager.subRowNumber + 1)
+                                            } else {
+                                                isSubScrollViewEnabled = false
+                                                subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) / CGFloat(ConfigManager.subColumnNumber)), spacing: 5), count: ConfigManager.subColumnNumber)
+                                            }
+                                        }
+                                    } label: {
+                                        if let range = mainCategoryId.mainCategory.range(of: ":=") {
+                                            let idx = mainCategoryId.mainCategory.index(range.lowerBound, offsetBy: -1)
+                                            Text(mainCategoryId.mainCategory[...idx])
+                                                .frame(maxWidth: .infinity, minHeight: 50)
+                                                .background(mainCategoryId.id == targetMainCategoryIndex ? .cyan : .blue)
+                                                .foregroundColor(.white)
                                         }
                                     }
-                                } label: {
-                                    if let range = mainCategoryId.mainCategory.range(of: ":=") {
-                                        let idx = mainCategoryId.mainCategory.index(range.lowerBound, offsetBy: -1)
-                                        Text(mainCategoryId.mainCategory[...idx])
-                                            .frame(maxWidth: .infinity, minHeight: 50)
-                                            .background(mainCategoryId.id == targetMainCategoryIndex ? .cyan : .blue)
-                                            .foregroundColor(.white)
+                                    if isPresentedProgressView2 == true, targetMainCategoryIndex == mainCategoryId.id, mainCategoryIds[targetMainCategoryIndex].items.count > 0 {
+                                        ProgressView()
                                     }
                                 }
                             }
@@ -214,6 +240,10 @@ struct CategorySelectorView: View {
                                         .fullScreenCover(isPresented: $showImageStocker) {
                                             ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
                                         }
+                                    }
+                                    VStack { }
+                                    .onAppear {
+                                        isPresentedProgressView2 = false
                                     }
                                 }
                             }
