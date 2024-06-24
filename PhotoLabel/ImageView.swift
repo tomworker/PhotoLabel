@@ -112,6 +112,8 @@ struct ImageView: View {
                     let delta = value / self.lastValue
                     self.scale = self.scale * delta
                     self.lastValue = value
+                    self.location.x = (UIScreen.main.bounds.width / 2) + (self.location.x - (UIScreen.main.bounds.width / 2)) * delta
+                    self.location.y = (UIScreen.main.bounds.height / 2) + (self.location.y - (UIScreen.main.bounds.height / 2)) * delta
                 }
             }
             .onEnded { value in
