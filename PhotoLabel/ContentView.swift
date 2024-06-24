@@ -33,6 +33,7 @@ struct ContentView: View {
     @State var afterRenameFile = ""
     @State var isPresentedProgressView = false
     @State var targetItem = 0
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Button {
@@ -248,9 +249,19 @@ struct ContentView: View {
                                         loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                                     }
                                 } label: {
-                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil {
+                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil || documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
                                         if getIsToday(target: documentDirectoryFiles[item]) == true {
-                                            Text(documentDirectoryFiles[item])
+                                            if documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
+                                                HStack(spacing: 0) {
+                                                    Text("Eqp").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
+                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "Eqp", with: ""))
+                                                }
+                                            } else {
+                                                HStack(spacing: 0) {
+                                                    Text("InOut").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
+                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "InOut", with: ""))
+                                                }
+                                            }
                                         } else {
                                             Text(documentDirectoryFiles[item])
                                                 .foregroundColor(.red)
