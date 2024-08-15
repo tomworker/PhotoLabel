@@ -23,7 +23,6 @@ struct CategorySelectorView: View {
     @State var showImageStocker = false
     @State var showSubCategory = false
     @State var showCheckBox = false
-    @State var showCheckBoxMatrix = false
     @State var showFinalReport = false
     @State var moveToTrashBox = false
     @State var targetMainCategoryIndex = -1
