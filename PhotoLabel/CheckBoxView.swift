@@ -189,14 +189,6 @@ struct CheckBoxView: View {
                                 .background(GeometryReader { proxy -> Color in
                                     DispatchQueue.main.async {
                                         let positiony = proxy.frame(in: .named("")).origin.y
-                                        /*
-                                        if -(-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
-                                            countImageHeight2[mainIndex] += 1
-                                        } else if (-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
-                                            countImageHeight2[mainIndex] -= 1
-                                        }
-                                        originy2[mainIndex] = 150 - (imageHeight + 25 + correctionValue) * 0.5 * CGFloat(countImageHeight2[mainIndex])
-                                         */
                                         updateCountImageHiehgt2(imageHeight: imageHeight, mainIndex: mainIndex, positiony: positiony)
                                         updateOriginy2(imageHeight: imageHeight, mainIndex: mainIndex)
                                     }
