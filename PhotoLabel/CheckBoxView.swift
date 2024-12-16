@@ -114,7 +114,7 @@ struct CheckBoxView: View {
                         ForEach(mainCategoryArray.indices, id: \.self) { mainIndex in
                             Button {
                                 withAnimation {
-                                    scrollView.scrollTo(mainIndex + 1000)
+                                    scrollView.scrollTo(mainIndex + 1000, anchor: .center)
                                 }
                                 originy2[mainIndex] = 150.0
                                 countImageHeight2[mainIndex] = 0
@@ -189,12 +189,16 @@ struct CheckBoxView: View {
                                 .background(GeometryReader { proxy -> Color in
                                     DispatchQueue.main.async {
                                         let positiony = proxy.frame(in: .named("")).origin.y
+                                        /*
                                         if -(-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
                                             countImageHeight2[mainIndex] += 1
                                         } else if (-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
                                             countImageHeight2[mainIndex] -= 1
                                         }
                                         originy2[mainIndex] = 150 - (imageHeight + 25 + correctionValue) * 0.5 * CGFloat(countImageHeight2[mainIndex])
+                                         */
+                                        updateCountImageHiehgt2(imageHeight: imageHeight, mainIndex: mainIndex, positiony: positiony)
+                                        updateOriginy2(imageHeight: imageHeight, mainIndex: mainIndex)
                                     }
                                     return Color.clear
                                 })
@@ -404,5 +408,15 @@ struct CheckBoxView: View {
             }
             ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
         }
+    }
+    private func updateCountImageHiehgt2(imageHeight: CGFloat, mainIndex: Int, positiony: CGFloat) {
+        if -(-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
+            countImageHeight2[mainIndex] += 1
+        } else if (-95 + (imageHeight + 25) * 0.5 * CGFloat(countImageHeight2[mainIndex]) + positiony) >= (imageHeight + 25) {
+            countImageHeight2[mainIndex] -= 1
+        }
+    }
+    private func updateOriginy2(imageHeight: CGFloat, mainIndex: Int) {
+        originy2[mainIndex] = 150 - (imageHeight + 25 + correctionValue) * 0.5 * CGFloat(countImageHeight2[mainIndex])
     }
 }
