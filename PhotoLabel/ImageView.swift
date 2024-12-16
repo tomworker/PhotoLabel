@@ -69,21 +69,7 @@ struct ImageView: View {
                     self.endLocation.x = self.location.x
                     self.endLocation.y = self.location.y
                     if let uiimage = UIImage(contentsOfFile: imageFile) {
-                        if uiimage.imageOrientation == .right {
-                            let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
-                            self.croppedUiimage = uiimage.crop(to: rect)
-                        } else if uiimage.imageOrientation == .up {
-                            let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
-                            self.croppedUiimage = uiimage.crop(to: rect)
-                        } else if uiimage.imageOrientation == .left{
-                            let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
-                            self.croppedUiimage = uiimage.crop(to: rect)
-                        } else if uiimage.imageOrientation == .down {
-                            let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
-                            self.croppedUiimage = uiimage.crop(to: rect)
-                        } else {
-                            self.croppedUiimage = uiimage
-                        }
+                        updateCroppedUiimage(uiimage: uiimage)
                     }
                 }
             }
@@ -148,21 +134,7 @@ struct ImageView: View {
                     }
                     if self.scale != 1.0 {
                         if let uiimage = UIImage(contentsOfFile: imageFile) {
-                            if uiimage.imageOrientation == .right {
-                                let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
-                                self.croppedUiimage = uiimage.crop(to: rect)
-                            } else if uiimage.imageOrientation == .up {
-                                let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
-                                self.croppedUiimage = uiimage.crop(to: rect)
-                            } else if uiimage.imageOrientation == .left{
-                                let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
-                                self.croppedUiimage = uiimage.crop(to: rect)
-                            } else if uiimage.imageOrientation == .down {
-                                let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
-                                self.croppedUiimage = uiimage.crop(to: rect)
-                            } else {
-                                self.croppedUiimage = uiimage
-                            }
+                            updateCroppedUiimage2(uiimage: uiimage)
                         }
                     } else {
                         if let uiimage = UIImage(contentsOfFile: imageFile) {
@@ -648,6 +620,48 @@ struct ImageView: View {
                 }
             }
             return recognizedTexts
+        }
+    }
+    private func updateCroppedUiimage(uiimage: UIImage) {
+        if uiimage.imageOrientation == .right {
+            let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
+            self.croppedUiimage = uiimage.crop(to: rect)
+        } else if uiimage.imageOrientation == .up {
+            let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
+            self.croppedUiimage = uiimage.crop(to: rect)
+        } else if uiimage.imageOrientation == .left {
+            let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
+            self.croppedUiimage = uiimage.crop(to: rect)
+        } else if uiimage.imageOrientation == .down {
+            let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
+            self.croppedUiimage = uiimage.crop(to: rect)
+        } else {
+            self.croppedUiimage = uiimage
+        }
+    }
+    private func updateCroppedUiimage2(uiimage: UIImage) {
+        if self.scale != 1.0 {
+            if let uiimage = UIImage(contentsOfFile: imageFile) {
+                if uiimage.imageOrientation == .right {
+                    let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
+                    self.croppedUiimage = uiimage.crop(to: rect)
+                } else if uiimage.imageOrientation == .up {
+                    let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
+                    self.croppedUiimage = uiimage.crop(to: rect)
+                } else if uiimage.imageOrientation == .left {
+                    let rect = CGRect(x: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), y: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 - ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), width: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale, height: uiimage.size.width / self.scale)
+                    self.croppedUiimage = uiimage.crop(to: rect)
+                } else if uiimage.imageOrientation == .down {
+                    let rect = CGRect(x: uiimage.size.width * ((self.scale - 1) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.x - UIScreen.main.bounds.width * 0.5), y: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? 0 : uiimage.size.height * ((self.scale - aspectRatio * (uiimage.size.width / uiimage.size.height)) / self.scale) * 0.5 + ((uiimage.size.width / UIScreen.main.bounds.width) / self.scale) * (self.endLocation.y - UIScreen.main.bounds.height * 0.5), width: uiimage.size.width / self.scale, height: (UIScreen.main.bounds.width / uiimage.size.width) * uiimage.size.height * self.scale < UIScreen.main.bounds.width * aspectRatio ? (uiimage.size.width / UIScreen.main.bounds.width) * UIScreen.main.bounds.height * self.scale : aspectRatio * uiimage.size.width / self.scale)
+                    self.croppedUiimage = uiimage.crop(to: rect)
+                } else {
+                    self.croppedUiimage = uiimage
+                }
+            }
+        } else {
+            if let uiimage = UIImage(contentsOfFile: imageFile) {
+                self.croppedUiimage = uiimage
+            }
         }
     }
 }
