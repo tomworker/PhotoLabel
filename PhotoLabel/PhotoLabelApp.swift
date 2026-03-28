@@ -10,10 +10,11 @@ import SwiftUI
 @main
 struct PhotoLabelApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
+    @StateObject private var alertCenter = AlertCenter()
     var body: some Scene {
         WindowGroup {
             ContentView(workSpace: [], showPlistEditor: [], showCategorySelector: [], isRemove: [])
+                .environmentObject(alertCenter)
         }
     }
 }

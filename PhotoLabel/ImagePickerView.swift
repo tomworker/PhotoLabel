@@ -29,8 +29,6 @@ struct ImagePickerView: UIViewControllerRepresentable {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                 let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
-                let workSpaceImageFileName = "@\(dateFormatter.string(from: Date())).jpg"
-                let workSpaceJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
                 let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                 var plistJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                 let duplicateSpaceImageFileName = plistImageFileName
