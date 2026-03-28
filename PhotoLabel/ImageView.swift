@@ -36,9 +36,7 @@ struct ImageView: View {
     @StateObject var qrCapture = QRCapture()
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     @State var croppedUiimage: UIImage? = nil
-    //@GestureState var magnifyBy = 1.0
-    //@State var magnifyBy2 = 1.0
-    //@State var deltaM = 0.0
+    @EnvironmentObject var alertCenter: AlertCenter
 
     var body: some View {
         let dragGesture = DragGesture()
@@ -73,25 +71,6 @@ struct ImageView: View {
                     }
                 }
             }
-        /*
-        let magnifyGesture = MagnifyGesture()
-            .updating($magnifyBy) { value, gestureState, transaction in
-                gestureState = value.magnification
-                if magnifyBy == 1.0 {
-                    deltaM = magnifyBy2
-                } else {
-                    scale = value.magnification * deltaM
-                }
-            }
-            .onEnded { value in
-                if value.magnification > 1.0 {
-                    scale = value.magnification * deltaM
-                } else {
-                    scale = 1.0
-                    location = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
-                }
-            }
-         */
         let magnificationGesture = MagnificationGesture()
             .onChanged { value in
                 autoreleasepool {
@@ -330,7 +309,11 @@ struct ImageView: View {
                                             if targetImageFileIndex != -1 {
                                                 downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
                                             }
-                                            ZipManager.saveZip(fileUrl: fileUrl)
+                                            do {
+                                                try ZipManager.saveZip(fileUrl: fileUrl)
+                                            } catch {
+                                                alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
+                                            }
                                             showImageView = false
                                         } catch {
                                             print(error)
@@ -354,7 +337,11 @@ struct ImageView: View {
                                             if targetImageFileIndex != -1 {
                                                 downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
                                             }
-                                            ZipManager.saveZip(fileUrl: fileUrl)
+                                            do {
+                                                try ZipManager.saveZip(fileUrl: fileUrl)
+                                            } catch {
+                                                alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
+                                            }
                                             showImageView = false
                                         } catch {
                                             print(error)

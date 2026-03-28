@@ -994,7 +994,7 @@ class ZipManager {
             CategoryManager.write(fileUrl: targetPlistUrl, mainCategorys: CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds))
         }
     }
-    static func saveZip(fileUrl: URL) {
+    static func saveZip(fileUrl: URL) throws {
         autoreleasepool {
             let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
             let plistDirectoryUrl = fileUrl.deletingLastPathComponent()
@@ -1131,6 +1131,21 @@ class ZipManager {
                 } catch {
                     print("Copy of jpg file failed with error:\(error)")
                 }
+            }
+        }
+    }
+    static func contains(_ path: String, in zipUrl: URL) -> Bool {
+        autoreleasepool {
+            guard fileManager.fileExists(atPath: zipUrl.path) else { return false }
+            do {
+                let archive = try Archive(url: zipUrl, accessMode: .read)
+                if archive[path] != nil {
+                    return true
+                }
+                return false
+            } catch {
+                print("Reading ZIP archive failed with error:\(error)")
+                return false
             }
         }
     }

@@ -39,6 +39,7 @@ struct EachTabView: View {
     @State var isDuplicateMode = false
     @State var isSwapMode = false
     @State var isEditSubCategory = false
+    @EnvironmentObject var alertCenter: AlertCenter
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
@@ -386,7 +387,11 @@ struct EachTabView: View {
                                                             ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
                                                             workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: targetImageFile, subDirectory: "")})
                                                             print("Removed from WorkSpace:\(targetImageFile)")
-                                                            ZipManager.saveZip(fileUrl: fileUrl)
+                                                            do {
+                                                                try ZipManager.saveZip(fileUrl: fileUrl)
+                                                            } catch {
+                                                                alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
+                                                            }
                                                         } label: {
                                                             Image(systemName: "trash")
                                                                 .frame(width: 30, height: 30)

@@ -26,6 +26,7 @@ struct PhotoCaptureView: View {
     @State var isNoAnimation = false
     @State var isSelectFlashMode = false
     @State var capturedQRData = ""
+    @EnvironmentObject var alertCenter: AlertCenter
     let deviceWidth = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
     let deviceHeight = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
     private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
@@ -251,13 +252,18 @@ struct PhotoCaptureView: View {
                     HStack {
                         Button {
                             if photoCapture.isProcedureRunning == false {
-                                cancelView()
+                                if photoCapture.image == nil {
+                                    cancelView(jpgFileName: "")
+                                } else {
+                                    let plistImageFileName = saveImage()
+                                    cancelView(jpgFileName: plistImageFileName)
+                                }
                             } else {
                                 if photoCapture.image == nil {
-                                    //none
+                                    cancelView(jpgFileName: "")
                                 } else {
-                                    saveImage()
-                                    cancelView()
+                                    let plistImageFileName = saveImage()
+                                    cancelView(jpgFileName: plistImageFileName)
                                 }
                             }
                         } label: {
@@ -306,7 +312,7 @@ struct PhotoCaptureView: View {
                                     .foregroundColor(.gray)
                                     .onReceive(timer) { _ in
                                         if photoCapture.isProcedureRunning == true && photoCapture.image != nil {
-                                            saveImage()
+                                            _ = saveImage()
                                         }
                                     }
                             } else {
@@ -327,7 +333,7 @@ struct PhotoCaptureView: View {
                                             if photoCapture.image == nil {
                                                 //none
                                             } else {
-                                                saveImage()
+                                                _ = saveImage()
                                                 photoCapture.takePhoto()
                                                 photoOrientationAtShot = photoOrientation
                                                 photoCapture.isProcedureRunning = true
@@ -344,8 +350,9 @@ struct PhotoCaptureView: View {
             .background(.black)
         }
     }
-    private func saveImage() {
+    private func saveImage() -> String {
         autoreleasepool {
+            var plistImageFileName = ""
             if photoCapture.image != nil {
                 switch photoOrientationAtShot {
                 case "H":
@@ -364,7 +371,7 @@ struct PhotoCaptureView: View {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyyMMddHHmmssS"
                 let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
-                let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
+                plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                 var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                 let duplicateSpaceImageFileName = plistImageFileName
                 do {
@@ -384,9 +391,10 @@ struct PhotoCaptureView: View {
             }
             photoCapture.isProcedureRunning = false
             photoCapture.image = nil
+            return plistImageFileName
         }
     }
-    private func cancelView() {
+    private func cancelView(jpgFileName: String) {
         isNoAnimation = true
         showPhotoCapture = false
         photoCapture.image = nil
@@ -395,8 +403,25 @@ struct PhotoCaptureView: View {
         }
         photoCapture.reset(zoomReset: true)
         AppDelegate.orientationLock = .allButUpsideDown
+        let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
+        let targetZipUrl = fileUrl.deletingLastPathComponent().appendingPathComponent(plistNoExtensionName + ".zip")
+        let targetPlistUrl = fileUrl
         DispatchQueue.global(qos: .background).async {
-            ZipManager.saveZip(fileUrl: fileUrl)
+            do {
+                try ZipManager.saveZip(fileUrl: targetPlistUrl)
+            } catch {
+                DispatchQueue.main.async {
+                    alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
+                }
+            }
+            if jpgFileName != "" {
+                let expectedEntry = "\(plistNoExtensionName)/\(jpgFileName)"
+                if !ZipManager.contains(expectedEntry, in: targetZipUrl) {
+                    DispatchQueue.main.async {
+                        alertCenter.show(title: "Zip missing latest photo?(\(jpgFileName))", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
+                    }
+                }
+            }
         }
         if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
             window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()

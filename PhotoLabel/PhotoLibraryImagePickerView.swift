@@ -39,8 +39,6 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                     DispatchQueue.main.sync {
                         self.parent.images.append(image)
                         let jpgImageData = image.jpegData(compressionQuality: 0.5)
-                        let workSpaceImageFileName = "@\(dateFormatter.string(from: Date()))\(String(i)).jpg"
-                        let workSpaceJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(workSpaceImageFileName)
                         let plistImageFileName = "\(dateFormatter.string(from: Date()))\(String(i)).jpg"
                         var plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
                         let duplicateSpaceImageFileName = plistImageFileName
