@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct EachTabView: View {
-    @StateObject var photoCapture: PhotoCapture
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
@@ -141,7 +140,7 @@ struct EachTabView: View {
                                 }
                                 .fullScreenCover(isPresented: $showPhotoCapture) {
                                     if  UIDevice.current.userInterfaceIdiom == .phone {
-                                        PhotoCaptureView(photoCapture: photoCapture, showPhotoCapture: $showPhotoCapture, caLayer: photoCapture.videoPreviewLayer, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
+                                        PhotoCaptureView(showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
                                     } else {
                                         ImagePickerView(sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
                                     }
@@ -350,9 +349,9 @@ struct EachTabView: View {
                                             .onTapGesture(count: 2) {
                                                 CategoryManager.moveItemFromLastToFirst(imageKey: duplicateSpaceImageFileIndex, duplicateSpace: &duplicateSpace)
                                             }
-                                            //Recovery code for onTapGesture problem
-                                            .onChange(of: showImageView4) { }
-                                            //Above code goes well for some reason.
+                                            // Recovery code for onTapGesture problem
+                                            .onDataChange(of: showImageView4) { _ in }
+                                            // Above code goes well for some reason.
                                             .onTapGesture(count: 1) {
                                                 showImageView4 = true
                                                 if duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 {
@@ -422,9 +421,9 @@ struct EachTabView: View {
                                             .onTapGesture(count: 2) {
                                                 CategoryManager.moveItemFromLastToFirst(imageKey: workSpaceImageFileIndex, workSpace: &workSpace)
                                             }
-                                            //Recovery code for onTapGesture problem
-                                            .onChange(of: showImageView5) { }
-                                            //Above code goes well for some reason.
+                                            // Recovery code for onTapGesture problem
+                                            .onDataChange(of: showImageView5) { _ in }
+                                            // Above code goes well for some reason.
                                             .onTapGesture(count: 1) {
                                                 showImageView5 = true
                                                 targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path

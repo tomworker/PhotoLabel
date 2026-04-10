@@ -9,13 +9,13 @@ import SwiftUI
 import CoreMotion
 
 class MotionSensor: NSObject, ObservableObject {
-    //@Published var isStarted = false
-    @Published var xAcc = "0.0"
-    var yAcc = "0.0"
-    var zAcc = "0.0"
-    var xGrv = "0.0"
-    var yGrv = "0.0"
-    var zGrv = "0.0"
+    @Published var orientation: String = "V"
+    var xAcc: Double = 0.0
+    var yAcc: Double = 0.0
+    var zAcc: Double = 0.0
+    var xGrv: Double = 0.0
+    var yGrv: Double = 0.0
+    var zGrv: Double = 0.0
     let motionManager = CMMotionManager()
     
     override init() {
@@ -23,24 +23,33 @@ class MotionSensor: NSObject, ObservableObject {
         start()
     }
     func start() {
-        if motionManager.isDeviceMotionAvailable {
-            motionManager.deviceMotionUpdateInterval = 1
-            motionManager.startDeviceMotionUpdates(to: OperationQueue.current!, withHandler: {(motion: CMDeviceMotion?, error: Error?) in
-                self.updateMotionData(deviceMotion: motion!)
-            })
+        guard motionManager.isDeviceMotionAvailable else { return }
+        motionManager.deviceMotionUpdateInterval = 0.2
+        motionManager.startDeviceMotionUpdates(to: .init()) { [weak self] (motion, error) in
+            guard let self = self else { return }
+            if let safeMotion = motion {
+                self.updateMotionData(deviceMotion: safeMotion)
+            }
         }
-        //isStarted = true
     }
     func stop() {
-        //isStarted = false
         motionManager.stopDeviceMotionUpdates()
     }
     private func updateMotionData(deviceMotion: CMDeviceMotion) {
-        xAcc = String(deviceMotion.userAcceleration.x)
-        yAcc = String(deviceMotion.userAcceleration.y)
-        zAcc = String(deviceMotion.userAcceleration.z)
-        xGrv = String(deviceMotion.gravity.x)
-        yGrv = String(deviceMotion.gravity.y)
-        zGrv = String(deviceMotion.gravity.z)
+        xAcc = deviceMotion.userAcceleration.x
+        yAcc = deviceMotion.userAcceleration.y
+        zAcc = deviceMotion.userAcceleration.z
+        xGrv = deviceMotion.gravity.x
+        yGrv = deviceMotion.gravity.y
+        zGrv = deviceMotion.gravity.z
+        updateGravity(x: xGrv, y: yGrv)
+    }
+    private func updateGravity(x: Double, y: Double) {
+        let newOrientation = (abs(x) > abs(y)) ? "H" : "V"
+        if newOrientation != self.orientation {
+            DispatchQueue.main.async {
+                self.orientation = newOrientation
+            }
+        }
     }
 }

@@ -258,49 +258,49 @@ struct ConfigView: View {
                 .onAppear {
                     initialLoad()
                 }
-                .onChange(of: iPadMaxColumnsCategoryButton ) {
+                .onDataChange(of: iPadMaxColumnsCategoryButton ) { _ in
                     ConfigManager.iPadMainColumnNumber = iPadMaxColumnsCategoryButton
                 }
-                .onChange(of: iPadMaxColumnsDetailsButton ) {
+                .onDataChange(of: iPadMaxColumnsDetailsButton ) { _ in
                     ConfigManager.iPadSubColumnNumber = iPadMaxColumnsDetailsButton
                 }
-                .onChange(of: iPadMaxColumnsPhotos ) {
+                .onDataChange(of: iPadMaxColumnsPhotos ) { _ in
                     ConfigManager.iPadImageColumnNumber = iPadMaxColumnsPhotos
                 }
-                .onChange(of: maxColumnsCategoryButton ) {
+                .onDataChange(of: maxColumnsCategoryButton ) { _ in
                     ConfigManager.mainColumnNumber = maxColumnsCategoryButton
                 }
-                .onChange(of: maxColumnsDetailsButton ) {
+                .onDataChange(of: maxColumnsDetailsButton ) { _ in
                     ConfigManager.subColumnNumber = maxColumnsDetailsButton
                 }
-                .onChange(of: maxColumnsPhotos ) {
+                .onDataChange(of: maxColumnsPhotos ) { _ in
                     ConfigManager.imageColumnNumber = maxColumnsPhotos
                 }
-                .onChange(of: iPadMaxRowsCategoryButton ) {
+                .onDataChange(of: iPadMaxRowsCategoryButton ) { _ in
                     ConfigManager.iPadMainRowNumber = iPadMaxRowsCategoryButton
                 }
-                .onChange(of: iPadMaxRowsDetailsButton ) {
+                .onDataChange(of: iPadMaxRowsDetailsButton ) { _ in
                     ConfigManager.iPadSubRowNumber = iPadMaxRowsDetailsButton
                 }
-                .onChange(of: maxRowsCategoryButton ) {
+                .onDataChange(of: maxRowsCategoryButton ) { _ in
                     ConfigManager.mainRowNumber = maxRowsCategoryButton
                 }
-                .onChange(of: maxRowsDetailsButton ) {
+                .onDataChange(of: maxRowsDetailsButton ) { _ in
                     ConfigManager.subRowNumber = maxRowsDetailsButton
                 }
-                .onChange(of: maxEntryOfCategorys ) {
+                .onDataChange(of: maxEntryOfCategorys ) { _ in
                     ConfigManager.maxNumberOfMainCategory = maxEntryOfCategorys
                 }
-                .onChange(of: maxEntryOfDetails ) {
+                .onDataChange(of: maxEntryOfDetails ) { _ in
                     ConfigManager.maxNumberOfSubCategory = maxEntryOfDetails
                 }
-                .onChange(of: maxEntryOfPhotos ) {
+                .onDataChange(of: maxEntryOfPhotos ) { _ in
                     ConfigManager.maxNumberOfImageFile = maxEntryOfPhotos
                 }
-                .onChange(of: iPadCheckBoxMatrixColumnWidth ) {
+                .onDataChange(of: iPadCheckBoxMatrixColumnWidth ) { _ in
                     ConfigManager.iPadCheckBoxMatrixColumnWidth = iPadCheckBoxMatrixColumnWidth
                 }
-                .onChange(of: checkBoxMatrixColumnWidth ) {
+                .onDataChange(of: checkBoxMatrixColumnWidth ) { _ in
                     ConfigManager.checkBoxMatrixColumnWidth = checkBoxMatrixColumnWidth
                 }
         }

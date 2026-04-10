@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct CheckBoxView: View {
-    @StateObject var photoCapture: PhotoCapture
     @Binding var workSpace: [WorkSpaceImageFile]
     @Binding var duplicateSpace: [DuplicateImageFile]
     @Binding var plistCategoryName: String
@@ -43,7 +42,7 @@ struct CheckBoxView: View {
     @State var countImageHeight = 0
     @State var countImageHeight2: [Int] = Array(repeating: 0, count: ConfigManager.maxNumberOfMainCategory)
     let correctionValue = UIDevice.current.userInterfaceIdiom == .pad ? pow(((UIScreen.main.bounds.width - CGFloat((5 - 1) * 10)) * CGFloat(0.15) + 25), 1.92) / pow(10, 2) - 75.2 : pow(((UIScreen.main.bounds.width - CGFloat((3 - 1) * 10)) / CGFloat(4) + 25), 1.9) / pow(10, 2) - 64.9
-    
+
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
@@ -186,13 +185,13 @@ struct CheckBoxView: View {
                                     Spacer()
                                 }
                                 .id(mainIndex + 1000)
-                                .background(GeometryReader { proxy -> Color in
-                                    DispatchQueue.main.async {
+                                .background(GeometryReader { proxy in
+                                    let _ = DispatchQueue.main.async {
                                         let positiony = proxy.frame(in: .named("")).origin.y
                                         updateCountImageHiehgt2(imageHeight: imageHeight, mainIndex: mainIndex, positiony: positiony)
                                         updateOriginy2(imageHeight: imageHeight, mainIndex: mainIndex)
                                     }
-                                    return Color.clear
+                                    Color.clear
                                 })
                                 ForEach(mainCategoryIds[mainIndex].items) { subCategoryId in
                                     if originy2[mainIndex] >= CGFloat(150) - (CGFloat(subCategoryId.id + lowerLoadLimit) * (imageHeight + 25)) && originy2[mainIndex] <= CGFloat(150) - (CGFloat(subCategoryId.id - upperLoadLimit) * (imageHeight + 25)) {
@@ -218,9 +217,9 @@ struct CheckBoxView: View {
                                                             .foregroundColor(.white)
                                                             .background(.gray.opacity((0.3)))
                                                             .cornerRadius(10)
-                                                            //Recovery code for onLongPressGesture problem
-                                                            .onChange(of: showImageStocker) { }
-                                                            //Above code goes well for some reason.
+                                                            // Recovery code for onLongPressGesture problem
+                                                            .onDataChange(of: showImageStocker) { _ in }
+                                                            // Above code goes well for some reason.
                                                             .onTapGesture { }
                                                             .onLongPressGesture {
                                                                 showImageStocker = true
@@ -234,17 +233,17 @@ struct CheckBoxView: View {
                                                                         .aspectRatio(uiimage.size.width > uiimage.size.height ? 4 / 3 : uiimage.size.width == uiimage.size.height ? 1 : 3 / 4, contentMode: .fit)
                                                                         .frame(width: uiimage.size.width > uiimage.size.height ? imageWidth : imageHeight, height: imageHeight)
                                                                         .cornerRadius(10)
-                                                                    //Recovery code for onTapGesture problem
-                                                                        .onChange(of: showImageView) { }
-                                                                    //Above code goes well for some reason.
+                                                                        // Recovery code for onTapGesture problem
+                                                                        .onDataChange(of: showImageView) { _ in  }
+                                                                        // Above code goes well for some reason.
                                                                         .onTapGesture(count: 1) {
                                                                             showImageView = true
                                                                             targetSubCategoryIndex = [mainIndex, subCategoryId.id]
                                                                             targetImageFileIndex = index
                                                                         }
-                                                                    //Recovery code for onLongPressGesture problem
-                                                                        .onChange(of: showImageStocker) { }
-                                                                    //Above code goes well for some reason.
+                                                                        // Recovery code for onLongPressGesture problem
+                                                                        .onDataChange(of: showImageStocker) { _ in  }
+                                                                        // Above code goes well for some reason.
                                                                         .onLongPressGesture {
                                                                             showImageStocker = true
                                                                             targetSubCategoryIndex = [mainIndex, subCategoryId.id]
@@ -261,7 +260,7 @@ struct CheckBoxView: View {
                                                         ImageTabView(fileUrl: $fileUrl, showImageView: $showImageView, showImageView3: $showImageView3, targetImageFileIndex: $targetImageFileIndex, images: mainCategoryIds[targetSubCategoryIndex[0]].items[targetSubCategoryIndex[1]].images, mainCategoryIndex: targetSubCategoryIndex[0], subCategoryIndex: $targetSubCategoryIndex[1], downSizeImages: $downSizeImages, mainCategoryIds: $mainCategoryIds)
                                                     }
                                                     .fullScreenCover(isPresented: $showImageStocker) {
-                                                        ImageStockerTabView(photoCapture: _photoCapture, showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
+                                                        ImageStockerTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
                                                     }
                                                 }
                                                 Spacer()

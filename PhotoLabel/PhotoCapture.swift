@@ -9,7 +9,7 @@ import SwiftUI
 import AVFoundation
 
 class PhotoCapture: NSObject, ObservableObject {
-    var image: UIImage?
+    @Published var image: UIImage?
     var isImage = false
     var captureSession = AVCaptureSession()
     var videoPreviewLayer: AVCaptureVideoPreviewLayer!
@@ -25,7 +25,7 @@ class PhotoCapture: NSObject, ObservableObject {
     var isShowInterestArea = false
     var isShowInterestAreaWeak = false
     var isMoved = false
-    var addingPosition = CGFloat(0.0)
+    @Published var addingPosition = CGFloat(0.0)
     var initialValue = CGFloat(0.0)
     var endedValue = CGFloat(0.0)
     var userAccelarationX = Double(0.0)
@@ -34,10 +34,12 @@ class PhotoCapture: NSObject, ObservableObject {
     var interestTimer: Timer?
     var flashMode = "auto"
     var isFlipCameraDevice = false
-    var isProcedureRunning = false
+    @Published var isProcedureRunning = false
     @Published var QRData: [String] = []
     @Published var QRFrame: [CGRect] = []
     @Published var isDetectQR: [Bool] = []
+    var onPhotoCaptured: ((UIImage) -> Void)?
+    @Published var lockStatusText: String = ""
 
     override init() {
         super.init()
@@ -147,7 +149,8 @@ class PhotoCapture: NSObject, ObservableObject {
             print(error)
         }
         interestTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: false) { [weak self] _ in
-            self!.isShowInterestArea = false
+            guard let self = self else { return }
+            self.isShowInterestArea = false
         }
     }
     func flipCameraDevice() {
@@ -243,8 +246,9 @@ class PhotoCapture: NSObject, ObservableObject {
                 print(error)
             }
             interestTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
-                self!.isMoved = false
-                self!.isShowInterestAreaWeak = true
+                guard let self = self else { return }
+                self.isMoved = false
+                self.isShowInterestAreaWeak = true
             }
         }
     }
@@ -280,8 +284,9 @@ class PhotoCapture: NSObject, ObservableObject {
             print("Failed to change zoom factor.")
         }
         interestTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
-            self!.isMoved = false
-            self!.isShowInterestAreaWeak = true
+            guard let self = self else { return }
+            self.isMoved = false
+            self.isShowInterestAreaWeak = true
         }
     }
     @objc func onTapGesture(_ sender: UITapGestureRecognizer) {
@@ -318,12 +323,14 @@ class PhotoCapture: NSObject, ObservableObject {
                 device?.setExposureTargetBias(0)
                 device?.unlockForConfiguration()
                 isAutoExposureAutoFocusLocked = false
+                lockStatusText = ""
             } catch {
                 print(error)
             }
             interestTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
-                self!.isMoved = false
-                self!.isShowInterestAreaWeak = true
+                guard let self = self else { return }
+                self.isMoved = false
+                self.isShowInterestAreaWeak = true
             }
         }
     }
@@ -346,7 +353,16 @@ class PhotoCapture: NSObject, ObservableObject {
                     device?.exposureMode = .locked
                 }
                 device?.unlockForConfiguration()
-                if device?.focusMode == .locked || device?.exposureMode == .locked {
+                let hasFocusLock = device?.focusMode == .locked
+                let hasExposureLock = device?.exposureMode == .locked
+                if hasFocusLock || hasExposureLock {
+                    if hasFocusLock && hasExposureLock {
+                        lockStatusText = "AE/AF locked"
+                    } else if hasFocusLock {
+                        lockStatusText = "AF locked"
+                    } else {
+                        lockStatusText = "AE locked"
+                    }
                     isAutoExposureAutoFocusLocked = true
                 }
             } catch {
@@ -354,11 +370,12 @@ class PhotoCapture: NSObject, ObservableObject {
             }
         }
         interestTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { [weak self] _ in
-            self!.isMoved = false
-            self!.isShowInterestAreaWeak = true
+            guard let self = self else { return }
+            self.isMoved = false
+            self.isShowInterestAreaWeak = true
         }
     }
-    func takePhoto() {
+    func takePhoto(completion: @escaping (UIImage) -> Void) {
         let settings = AVCapturePhotoSettings()
         switch flashMode {
         case "auto":
@@ -374,6 +391,8 @@ class PhotoCapture: NSObject, ObservableObject {
             settings.flashMode = .auto
             break
         }
+        self.onPhotoCaptured = completion
+        self.isProcedureRunning = true
         dataOutput.capturePhoto(with: settings, delegate: self)
     }
     func setPhotoOrientation(photoOrientation: String) {
@@ -382,8 +401,14 @@ class PhotoCapture: NSObject, ObservableObject {
 }
 extension PhotoCapture: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        if let imageData = photo.fileDataRepresentation(), let uiImage = UIImage(data: imageData) {
-            image = uiImage
+        guard error == nil, let imageData = photo.fileDataRepresentation(), let uiImage = UIImage(data: imageData) else {
+            DispatchQueue.main.async { self.isProcedureRunning = false }
+            return
+        }
+        DispatchQueue.main.async {
+            self.image = uiImage
+            self.onPhotoCaptured?(uiImage)
+            self.isProcedureRunning = false
         }
     }
 }

@@ -87,13 +87,13 @@ struct PlistEditorSubView: View {
                             .frame(width: 25)
                             .keyboardType(.numberPad)
                     }
-                    .onChange(of: subCategoryStrings2[item]) {
+                    .onDataChange(of: subCategoryStrings2[item]) { _ in
                         if subCategoryStrings2[item] != "" && countStoredImagesString[item] == "" {
                             countStoredImagesString[item] = "0"
                         }
                         subCategoryStrings[item] = subCategoryStrings2[item]
                     }
-                    .onChange(of: countStoredImagesString[item]) {
+                    .onDataChange(of: countStoredImagesString[item]) { _ in
                         if let countStoredImagesInt = Int(countStoredImagesString[item]) {
                             countStoredImages[item] = countStoredImagesInt
                         }
