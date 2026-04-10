@@ -9,7 +9,6 @@ import SwiftUI
 import ZIPFoundation
 
 struct ContentView: View {
-    @StateObject var photoCapture = PhotoCapture()
     @State var mainCategoryIds: [MainCategoryId] = []
     @State var workSpace: [WorkSpaceImageFile] = []
     @State var duplicateSpace: [DuplicateImageFile] = []
@@ -34,7 +33,8 @@ struct ContentView: View {
     @State var isPresentedProgressView = false
     @State var targetItem = 0
     @Environment(\.colorScheme) var colorScheme
-    
+    @State private var internalTimer: Timer?
+
     var body: some View {
         Button {
             showAppVersion = true
@@ -189,8 +189,10 @@ struct ContentView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
-            .onChange(of: showPlistCreator || isChangeFlag) {
-                showPlistList()
+            .onDataChange(of: [showPlistCreator, isChangeFlag]) { _ in
+                if showPlistCreator || isChangeFlag {
+                    showPlistList()
+                }
             }
             .onAppear {
                 let jsonUrl = documentDirectoryUrl.appendingPathComponent("config.json")
@@ -239,14 +241,13 @@ struct ContentView: View {
                             let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
                             ZStack {
                                 Button {
-                                    photoCapture.interestTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-                                        if showCategorySelector[item] == false {
-                                            isPresentedProgressView = true
-                                            targetItem = item
+                                    isPresentedProgressView = true
+                                    targetItem = item
+                                    internalTimer?.invalidate()
+                                    internalTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
+                                        DispatchQueue.global(qos: .userInteractive).async {
+                                            loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                                         }
-                                    }
-                                    DispatchQueue.global(qos: .userInteractive).async {
-                                        loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
                                     }
                                 } label: {
                                     if documentDirectoryFiles[item].range(of: "InOutMgr") != nil || documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
@@ -270,7 +271,7 @@ struct ContentView: View {
                                         Text(documentDirectoryFiles[item])
                                     }
                                 }
-                                .onChange(of: showPlistEditor[item]) {
+                                .onDataChange(of: showPlistEditor[item]) { _ in
                                     showPlistListEdit()
                                 }
                                 .swipeActions {
@@ -302,7 +303,7 @@ struct ContentView: View {
                                 .fullScreenCover(isPresented: $showCategorySelector[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
                                     let downSizeImages = mainCategoryIds.map{$0.items.map{$0.images.map{UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + $0.imageFile)!.resize(targetSize: CGSize(width: 200, height: 200))}}}
-                                    CategorySelectorView(photoCapture: photoCapture, showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
+                                    CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
                                 }
                                 .fullScreenCover(isPresented: $showPlistEditor[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))

@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct PhotoCaptureView: View {
-    @StateObject var photoCapture: PhotoCapture
+    @StateObject var photoCapture = PhotoCapture()
     @StateObject var sensor = MotionSensor()
     @Binding var showPhotoCapture: Bool
-    let caLayer: CALayer
     @Binding var mainCategoryIds: [MainCategoryId]
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
@@ -27,29 +27,18 @@ struct PhotoCaptureView: View {
     @State var isSelectFlashMode = false
     @State var capturedQRData = ""
     @EnvironmentObject var alertCenter: AlertCenter
-    let deviceWidth = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
-    let deviceHeight = (AppDelegate.orientationLock == .allButUpsideDown && (UIDevice.current.orientation == .landscapeLeft || UIDevice.current.orientation == .landscapeRight || UIDevice.current.orientation == .portraitUpsideDown)) ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
-    private let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
-    
+    let deviceWidth = UIScreen.main.bounds.width
+    let deviceHeight = UIScreen.main.bounds.height
+    private var camera: AVCaptureDevice? {
+        photoCapture.device
+    }
+
     var body: some View {
-        if AppDelegate.orientationLock == .allButUpsideDown && isNoAnimation == false {
-            Spacer()
-                .background(.clear)
-                .onAppear {
-                    AppDelegate.orientationLock = .portrait
-                    if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
-                        window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-                    }
-                }
-        } else if AppDelegate.orientationLock == .portrait && isNoAnimation == false {
+        if isNoAnimation == false {
             ZStack {
                 ZStack {
                     VStack {
-                        CameraView(caLayer: caLayer, photoCapture: photoCapture)
-                            .onPinchGesture()
-                            .onPanGesture()
-                            .onLongPressGesture()
-                            .onTapGesture()
+                        CameraView(photoCapture: photoCapture)
                     }
                     .onAppear {
                         print(deviceWidth, " : ", deviceHeight)
@@ -57,80 +46,9 @@ struct PhotoCaptureView: View {
                             window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
                         }
                     }
-                    .onReceive(timer) { _ in
-                        photoCapture.setUserAccelaration(xAcc: Double(sensor.xAcc)!, yAcc: Double(sensor.yAcc)!, zAcc: Double(sensor.zAcc)!)
-                        if fabs(Double(sensor.xGrv)!) < 0.2 && fabs(Double(sensor.yGrv)!) < 0.2 {
-                            //none
-                        } else {
-                            if fabs(Double(sensor.xGrv)!) / fabs(Double(sensor.yGrv)!) > 1 {
-                                photoOrientation = "H"
-                            } else {
-                                photoOrientation = "V"
-                            }
-                            photoCapture.setPhotoOrientation(photoOrientation: photoOrientation)
-                        }
-                    }
-                    if photoCapture.isShowInterestArea == false && photoCapture.isAutoExposureAutoFocusLocked == false {
-                        //none
-                    } else {
-                        Rectangle()
-                            .frame(width: 80, height: 80)
-                            .border(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow, width: 1)
-                            .foregroundColor(.clear)
-                            .position(photoCapture.tapPoint2)
-                        Rectangle()
-                            .frame(width: 5, height: 1)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(photoCapture.tapPoint2)
-                            .offset(x: -37.5)
-                        Rectangle()
-                            .frame(width: 5, height: 1)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(photoCapture.tapPoint2)
-                            .offset(x: 37.5)
-                        Rectangle()
-                            .frame(width: 1, height: 5)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(photoCapture.tapPoint2)
-                            .offset(y: -37.5)
-                        Rectangle()
-                            .frame(width: 1, height: 5)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(photoCapture.tapPoint2)
-                            .offset(y: 37.5)
-                        Image(systemName: "sun.max.fill")
-                            .font(.system(size: 20, weight: .light))
-                            .frame(width: 30)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(x: photoOrientation == "V" ? photoCapture.tapPoint2.x + 70 < UIScreen.main.bounds.width ? photoCapture.tapPoint2.x + 56 : photoCapture.tapPoint2.x - 56 : photoCapture.tapPoint2.x + photoCapture.addingPosition, y: photoOrientation == "V" ? photoCapture.tapPoint2.y - photoCapture.addingPosition : photoCapture.tapPoint2.y + 70 < 60 + (UIScreen.main.bounds.width / 0.75) ? photoCapture.tapPoint2.y + 56 : photoCapture.tapPoint2.y - 56)
-                        Rectangle()
-                            .frame(width: photoOrientation == "V" ? 1 : 80, height: photoOrientation == "V" ? 80 : 1)
-                            .foregroundColor(photoCapture.isShowInterestAreaWeak == true ? .yellow.opacity(0.5) : .yellow)
-                            .position(x: photoOrientation == "V" ? photoCapture.tapPoint2.x + 70 < UIScreen.main.bounds.width ? photoCapture.tapPoint2.x + 56 : photoCapture.tapPoint2.x - 56 : photoCapture.tapPoint2.x, y: photoOrientation == "V" ? photoCapture.tapPoint2.y : photoCapture.tapPoint2.y + 70 < 60 + (UIScreen.main.bounds.width / 0.75) ? photoCapture.tapPoint2.y + 56 : photoCapture.tapPoint2.y - 56)
-                    }
-                    if photoCapture.isAutoExposureAutoFocusLocked == true {
-                        if photoOrientation == "H" {
-                            VStack {
-                                Text(photoCapture.device!.isExposureModeSupported(.locked) ? photoCapture.device!.isFocusModeSupported(.locked) ? "AE/AF locked" : "AE locked" : photoCapture.device!.isFocusModeSupported(.locked) ? "AF locked" : "").font(.system(.caption))
-                                    .frame(width: 80, height: 15)
-                                    .background(.yellow)
-                                    .foregroundColor(.black)
-                                    .cornerRadius(1)
-                                    .rotationEffect(Angle(degrees: 90))
-                                    .position(x: UIScreen.main.bounds.width - 7.5, y: UIScreen.main.bounds.height / 2)
-                            }
-                        }
-                        if photoOrientation == "V" {
-                            VStack {
-                                Text(photoCapture.device!.isExposureModeSupported(.locked) ? photoCapture.device!.isFocusModeSupported(.locked) ? "AE/AF locked" : "AE locked" : photoCapture.device!.isFocusModeSupported(.locked) ? "AF locked" : "").font(.system(.caption))
-                                    .frame(width: 80, height: 15)
-                                    .background(.yellow)
-                                    .foregroundColor(.black)
-                                    .cornerRadius(1)
-                                    .offset(y: ((UIScreen.main.bounds.height - (UIScreen.main.bounds.width / 0.75)) / 2))
-                                Spacer()
-                            }
-                        }
+                    .onReceive(sensor.$orientation) { newOrientation in
+                        photoOrientation = newOrientation
+                        photoCapture.setPhotoOrientation(photoOrientation: newOrientation)
                     }
                     Button {
                         capturedQRData = ""
@@ -169,6 +87,37 @@ struct PhotoCaptureView: View {
                                 .background(capturedQRData == photoCapture.QRData[index] ? .blue.opacity(0.3) : .green.opacity(0.3))
                         }
                         .position(CGPoint(x: photoCapture.QRFrame[index].minX + photoCapture.QRFrame[index].width / 2, y: photoCapture.QRFrame[index].minY + photoCapture.QRFrame[index].height / 2))
+                    }
+                    if photoCapture.isShowInterestArea || photoCapture.isAutoExposureAutoFocusLocked {
+                        FocusBracket(at: photoCapture.tapPoint2, isWeak: photoCapture.isShowInterestAreaWeak)
+                        ExposureIndicator(at: photoCapture.tapPoint2, isWeak: photoCapture.isShowInterestAreaWeak, orientation: photoOrientation)
+                    }
+                    if photoCapture.isAutoExposureAutoFocusLocked {
+                        let statusText = photoCapture.lockStatusText
+                        if photoOrientation == "H" {
+                            VStack {
+                                Text(statusText)
+                                    .font(.system(.caption))
+                                    .frame(width: 80, height: 15)
+                                    .background(.yellow)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(1)
+                                    .rotationEffect(Angle(degrees: 90))
+                                    .position(x: UIScreen.main.bounds.width - 7.5, y: UIScreen.main.bounds.height / 2)
+                            }
+                        }
+                        if photoOrientation == "V" {
+                            VStack {
+                                Text(statusText)
+                                    .font(.system(.caption))
+                                    .frame(width: 80, height: 15)
+                                    .background(.yellow)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(1)
+                                    .offset(y: ((UIScreen.main.bounds.height - (UIScreen.main.bounds.width / 0.75)) / 2))
+                                Spacer()
+                            }
+                        }
                     }
                 }
                 VStack {
@@ -218,8 +167,8 @@ struct PhotoCaptureView: View {
                 }
                 HStack {
                     Spacer()
-                    ForEach(photoCapture.device!.virtualDeviceSwitchOverVideoZoomFactors, id: \.self) { value in
-                        if value == photoCapture.device!.virtualDeviceSwitchOverVideoZoomFactors[0] {
+                    ForEach(camera?.virtualDeviceSwitchOverVideoZoomFactors ?? [], id: \.self) { value in
+                        if value == camera?.virtualDeviceSwitchOverVideoZoomFactors[0] {
                             Button {
                                 photoCapture.selectDevice(zoomFactor: CGFloat(1))
                             } label: {
@@ -310,34 +259,18 @@ struct PhotoCaptureView: View {
                                 Circle()
                                     .frame(width: 50, height: 50)
                                     .foregroundColor(.gray)
-                                    .onReceive(timer) { _ in
-                                        if photoCapture.isProcedureRunning == true && photoCapture.image != nil {
-                                            _ = saveImage()
-                                        }
-                                    }
                             } else {
                                 Circle()
                                     .frame(width: 50, height: 50)
                                     .foregroundColor(.white)
                                     .onTapGesture {
+                                        guard !photoCapture.isProcedureRunning else { return }
                                         photoCapture.setPhotoOrientation(photoOrientation: photoOrientation)
-                                        if photoCapture.isProcedureRunning == false {
-                                            if photoCapture.image == nil {
-                                                photoCapture.takePhoto()
-                                                photoOrientationAtShot = photoOrientation
-                                                photoCapture.isProcedureRunning = true
-                                            } else {
-                                                print("isProcedureRunning false & image not nil")
-                                            }
-                                        } else {
-                                            if photoCapture.image == nil {
-                                                //none
-                                            } else {
-                                                _ = saveImage()
-                                                photoCapture.takePhoto()
-                                                photoOrientationAtShot = photoOrientation
-                                                photoCapture.isProcedureRunning = true
-                                            }
+                                        photoOrientationAtShot = photoOrientation
+                                        photoCapture.isProcedureRunning = true
+                                        photoCapture.takePhoto { capturedImage in
+                                            let result = saveImage()
+                                            print("saving image result: \(result)")
                                         }
                                     }
                             }
@@ -350,59 +283,94 @@ struct PhotoCaptureView: View {
             .background(.black)
         }
     }
-    private func saveImage() -> String {
-        autoreleasepool {
+}
+private extension PhotoCaptureView {
+    @ViewBuilder
+    func FocusBracket(at point: CGPoint, isWeak: Bool) -> some View {
+        let color = isWeak ? Color.yellow.opacity(0.5) : Color.yellow
+        ZStack {
+            Rectangle().stroke(color, lineWidth: 1).frame(width: 80, height: 80)
+            Rectangle().fill(color).frame(width: 5, height: 1).offset(x: -37.5)
+            Rectangle().fill(color).frame(width: 5, height: 1).offset(x: 37.5)
+            Rectangle().fill(color).frame(width: 1, height: 5).offset(y: -37.5)
+            Rectangle().fill(color).frame(width: 1, height: 5).offset(y: 37.5)
+        }
+        .position(point)
+    }
+    @ViewBuilder
+    func ExposureIndicator(at point: CGPoint, isWeak: Bool, orientation: String) -> some View {
+        let color = isWeak ? Color.yellow.opacity(0.5) : Color.yellow
+        let isV = (orientation == "V")
+        let screenWidth = UIScreen.main.bounds.width
+        let limitY = 60 + (screenWidth / 0.75)
+        let sunX: CGFloat = isV ? (point.x + 70 < screenWidth ? point.x + 56 : point.x - 56) : (point.x + photoCapture.addingPosition)
+        let rectX: CGFloat = isV ? (point.x + 70 < screenWidth ? point.x + 56 : point.x - 56) : point.x
+        let sunY: CGFloat = isV ? (point.y - photoCapture.addingPosition) : (point.y + 70 < limitY ? point.y + 56 : point.y - 56)
+        let rectY: CGFloat = isV ? point.y : (point.y + 70 < limitY ? point.y + 56 : point.y - 56)
+        Group {
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 20, weight: .light))
+                .foregroundColor(color)
+                .frame(width: 30)
+                .position(x: sunX, y: sunY)
+            Rectangle()
+                .fill(color)
+                .frame(width: orientation == "V" ? 1 : 80, height: orientation == "V" ? 80 : 1)
+                .position(x: rectX, y: rectY)
+        }
+    }
+    func saveImage() -> String {
+        return autoreleasepool {
             var plistImageFileName = ""
-            if photoCapture.image != nil {
-                switch photoOrientationAtShot {
-                case "H":
-                    let cgImage = photoCapture.image?.cgImage
-                    let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.up)
-                    photoCapture.image? = rotatedImage
-                    break
-                case "V":
-                    let cgImage = photoCapture.image?.cgImage
-                    let rotatedImage = UIImage(cgImage: cgImage!, scale: photoCapture.image!.scale, orientation: UIImage.Orientation.right)
-                    photoCapture.image? = rotatedImage
-                    break
-                default:
-                    break
-                }
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyyMMddHHmmssS"
-                let jpgImageData = photoCapture.image?.jpegData(compressionQuality: 0.5)
-                plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
-                let duplicateSpaceImageFileName = plistImageFileName
-                do {
-                    if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-                        ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-                        plistJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
-                    }
-                    try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                    duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName, imageInfo: capturedQRData), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-                    downSizeImages[mainCategoryIndex][subCategoryIndex].append(UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
-                    mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-                    ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                } catch {
-                    print("Writing Jpg file failed with error:\(error)")
-                }
+            guard let originalImage = photoCapture.image else {
+                photoCapture.isProcedureRunning = false
+                return ""
             }
-            photoCapture.isProcedureRunning = false
-            photoCapture.image = nil
+            var processedImage = originalImage
+            if let cgImage = originalImage.cgImage {
+                let orientation: UIImage.Orientation = (photoOrientationAtShot == "V") ? .right : (camera?.position == .front) ? .down : .up
+                processedImage = UIImage(cgImage: cgImage, scale: originalImage.scale, orientation: orientation)
+            }
+            guard let jpgImageData = processedImage.jpegData(compressionQuality: 0.5) else { return "" }
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMddHHmmssS"
+            plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
+            var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
+            let duplicateSpaceImageFileName = plistImageFileName
+            let mainCat = mainCategoryIds[mainCategoryIndex]
+            let subCat = mainCat.items[subCategoryIndex]
+            do {
+                if mainCat.subFolderMode == 1 {
+                    let mainName = ZipManager.replaceString(targetString: mainCat.mainCategory)
+                    let subName = ZipManager.replaceString(targetString: subCat.subCategory)
+                    let folderUrl = tempDirectoryUrl.appendingPathComponent(mainName).appendingPathComponent(subName)
+                    ZipManager.create(directoryUrl: folderUrl)
+                    plistJpgUrl = folderUrl.appendingPathComponent(plistImageFileName)
+                }
+                try jpgImageData.write(to: plistJpgUrl, options: .atomic)
+                duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCat.subFolderMode, mainCategoryName: mainCat.mainCategory, subCategoryName: subCat.subCategory), at: duplicateSpace.count)
+                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName, imageInfo: capturedQRData), at: subCat.images.count)
+                let thumb = processedImage.resize(targetSize: CGSize(width: 200, height: 200))
+                downSizeImages[mainCategoryIndex][subCategoryIndex].append(thumb)
+                mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
+                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                photoCapture.image = nil
+                photoCapture.isProcedureRunning = false
+            } catch {
+                print("Writing Jpg file failed with error:\(error)")
+                photoCapture.isProcedureRunning = false
+            }
             return plistImageFileName
         }
     }
-    private func cancelView(jpgFileName: String) {
+    func cancelView(jpgFileName: String) {
         isNoAnimation = true
         showPhotoCapture = false
         photoCapture.image = nil
-        if photoCapture.device!.position == .front {
+        if camera?.position == .front {
             photoCapture.flipCameraDevice()
         }
         photoCapture.reset(zoomReset: true)
-        AppDelegate.orientationLock = .allButUpsideDown
         let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let targetZipUrl = fileUrl.deletingLastPathComponent().appendingPathComponent(plistNoExtensionName + ".zip")
         let targetPlistUrl = fileUrl
