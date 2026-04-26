@@ -9,12 +9,23 @@ import SwiftUI
 
 struct PlistEditorSubView: View {
     @Binding var subCategoryStrings: [String]
-    @State var subCategoryStrings2: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
     @Binding var countStoredImages: [Int]
-    @State var countStoredImagesString: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory)
     @Binding var imageFiles: [[String]]
     @Binding var imageInfos: [[String]]
+    @ObservedObject var configManager = ConfigManager.shared
+    @State var subCategoryStrings2: [String]
+    @State var countStoredImagesString: [String]
     @State var selectedIndex: [Int] = [-1, -1]
+    
+    init(subCategoryStrings: Binding<[String]>, countStoredImages: Binding<[Int]>, imageFiles: Binding<[[String]]>, imageInfos: Binding<[[String]]>) {
+        self._subCategoryStrings = subCategoryStrings
+        self._countStoredImages = countStoredImages
+        self._imageFiles = imageFiles
+        self._imageInfos = imageInfos
+        let count = ConfigManager.shared.maxNumberOfSubCategory
+        self._subCategoryStrings2 = State(initialValue: Array(repeating: "", count: count))
+        self._countStoredImagesString = State(initialValue: Array(repeating: "", count: count))
+    }
 
     var body: some View {
         if selectedIndex[0] != -1 && selectedIndex[1] != -1 {
@@ -50,7 +61,7 @@ struct PlistEditorSubView: View {
         }
         List {
             Section(header: Text("Input Photo Label ") + Text("Detail").font(.title)) {
-                ForEach(0..<ConfigManager.maxNumberOfSubCategory, id: \.self) { item in
+                ForEach(0..<configManager.maxNumberOfSubCategory, id: \.self) { item in
                     HStack {
                         VStack {
                             Image(systemName: selectedIndex[0] == item || selectedIndex[1] == item ? "checkmark.circle.fill" : "circle")
@@ -117,13 +128,13 @@ struct PlistEditorSubView: View {
             if place1 == -1 {
                 place1 = selectedIndex[1]
             }
-            if subCategoryStrings2[ConfigManager.maxNumberOfSubCategory - 1] == "" {
+            if subCategoryStrings2[configManager.maxNumberOfSubCategory - 1] == "" {
                 subCategoryStrings2.insert("", at: place1)
                 countStoredImagesString.insert("0", at: place1)
                 subCategoryStrings.insert("", at: place1)
                 countStoredImages.insert(0, at: place1)
-                imageFiles.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
-                imageInfos.insert(Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), at: place1)
+                imageFiles.insert(Array(repeating: "", count: configManager.maxNumberOfImageFile), at: place1)
+                imageInfos.insert(Array(repeating: "", count: configManager.maxNumberOfImageFile), at: place1)
             }
         }
     }

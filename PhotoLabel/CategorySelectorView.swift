@@ -16,6 +16,13 @@ struct CategorySelectorView: View {
     @State var plistCategoryName: String
     @State var downSizeImages: [[[UIImage]]]
     @Binding var isPresentedProgressView: Bool
+    @ObservedObject var configManager = ConfigManager.shared
+    @State var columns1: [GridItem] = []
+    @State var columns2: [GridItem] = []
+    @State var mainScrollColumns1: [GridItem] = []
+    @State var mainScrollColumns2: [GridItem] = []
+    @State var subScrollColumns1: [GridItem] = []
+    @State var subScrollColumns2: [GridItem] = []
     @State var isPresentedProgressView2 = false
     @State var showPhotoCapture = false
     @State var showPhotoLibrary = false
@@ -32,12 +39,6 @@ struct CategorySelectorView: View {
     @State var isDuplicateMode = false
     @State var isMainScrollViewEnabled = false
     @State var isSubScrollViewEnabled = false
-    var columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
-    var columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
-    @State var mainScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.mainColumnNumber) - 1) * 5) / CGFloat(ConfigManager.mainColumnNumber)), spacing: 5), count: ConfigManager.mainColumnNumber)
-    @State var mainScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadMainColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadMainColumnNumber)), spacing: 5), count: ConfigManager.iPadMainColumnNumber)
-    @State var subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) / CGFloat(ConfigManager.subColumnNumber)), spacing: 5), count: ConfigManager.subColumnNumber)
-    @State var subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadSubColumnNumber)), spacing: 5), count: ConfigManager.iPadSubColumnNumber)
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
     private var mainScrollColumns: [GridItem] {
@@ -46,7 +47,7 @@ struct CategorySelectorView: View {
     private var subScrollColumns: [GridItem] {
         UIDevice.current.userInterfaceIdiom == .pad ? subScrollColumns2 : subScrollColumns1
     }
-
+     
     var body: some View {
         ScrollView {
             VStack(spacing: 5) {
@@ -57,6 +58,20 @@ struct CategorySelectorView: View {
                     subCategorySection
                 }
             }
+        }
+        .onAppear{
+            let iColNo = ConfigManager.shared.imageColumnNumber
+            let iPiColNo = ConfigManager.shared.iPadImageColumnNumber
+            let mColNo = ConfigManager.shared.mainColumnNumber
+            let iPmColNo = ConfigManager.shared.iPadMainColumnNumber
+            let sColNo = ConfigManager.shared.subColumnNumber
+            let iPsColNo = ConfigManager.shared.iPadSubColumnNumber
+            columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(iColNo) - 1) * 10) / CGFloat(iColNo)), spacing: 5), count: iColNo)
+            columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(iPiColNo) - 1) * 10) / CGFloat(iPiColNo)), spacing: 5), count: iPiColNo)
+            mainScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(mColNo) - 1) * 5) / CGFloat(mColNo)), spacing: 5), count: mColNo)
+            mainScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(iPmColNo) - 1) * 5) / CGFloat(iPmColNo)), spacing: 5), count: iPmColNo)
+            subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(sColNo) - 1) * 5) / CGFloat(sColNo)), spacing: 5), count: sColNo)
+            subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(iPsColNo) - 1) * 5) / CGFloat(iPsColNo)), spacing: 5), count: iPsColNo)
         }
         .fullScreenCover(isPresented: $showCheckBox) {
             CheckBoxView(workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox, downSizeImages: $downSizeImages)
@@ -144,8 +159,8 @@ extension CategorySelectorView {
         let isPad = UIDevice.current.userInterfaceIdiom == .pad
         let screenWidth = UIScreen.main.bounds.width
         if isPad {
-            let colCount = ConfigManager.iPadMainColumnNumber
-            let rowCount = ConfigManager.iPadMainRowNumber
+            let colCount = configManager.iPadMainColumnNumber
+            let rowCount = configManager.iPadMainRowNumber
             if mainCategoryIds.count > colCount * rowCount {
                 isMainScrollViewEnabled = true
                 let itemWidth = (screenWidth - (CGFloat(colCount) - 1) * 5) * 2 / (CGFloat(colCount) * 2 - 1)
@@ -155,8 +170,8 @@ extension CategorySelectorView {
                 mainScrollColumns2 = Array(repeating: GridItem(.fixed(itemWidth), spacing: 5), count: gridCount)
             }
         } else {
-            let colCount = ConfigManager.mainColumnNumber
-            let rowCount = ConfigManager.mainRowNumber
+            let colCount = configManager.mainColumnNumber
+            let rowCount = configManager.mainRowNumber
             if mainCategoryIds.count > colCount * rowCount {
                 isMainScrollViewEnabled = true
                 let itemWidth = (screenWidth - (CGFloat(colCount) - 1) * 5) * 2 / (CGFloat(colCount) * 2 - 1)
@@ -257,6 +272,7 @@ struct MainCategoryButton: View {
     @Binding var isPresentedProgressView2: Bool
     @Binding var subScrollColumns1: [GridItem]
     @Binding var subScrollColumns2: [GridItem]
+    @ObservedObject var configManager = ConfigManager.shared
 
     var body: some View {
         Button {
@@ -281,20 +297,20 @@ struct MainCategoryButton: View {
             targetMainCategoryIndex = mainCategoryId.id
             targetSubCategoryIndex[1] = -1
             if UIDevice.current.userInterfaceIdiom == .pad {
-                if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.iPadSubColumnNumber * ConfigManager.iPadSubRowNumber {
+                if mainCategoryIds[targetMainCategoryIndex].items.count > configManager.iPadSubColumnNumber * configManager.iPadSubRowNumber {
                     isSubScrollViewEnabled = true
-                    subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.iPadSubColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.iPadSubRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.iPadSubRowNumber)) / ConfigManager.iPadSubRowNumber + 1)
+                    subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(configManager.iPadSubColumnNumber) - 1) * 5) * 2 / ((CGFloat(configManager.iPadSubColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % configManager.iPadSubRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / configManager.iPadSubRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % configManager.iPadSubRowNumber)) / configManager.iPadSubRowNumber + 1)
                 } else {
                     isSubScrollViewEnabled = false
-                    subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(ConfigManager.iPadSubColumnNumber)), spacing: 5), count: ConfigManager.iPadSubColumnNumber)
+                    subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(configManager.iPadSubColumnNumber) - 1) * 5) / CGFloat(configManager.iPadSubColumnNumber)), spacing: 5), count: configManager.iPadSubColumnNumber)
                 }
             } else {
-                if mainCategoryIds[targetMainCategoryIndex].items.count > ConfigManager.subColumnNumber * ConfigManager.subRowNumber {
+                if mainCategoryIds[targetMainCategoryIndex].items.count > configManager.subColumnNumber * configManager.subRowNumber {
                     isSubScrollViewEnabled = true
-                    subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) * 2 / ((CGFloat(ConfigManager.subColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / ConfigManager.subRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % ConfigManager.subRowNumber)) / ConfigManager.subRowNumber + 1)
+                    subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(configManager.subColumnNumber) - 1) * 5) * 2 / ((CGFloat(configManager.subColumnNumber) + 1) * 2 - 1)), spacing: 5), count: mainCategoryIds[targetMainCategoryIndex].items.count % configManager.subRowNumber == 0 ? mainCategoryIds[targetMainCategoryIndex].items.count / configManager.subRowNumber : (mainCategoryIds[targetMainCategoryIndex].items.count - (mainCategoryIds[targetMainCategoryIndex].items.count % configManager.subRowNumber)) / configManager.subRowNumber + 1)
                 } else {
                     isSubScrollViewEnabled = false
-                    subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.subColumnNumber) - 1) * 5) / CGFloat(ConfigManager.subColumnNumber)), spacing: 5), count: ConfigManager.subColumnNumber)
+                    subScrollColumns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(configManager.subColumnNumber) - 1) * 5) / CGFloat(configManager.subColumnNumber)), spacing: 5), count: configManager.subColumnNumber)
                 }
             }
         } label: {

@@ -296,7 +296,7 @@ struct EachTabView: View {
                                     ForEach(duplicateSpace.indices, id: \.self) { duplicateSpaceImageFileIndex in
                                         if let uiimage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path) {
                                             ZStack {
-                                                Image(uiImage: uiimage.resize(targetSize: CGSize(width: 200, height: 200)))
+                                                Image(uiImage: ImageManager.downSizeToFill(uiimage: uiimage, targetSize: uiimage.getDisplaySize(forHeight: 200)))
                                                     .resizable()
                                                     .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
                                                     .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
@@ -368,7 +368,7 @@ struct EachTabView: View {
                                     ForEach(workSpace.indices, id: \.self) { workSpaceImageFileIndex in
                                         if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path) {
                                             ZStack {
-                                                Image(uiImage: uiimage.resize(targetSize: CGSize(width: 200, height: 200)))
+                                                Image(uiImage: ImageManager.downSizeToFill(uiimage: uiimage, targetSize: uiimage.getDisplaySize(forHeight: 200)))
                                                     .resizable()
                                                     .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
                                                     .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))

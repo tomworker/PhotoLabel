@@ -10,16 +10,17 @@ import SwiftUI
 struct PlistEditorView: View {
     @Binding var showPlistEditor: Bool
     @State var plistName: String
-    @State var initialPlistName = ""
     @State var mainCategoryIds: [MainCategoryId]
-    @State var mainCategoryStrings: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
-    @State var mainCategoryStrings2: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
-    @State var subFolderModes: [Int] = Array(repeating: 0, count: ConfigManager.maxNumberOfMainCategory)
-    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
-    @State var subCategoryStrings2: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
-    @State var countStoredImages: [[Int]] = Array(repeating: Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
-    @State var imageFiles: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
-    @State var imageInfos: [[[String]]] = Array(repeating: Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
+    @ObservedObject var configManager = ConfigManager.shared
+    @State var mainCategoryStrings: [String] = []
+    @State var mainCategoryStrings2: [String] = []
+    @State var subFolderModes: [Int] = []
+    @State var subCategoryStrings: [[String]] = []
+    @State var subCategoryStrings2: [[String]] = []
+    @State var countStoredImages: [[Int]] = []
+    @State var imageFiles: [[[String]]] = []
+    @State var imageInfos: [[[String]]] = []
+    @State var initialPlistName = ""
     @State var mainCategorys: [MainCategory] = []
     @State var isRename = false
     @State var isCopy = false
@@ -31,84 +32,86 @@ struct PlistEditorView: View {
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
-        HStack {
-            Spacer()
-            HStack {
-                TextField("Ex) Topics_2023", text: $plistName)
-                    .multilineTextAlignment(.trailing)
-                    .frame(maxWidth: .infinity, minHeight: 30)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                Text(".plist")
-                    .multilineTextAlignment(.leading)
-                    .frame(width: 40)
+        VStack {
+            EditorHeaderView(
+                plistName: $plistName,
+                initialPlistName: initialPlistName,
+                isRename: $isRename,
+                showPlistEditor: $showPlistEditor,
+                onSave: {
+                    if plistName == initialPlistName { savePlist(isRename: false, isCopy: false) }
+                    else { isRename = true }
+                }
+            )
+            EditorActionBar(
+                selectedIndex: $selectedIndex,
+                subFolderModes: $subFolderModes,
+                onInsert: insertBlankPlist,
+                onChangePlace: changePlacePlist,
+                onCopy: copyPlist,
+                onToggleMode: subFolderMode
+            )
+            List {
+                Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
+                    ForEach(mainCategoryStrings.indices, id: \.self) { item in
+                        CategoryRowView(
+                            item: item,
+                            selectedIndex: $selectedIndex,
+                            subFolderMode: $subFolderModes[item],
+                            categoryText: $mainCategoryStrings[item]
+                        )
+                    }
+                }
             }
-            .confirmationDialog("Save as another plist or Rename?", isPresented: $isRename, titleVisibility: .visible) {
-                Button("Save as another plist") {
-                    savePlist(isRename: true, isCopy: true)
+            NavigationView {
+                List {
+                    Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
+                        ForEach(mainCategoryStrings.indices, id: \.self) { item in
+                            SubCategoryRowView(
+                                subCategoryText: $mainCategoryStrings[item],
+                                subCategoryStrings: $subCategoryStrings[item],
+                                countStoredImages: $countStoredImages[item],
+                                imageFiles: $imageFiles[item],
+                                imageInfos: $imageInfos[item]
+                            )
+                        }
+                    }
                 }
-                Button("Rename") {
-                    savePlist(isRename: true, isCopy: false)
-                }
-                Button("Cancel", role: .cancel) {
-                    plistName = initialPlistName
-                }
-            }
-            Button {
-                if plistName == initialPlistName {
-                    savePlist(isRename: false, isCopy: false)
-                } else {
-                    isRename = true
-                }
-            } label : {
-                Text("Save")
-                    .frame(width: 50, height: 30)
-                    .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            Button {
-                showPlistEditor = false
-            } label: {
-                Image(systemName: "xmark")
-                    .frame(width: 30, height: 30)
-                    .background(.orange)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.trailing)
+                .listStyle(.grouped)
             }
         }
-        ZStack {
-            VStack{
-            }
-            .alert(isPresented: $isMaxNumberMainError) {
-                Alert(title: Text("Canceled"), message: Text("Category max number exceeded the limit of \(ConfigManager.maxNumberOfMainCategory)."),
-                      dismissButton: .default(Text("OK"), action: {
-                    showPlistEditor = false
-                }))
-            }
-            VStack{
-            }
-            .alert(isPresented: $isMaxNumberSubError) {
-                Alert(title: Text("Canceled"), message: Text("Details max number exceeded the limit of \(ConfigManager.maxNumberOfSubCategory)."),
-                      dismissButton: .default(Text("OK"), action: {
-                    showPlistEditor = false
-                }))
-            }
-            VStack{
-            }
-            .alert(isPresented: $isMaxNumberImageError) {
-                Alert(title: Text("Canceled"), message: Text("Image file max number exceeded the limit of \(ConfigManager.maxNumberOfImageFile)."),
-                      dismissButton: .default(Text("OK"), action: {
-                    showPlistEditor = false
-                }))
-            }
+        .alert("Canceled", isPresented: $isMaxNumberMainError) {
+            Button("OK") { showPlistEditor = false }
+        } message: {
+            Text("Category max number exceeded the limit of \(configManager.maxNumberOfMainCategory).")
+        }
+        .alert("Canceled", isPresented: $isMaxNumberSubError) {
+            Button("OK") { showPlistEditor = false }
+        } message: {
+            Text("Details max number exceeded the limit of \(configManager.maxNumberOfSubCategory).")
+        }
+        .alert("Canceled", isPresented: $isMaxNumberImageError) {
+            Button("OK") { showPlistEditor = false }
+        } message: {
+            Text("Image file max number exceeded the limit of \(configManager.maxNumberOfImageFile).")
         }
         .onAppear {
+            let mCount = ConfigManager.shared.maxNumberOfMainCategory
+            let sCount = ConfigManager.shared.maxNumberOfSubCategory
+            let iCount = ConfigManager.shared.maxNumberOfImageFile
+            mainCategoryStrings = Array(repeating: "", count: mCount)
+            mainCategoryStrings2 = Array(repeating: "", count: mCount)
+            subFolderModes = Array(repeating: 0, count: mCount)
+            subCategoryStrings = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
+            subCategoryStrings2 = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
+            countStoredImages = Array(repeating: Array(repeating: 0, count: sCount), count: mCount)
+            imageFiles = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
+            imageInfos = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
             initialPlistName = plistName
             mainCategorys = CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds)
             var array: [String] = ["", ""]
             for i in 0..<mainCategorys.count {
-                if mainCategorys.count > ConfigManager.maxNumberOfMainCategory {
+                if mainCategorys.count > configManager.maxNumberOfMainCategory {
                     isMaxNumberMainError = true
                     break
                 }
@@ -125,7 +128,7 @@ struct PlistEditorView: View {
                 mainCategoryStrings2[i] = array[1]
                 subFolderModes[i] = mainCategorys[i].subFolderMode
                 for j in 0..<mainCategorys[i].items.count {
-                    if mainCategorys[i].items.count > ConfigManager.maxNumberOfSubCategory {
+                    if mainCategorys[i].items.count > configManager.maxNumberOfSubCategory {
                         isMaxNumberSubError = true
                         break
                     }
@@ -142,7 +145,7 @@ struct PlistEditorView: View {
                     subCategoryStrings2[i][j] = array[1]
                     countStoredImages[i][j] = mainCategorys[i].items[j].countStoredImages
                     for k in 0..<mainCategorys[i].items[j].countStoredImages{
-                        if mainCategorys[i].items[j].countStoredImages > ConfigManager.maxNumberOfImageFile {
+                        if mainCategorys[i].items[j].countStoredImages > configManager.maxNumberOfImageFile {
                             isMaxNumberImageError = true
                             break
                         }
@@ -151,111 +154,6 @@ struct PlistEditorView: View {
                     }
                 }
             }
-        }
-        VStack {
-            if selectedIndex[0] != -1 && selectedIndex[1] != -1 {
-                Spacer(minLength: 8)
-                HStack {
-                    Button {
-                        changePlacePlist()
-                    } label: {
-                        Text("Change Places")
-                            .frame(width: 140, height: 30)
-                            .background(.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding(.leading)
-                    }
-                    Button {
-                        copyPlist()
-                    } label: {
-                        Text("Copy \(selectedIndex[0] + 1) to \(selectedIndex[1] + 1) w/o photos")
-                        .frame(width: 220, height: 30)
-                        .background(.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    Spacer()
-                }
-            } else if (selectedIndex[0] != -1 && selectedIndex[1] == -1) || (selectedIndex[0] == -1 && selectedIndex[1] != -1) {
-                Spacer(minLength: 8)
-                HStack {
-                    Button {
-                        insertBlankPlist()
-                    } label: {
-                        Text("Insert Blank")
-                            .frame(width: 130, height: 30)
-                            .background(.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding(.leading)
-                    }
-                    Button {
-                        subFolderMode()
-                    } label: {
-                        if selectedIndex[0] != -1 {
-                            Text(subFolderModes[selectedIndex[0]] == 1 ? "SubFolder Mode OFF" : "SubFolder Mode ON")
-                                .frame(width: 200, height: 30)
-                                .background(.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .padding(.leading)
-                        }
-                    }
-                    Spacer()
-                }
-            }
-            List {
-                Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                    ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
-                        HStack {
-                            VStack {
-                                Image(systemName: selectedIndex[0] == item || selectedIndex[1] == item ? "checkmark.circle.fill" : "circle")
-                                    .frame(width: 25)
-                                    .foregroundColor(selectedIndex[0] != -1 && selectedIndex[1] != -1 ? selectedIndex[0] == item || selectedIndex[1] == item ? .blue : .gray : .blue)
-                            }
-                            .onTapGesture {
-                                if selectedIndex[0] == item {
-                                    if selectedIndex[1] == -1 {
-                                        selectedIndex[0] = -1
-                                    } else {
-                                        selectedIndex[0] = selectedIndex[1]
-                                        selectedIndex[1] = -1
-                                    }
-                                } else if selectedIndex[1] == item {
-                                    selectedIndex[1] = -1
-                                } else {
-                                    if selectedIndex[0] == -1 {
-                                        selectedIndex[0] = item
-                                    } else {
-                                        if selectedIndex[1] == -1 {
-                                            selectedIndex[1] = item
-                                        }
-                                    }
-                                }
-                            }
-                            Text(subFolderModes[item] == 1 ? "S" : "")
-                                .frame(width: 10)
-                            Text(String(item + 1))
-                                .frame(width: 32)
-                            TextField("Category", text: $mainCategoryStrings[item])
-                        }
-                    }
-                }
-            }
-            NavigationView {
-                List {
-                    Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                        ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
-                            NavigationLink(destination: PlistEditorSubView(subCategoryStrings: $subCategoryStrings[item], countStoredImages: $countStoredImages[item], imageFiles: $imageFiles[item], imageInfos: $imageInfos[item])) {
-                                Text(mainCategoryStrings[item])
-                            }
-                        }
-                    }
-                }
-                .listStyle(.grouped)
-            }
-            
         }
     }
     private func subFolderMode() {
@@ -275,13 +173,13 @@ struct PlistEditorView: View {
         autoreleasepool {
             let place1 = selectedIndex[0]
             let place2 = selectedIndex[1]
-            if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+            if mainCategoryStrings[configManager.maxNumberOfMainCategory - 1] == "" {
                 mainCategoryStrings.insert("", at: place2)
                 subFolderModes.insert(0, at: place2)
-                subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place2)
-                countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place2)
-                imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
-                imageInfos.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place2)
+                subCategoryStrings.insert(Array(repeating: "", count: configManager.maxNumberOfSubCategory), at: place2)
+                countStoredImages.insert(Array(repeating: 0, count: configManager.maxNumberOfSubCategory), at: place2)
+                imageFiles.insert(Array(repeating: Array(repeating: "", count: configManager.maxNumberOfImageFile), count: configManager.maxNumberOfSubCategory), at: place2)
+                imageInfos.insert(Array(repeating: Array(repeating: "", count: configManager.maxNumberOfImageFile), count: configManager.maxNumberOfSubCategory), at: place2)
                 if place1 < place2 {
                     mainCategoryStrings[place2] = mainCategoryStrings[place1]
                     subFolderModes[place2] = subFolderModes[place1]
@@ -300,13 +198,13 @@ struct PlistEditorView: View {
             if place1 == -1 {
                 place1 = selectedIndex[1]
             }
-            if mainCategoryStrings[ConfigManager.maxNumberOfMainCategory - 1] == "" {
+            if mainCategoryStrings[configManager.maxNumberOfMainCategory - 1] == "" {
                 mainCategoryStrings.insert("", at: place1)
                 subFolderModes.insert(0, at: place1)
-                subCategoryStrings.insert(Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), at: place1)
-                countStoredImages.insert(Array(repeating: 0, count: ConfigManager.maxNumberOfSubCategory), at: place1)
-                imageFiles.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
-                imageInfos.insert(Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfImageFile), count: ConfigManager.maxNumberOfSubCategory), at: place1)
+                subCategoryStrings.insert(Array(repeating: "", count: configManager.maxNumberOfSubCategory), at: place1)
+                countStoredImages.insert(Array(repeating: 0, count: configManager.maxNumberOfSubCategory), at: place1)
+                imageFiles.insert(Array(repeating: Array(repeating: "", count: configManager.maxNumberOfImageFile), count: configManager.maxNumberOfSubCategory), at: place1)
+                imageInfos.insert(Array(repeating: Array(repeating: "", count: configManager.maxNumberOfImageFile), count: configManager.maxNumberOfSubCategory), at: place1)
             }
         }
     }
@@ -406,6 +304,159 @@ struct PlistEditorView: View {
                     ZipManager.remove(fileUrl: oldPlistUrl)
                 }
             }
+        }
+    }
+}
+struct EditorHeaderView: View {
+    @Binding var plistName: String
+    var initialPlistName: String
+    @Binding var isRename: Bool
+    @Binding var showPlistEditor: Bool
+    var onSave: () -> Void
+
+    var body: some View {
+        HStack {
+            Spacer()
+            HStack {
+                TextField("Ex) Topics_2023", text: $plistName)
+                    .multilineTextAlignment(.trailing)
+                    .frame(maxWidth: .infinity, minHeight: 30)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Text(".plist")
+                    .frame(width: 40)
+            }
+            Button(action: onSave) {
+                Text("Save")
+                    .frame(width: 50, height: 30)
+                    .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            Button { showPlistEditor = false } label: {
+                Image(systemName: "xmark")
+                    .frame(width: 30, height: 30)
+                    .background(.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.trailing)
+            }
+        }
+    }
+}
+struct EditorActionBar: View {
+    @Binding var selectedIndex: [Int]
+    @Binding var subFolderModes: [Int]
+    var onInsert: () -> Void
+    var onChangePlace: () -> Void
+    var onCopy: () -> Void
+    var onToggleMode: () -> Void
+
+    var body: some View {
+        VStack {
+            if selectedIndex[0] != -1 && selectedIndex[1] != -1 {
+                HStack {
+                    ActionButton(title: "Change Places", action: onChangePlace)
+                    ActionButton(title: "Copy \(selectedIndex[0] + 1) to \(selectedIndex[1] + 1) w/o photos", width: 200, action: onCopy)
+                    Spacer()
+                }
+            } else if isAnySelected {
+                HStack {
+                    ActionButton(title: "Insert Blank", action: onInsert)
+                    ActionButton(title: currentModeTitle, width: 200, action: onToggleMode)
+                    Spacer()
+                }
+            }
+        }
+    }
+    private var isAnySelected: Bool {
+        selectedIndex[0] != -1 || selectedIndex[1] != -1
+    }
+    private var currentModeTitle: String {
+        let idx = selectedIndex[0] != -1 ? selectedIndex[0] : selectedIndex[1]
+        return subFolderModes[idx] == 1 ? "SubFolder Mode OFF" : "SubFolder Mode ON"
+    }
+}
+struct ActionButton: View {
+    let title: String
+    var width: CGFloat = 130
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .frame(width: width, height: 30)
+                .background(.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding(.leading)
+        }
+    }
+}
+struct CategoryRowView: View {
+    let item: Int
+    @Binding var selectedIndex: [Int]
+    @Binding var subFolderMode: Int
+    @Binding var categoryText: String
+
+    var body: some View {
+        HStack {
+            VStack {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .frame(width: 25)
+                    .foregroundColor(selectionColor)
+            }
+            .onTapGesture {
+                updateSelection()
+            }
+            Text(subFolderMode == 1 ? "S" : "")
+                .frame(width: 10)
+            Text(String(item + 1))
+                .frame(width: 32)
+            TextField("Category", text: $categoryText)
+        }
+    }
+    private var isSelected: Bool {
+        selectedIndex[0] == item || selectedIndex[1] == item
+    }
+    private var selectionColor: Color {
+        if selectedIndex[0] != -1 && selectedIndex[1] != -1 {
+            return isSelected ? .blue : .gray
+        }
+        return .blue
+    }
+    private func updateSelection() {
+        if selectedIndex[0] == item {
+            if selectedIndex[1] == -1 {
+                selectedIndex[0] = -1
+            } else {
+                selectedIndex[0] = selectedIndex[1]
+                selectedIndex[1] = -1
+            }
+        } else if selectedIndex[1] == item {
+            selectedIndex[1] = -1
+        } else {
+            if selectedIndex[0] == -1 {
+                selectedIndex[0] = item
+            } else if selectedIndex[1] == -1 {
+                selectedIndex[1] = item
+            }
+        }
+    }
+}
+struct SubCategoryRowView: View {
+    @Binding var subCategoryText: String
+    @Binding var subCategoryStrings: [String]
+    @Binding var countStoredImages: [Int]
+    @Binding var imageFiles: [[String]]
+    @Binding var imageInfos: [[String]]
+
+    var body: some View {
+        NavigationLink(destination: PlistEditorSubView(
+            subCategoryStrings: $subCategoryStrings,
+            countStoredImages: $countStoredImages,
+            imageFiles: $imageFiles,
+            imageInfos: $imageInfos
+        )) {
+            Text(subCategoryText)
         }
     }
 }

@@ -34,11 +34,154 @@ struct ContentView: View {
     @State var targetItem = 0
     @Environment(\.colorScheme) var colorScheme
     @State private var internalTimer: Timer?
+    @ObservedObject var configManager = ConfigManager.shared
 
     var body: some View {
         Button {
             showAppVersion = true
         } label: {
+            appLogoView
+        }
+        .fullScreenCover(isPresented: $showAppVersion) {
+            AppVersionView(showAppVersion: $showAppVersion)
+        }
+        HStack {
+            Button {
+                showConfig = true
+            } label: {
+                Image(systemName: "gearshape")
+                    .frame(width: 50, height: 30)
+                    .background(.indigo)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.leading)
+            }
+            .fullScreenCover(isPresented: $showConfig) {
+                ConfigView(showConfig: $showConfig)
+            }
+            Spacer()
+            Button {
+                showPlistCreator = true
+            } label: {
+                Text("New Photo Labels")
+                    .frame(width: 180, height: 30)
+                    .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .onDataChange(of: [showPlistCreator, isChangeFlag]) { _ in
+                if showPlistCreator || isChangeFlag {
+                    showPlistList()
+                }
+            }
+            .onAppear {
+                configManager.loadFromLocalConfig()
+                showPlistList()
+            }
+            .fullScreenCover(isPresented: $showPlistCreator) {
+                PlistCreatorView(showPlistCreator: $showPlistCreator)
+            }
+            Button {
+                showPlistList()
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .frame(width: 30, height: 30)
+                    .background(.indigo)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.trailing)
+            }
+        }
+        VStack {
+            List {
+                Section(header: Text("Photo Label").font(.title) + Text(" Plist (XML File)")) {
+                    ForEach(documentDirectoryFiles.indices, id:\.self) { item in
+                        if documentDirectoryFiles[item].suffix(6) == ".plist" {
+                            let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
+                            ZStack {
+                                Button {
+                                    isPresentedProgressView = true
+                                    targetItem = item
+                                    internalTimer?.invalidate()
+                                    internalTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
+                                        DispatchQueue.global(qos: .userInteractive).async {
+                                            loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
+                                        }
+                                    }
+                                } label: {
+                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil || documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
+                                        if getIsToday(target: documentDirectoryFiles[item]) == true {
+                                            if documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
+                                                HStack(spacing: 0) {
+                                                    Text("Eqp").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
+                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "Eqp", with: ""))
+                                                }
+                                            } else {
+                                                HStack(spacing: 0) {
+                                                    Text("InOut").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
+                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "InOut", with: ""))
+                                                }
+                                            }
+                                        } else {
+                                            Text(documentDirectoryFiles[item])
+                                                .foregroundColor(.red)
+                                        }
+                                    } else {
+                                        Text(documentDirectoryFiles[item])
+                                    }
+                                }
+                                .onDataChange(of: showPlistEditor[item]) { _ in
+                                    showPlistListEdit()
+                                }
+                                .swipeActions {
+                                    Button(role: .destructive) {
+                                        isRemove[item] = true;
+                                    } label : {
+                                        Label("Remove", systemImage: "trash")
+                                    }
+                                    Button {
+                                        showPlistEditor[item] = true
+                                        plistName = documentDirectoryFiles[item]
+                                        plistName = plistName.replacingOccurrences(of: ".plist", with: "")
+                                    } label : {
+                                        Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
+                                    }
+                                    .tint(.blue)
+                                }
+                                .alert(isPresented: $isRemove[item]) {
+                                    Alert(title: Text("Really remove it?"),
+                                          primaryButton: .cancel(Text("Cancel")),
+                                          secondaryButton: .destructive(Text("Remove"), action: {
+                                        ZipManager.remove(fileUrl: targetPlistUrl)
+                                        let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
+                                        let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
+                                        ZipManager.remove(fileUrl: targetZipUrl)
+                                        isChangeFlag.toggle()
+                                    }))
+                                }
+                                .fullScreenCover(isPresented: $showCategorySelector[item]) {
+                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
+                                    let downSizeImages = ImageManager.generateDownSizeImages(mainCategoryIds: mainCategoryIds, tempDirectoryUrl: tempDirectoryUrl, imageHeight: 200)
+                                    CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
+                                }
+                                .fullScreenCover(isPresented: $showPlistEditor[item]) {
+                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
+                                    PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
+                                }
+                                if isPresentedProgressView, item == targetItem {
+                                    ProgressView()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .listStyle(.sidebar)
+            Spacer()
+        }
+    }
+    private var appLogoView: some View {
+        Group{
             VStack(spacing: 0) {
                 HStack {
                     ZStack(alignment: .top) {
@@ -161,164 +304,6 @@ struct ContentView: View {
                     .padding(.trailing)
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showAppVersion) {
-            AppVersionView(showAppVersion: $showAppVersion)
-        }
-        HStack {
-            Button {
-                showConfig = true
-            } label: {
-                Image(systemName: "gearshape")
-                    .frame(width: 50, height: 30)
-                    .background(.indigo)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.leading)
-            }
-            .fullScreenCover(isPresented: $showConfig) {
-                ConfigView(showConfig: $showConfig)
-            }
-            Spacer()
-            Button {
-                showPlistCreator = true
-            } label: {
-                Text("New Photo Labels")
-                    .frame(width: 180, height: 30)
-                    .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .onDataChange(of: [showPlistCreator, isChangeFlag]) { _ in
-                if showPlistCreator || isChangeFlag {
-                    showPlistList()
-                }
-            }
-            .onAppear {
-                let jsonUrl = documentDirectoryUrl.appendingPathComponent("config.json")
-                if FileManager.default.fileExists(atPath: jsonUrl.path) {
-                    let config = JsonManager.load(fileUrl: jsonUrl)
-                    if config.iPadMaxColCatBtn == 0 {
-                    } else {
-                        ConfigManager.iPadMainColumnNumber = config.iPadMaxColCatBtn
-                        ConfigManager.iPadSubColumnNumber = config.iPadMaxColDetBtn
-                        ConfigManager.iPadImageColumnNumber = config.iPadMaxColPhoto
-                        ConfigManager.mainColumnNumber = config.maxColCatBtn
-                        ConfigManager.subColumnNumber = config.maxColDetBtn
-                        ConfigManager.imageColumnNumber = config.maxColPhoto
-                        ConfigManager.iPadMainRowNumber = config.iPadMaxRowCatBtn
-                        ConfigManager.iPadSubRowNumber = config.iPadMaxRowDetBtn
-                        ConfigManager.mainRowNumber = config.maxRowCatBtn
-                        ConfigManager.subRowNumber = config.maxRowDetBtn
-                        ConfigManager.maxNumberOfMainCategory = config.maxEntCat
-                        ConfigManager.maxNumberOfSubCategory = config.maxEntDet
-                        ConfigManager.maxNumberOfImageFile = config.maxEntPhoto
-                        ConfigManager.iPadCheckBoxMatrixColumnWidth = config.iPadChkBoxMtxColWidth
-                        ConfigManager.checkBoxMatrixColumnWidth = config.chkBoxMtxColWidth
-                    }
-                }
-                showPlistList()
-            }
-            .fullScreenCover(isPresented: $showPlistCreator) {
-                PlistCreatorView(showPlistCreator: $showPlistCreator)
-            }
-            Button {
-                showPlistList()
-            } label: {
-                Image(systemName: "arrow.clockwise")
-                    .frame(width: 30, height: 30)
-                    .background(.indigo)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.trailing)
-            }
-        }
-        VStack {
-            List {
-                Section(header: Text("Photo Label").font(.title) + Text(" Plist (XML File)")) {
-                    ForEach(documentDirectoryFiles.indices, id:\.self) { item in
-                        if documentDirectoryFiles[item].suffix(6) == ".plist" {
-                            let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
-                            ZStack {
-                                Button {
-                                    isPresentedProgressView = true
-                                    targetItem = item
-                                    internalTimer?.invalidate()
-                                    internalTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-                                        DispatchQueue.global(qos: .userInteractive).async {
-                                            loadPlist(fileUrl: targetPlistUrl, showCategorySelector: &showCategorySelector[item])
-                                        }
-                                    }
-                                } label: {
-                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil || documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
-                                        if getIsToday(target: documentDirectoryFiles[item]) == true {
-                                            if documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
-                                                HStack(spacing: 0) {
-                                                    Text("Eqp").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
-                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "Eqp", with: ""))
-                                                }
-                                            } else {
-                                                HStack(spacing: 0) {
-                                                    Text("InOut").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
-                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "InOut", with: ""))
-                                                }
-                                            }
-                                        } else {
-                                            Text(documentDirectoryFiles[item])
-                                                .foregroundColor(.red)
-                                        }
-                                    } else {
-                                        Text(documentDirectoryFiles[item])
-                                    }
-                                }
-                                .onDataChange(of: showPlistEditor[item]) { _ in
-                                    showPlistListEdit()
-                                }
-                                .swipeActions {
-                                    Button(role: .destructive) {
-                                        isRemove[item] = true;
-                                    } label : {
-                                        Label("Remove", systemImage: "trash")
-                                    }
-                                    Button {
-                                        showPlistEditor[item] = true
-                                        plistName = documentDirectoryFiles[item]
-                                        plistName = plistName.replacingOccurrences(of: ".plist", with: "")
-                                    } label : {
-                                        Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
-                                    }
-                                    .tint(.blue)
-                                }
-                                .alert(isPresented: $isRemove[item]) {
-                                    Alert(title: Text("Really remove it?"),
-                                          primaryButton: .cancel(Text("Cancel")),
-                                          secondaryButton: .destructive(Text("Remove"), action: {
-                                        ZipManager.remove(fileUrl: targetPlistUrl)
-                                        let targetZipName = targetPlistUrl.lastPathComponent.replacingOccurrences(of: ".plist", with: ".zip")
-                                        let targetZipUrl = ZipManager.documentDirectoryUrl.appendingPathComponent(targetZipName)
-                                        ZipManager.remove(fileUrl: targetZipUrl)
-                                        isChangeFlag.toggle()
-                                    }))
-                                }
-                                .fullScreenCover(isPresented: $showCategorySelector[item]) {
-                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    let downSizeImages = mainCategoryIds.map{$0.items.map{$0.images.map{UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + $0.imageFile)!.resize(targetSize: CGSize(width: 200, height: 200))}}}
-                                    CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
-                                }
-                                .fullScreenCover(isPresented: $showPlistEditor[item]) {
-                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
-                                }
-                                if isPresentedProgressView, item == targetItem {
-                                    ProgressView()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.sidebar)
-            Spacer()
         }
     }
     private func getIsToday(target: String) -> Bool {
@@ -524,58 +509,52 @@ struct DuplicateImageFile: Equatable {
     let subCategoryName: String
 }
 class ImageManager {
-    static func downSize(uiimage: UIImage, scale: CGFloat) -> UIImage {
-        autoreleasepool {
-            let cgimage = uiimage.cgImage
-            let ciimage = CIImage(cgImage: cgimage!)
-            let matrix = CGAffineTransform(scaleX: scale, y: scale)
-            let ciimage2 = ciimage.transformed(by: matrix)
-            let context = CIContext(options: nil)
-            let cgimage2 = context.createCGImage(ciimage2, from: ciimage2.extent)
-            let uiimage2 = UIImage(cgImage: cgimage2!, scale: uiimage.scale, orientation: uiimage.imageOrientation)
-            return uiimage2
+    static func downSizeToFill(uiimage: UIImage, targetSize: CGSize) -> UIImage {
+        let widthRatio = targetSize.width / uiimage.size.width
+        let heightRatio = targetSize.height / uiimage.size.height
+        let scale = max(widthRatio, heightRatio)
+        let scaledWidth = uiimage.size.width * scale
+        let scaledHeight = uiimage.size.height * scale
+        let x = (targetSize.width - scaledWidth) / 2
+        let y = (targetSize.height - scaledHeight) / 2
+        let drawRect = CGRect(x: x, y: y, width: scaledWidth, height: scaledHeight)
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        return renderer.image { _ in
+            uiimage.draw(in: drawRect)
+        }
+    }
+    static func generateDownSizeImages(mainCategoryIds: [MainCategoryId], tempDirectoryUrl: URL, imageHeight: CGFloat) -> [[[UIImage]]] {
+        return mainCategoryIds.map { mainCategory in
+            mainCategory.items.map { subCategoryItem in
+                subCategoryItem.images.map { imageFile in
+                    let path = tempDirectoryUrl.path + "/" + imageFile.imageFile
+                    guard let uiImage = UIImage(contentsOfFile: path) else { return UIImage() }
+                    return downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: imageHeight))
+                }
+            }
         }
     }
 }
 extension UIImage {
-    func resize(targetSize: CGSize) -> UIImage {
-        return UIGraphicsImageRenderer(size: targetSize).image { _ in
-            self.draw(in: CGRect(origin: .zero, size: targetSize))
+    func getDisplaySize(forHeight height: CGFloat) -> CGSize {
+        if size.width > size.height {
+            return CGSize(width: height, height: height * 3 / 4)
         }
+        if size.height > size.width {
+            return CGSize(width: height * 3 / 4, height: height)
+        }
+        return CGSize(width: height, height: height)
+    }
+    var displayAspectRatio: CGFloat {
+        if size.width > size.height { return 4 / 3 }
+        if size.height > size.width { return 3 / 4 }
+        return 1.0
+    }
+    func displayWidth(defaultWidth: CGFloat, defaultHeight: CGFloat) -> CGFloat {
+        return size.width > size.height ? defaultWidth : (size.height > size.width ? defaultHeight * 3 / 4 : defaultHeight)
     }
 }
-class ConfigManager {
-    static var iPadMainColumnNumber = 6
-    static var iPadSubColumnNumber = 4
-    static var iPadImageColumnNumber = 5
-    static var mainColumnNumber = 3
-    static var subColumnNumber = 2
-    static var imageColumnNumber = 2
-    static var iPadMainRowNumber = 5
-    static var iPadSubRowNumber = 5
-    static var mainRowNumber = 3
-    static var subRowNumber = 3
-    static var maxNumberOfMainCategory = 99
-    static var maxNumberOfSubCategory = 999
-    static var maxNumberOfImageFile = 999
-    static var iPadCheckBoxMatrixColumnWidth = 90
-    static var checkBoxMatrixColumnWidth = 60
-    static let initialIPadMainColumnNumber = 6
-    static let initialIPadSubColumnNumber = 4
-    static let initialIPadImageColumnNumber = 5
-    static let initialMainColumnNumber = 3
-    static let initialSubColumnNumber = 2
-    static let initialImageColumnNumber = 2
-    static let initialIPadMainRowNumber = 5
-    static let initialIPadSubRowNumber = 5
-    static let initialMainRowNumber = 3
-    static let initialSubRowNumber = 3
-    static let initialMaxNumberOfMainCategory = 99
-    static let initialMaxNumberOfSubCategory = 999
-    static let initialMaxNumberOfImageFile = 999
-    static let initialIPadCheckBoxMatrixColumnWidth = 90
-    static let initialCheckBoxMatrixColumnWidth = 60
-}
+
 class CategoryManager {
     static let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     static let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -614,8 +593,8 @@ class CategoryManager {
     }
     static func getColumns(userInterfaceIdiom: UIUserInterfaceIdiom) -> [GridItem] {
         autoreleasepool {
-            let columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)), spacing: 5), count: ConfigManager.imageColumnNumber)
-            let columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.iPadImageColumnNumber)
+            let columns1 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.shared.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.shared.imageColumnNumber)), spacing: 5), count: ConfigManager.shared.imageColumnNumber)
+            let columns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(ConfigManager.shared.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.shared.iPadImageColumnNumber)), spacing: 5), count: ConfigManager.shared.iPadImageColumnNumber)
             if userInterfaceIdiom == .pad {
                 return columns2
             } else {
@@ -640,9 +619,9 @@ class CategoryManager {
         autoreleasepool {
             var imageWidth: CGFloat
             if userInterfaceIdiom == .pad {
-                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.iPadImageColumnNumber)
+                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.shared.iPadImageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.shared.iPadImageColumnNumber)
             } else {
-                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.imageColumnNumber)
+                imageWidth = (UIScreen.main.bounds.width - (CGFloat(ConfigManager.shared.imageColumnNumber) - 1) * 10) / CGFloat(ConfigManager.shared.imageColumnNumber)
             }
             if width > height {
                 return imageWidth
@@ -663,13 +642,13 @@ class CategoryManager {
     static func isLocatedWithinArea(originy: CGFloat, id: Int, lowerLoadLimit: Int, upperLoadLimit: Int) -> Bool {
         autoreleasepool {
             if UIDevice.current.userInterfaceIdiom == .pad {
-                if originy > 150 - (ceil(Double(id / ConfigManager.iPadImageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.iPadImageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
+                if originy > 150 - (ceil(Double(id / ConfigManager.shared.iPadImageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.shared.iPadImageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
                     return true
                 } else {
                     return false
                 }
             } else {
-                if originy > 150 - (ceil(Double(id / ConfigManager.imageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.imageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
+                if originy > 150 - (ceil(Double(id / ConfigManager.shared.imageColumnNumber)) + Double(lowerLoadLimit)) * (CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) && originy < 150 - (ceil(Double(id / ConfigManager.shared.imageColumnNumber)) - Double(upperLoadLimit)) * (CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom) + 25) {
                     return true
                 } else {
                     return false
@@ -949,7 +928,8 @@ class ZipManager {
             }
             ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-            downSizeImages.append(UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFile)!.resize(targetSize: CGSize(width: 200, height: 200)))
+            guard let uiImage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFile) else { return }
+            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
             workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
             print("Added to plist:\(plistImageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
@@ -958,7 +938,8 @@ class ZipManager {
     static func moveImagesFromDuplicateSpaceToPlist(imageFile: String, mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, downSizeImages: inout [UIImage]) {
         autoreleasepool {
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-            downSizeImages.append(UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + imageFile)!.resize(targetSize: CGSize(width: 200, height: 200)))
+            guard let uiImage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + imageFile) else { return }
+            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
             print("Added to plist:\(imageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
         }

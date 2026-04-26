@@ -26,6 +26,9 @@
 		989697282A35FFDB00EE3599 /* PlistCreatorSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697272A35FFDB00EE3599 /* PlistCreatorSubView.swift */; };
 		9896972A2A36000200EE3599 /* PlistEditorSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989697292A36000200EE3599 /* PlistEditorSubView.swift */; };
 		9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9896972B2A36002E00EE3599 /* ImagePickerView.swift */; };
+		98B177D72F93398C007265A0 /* ConfigManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98B177D62F93398C007265A0 /* ConfigManager.swift */; };
+		98BBE5F42F9244020072A3A5 /* FreezeScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BBE5F32F9244020072A3A5 /* FreezeScrollView.swift */; };
+		98BBE5F62F9244570072A3A5 /* ScOffsetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BBE5F52F9244570072A3A5 /* ScOffsetView.swift */; };
 		98C753762A35F14400648C02 /* PhotoLabelApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C753752A35F14400648C02 /* PhotoLabelApp.swift */; };
 		98C753782A35F14400648C02 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C753772A35F14400648C02 /* ContentView.swift */; };
 		98C7537A2A35F14500648C02 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98C753792A35F14500648C02 /* Assets.xcassets */; };
@@ -55,6 +58,9 @@
 		989697272A35FFDB00EE3599 /* PlistCreatorSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistCreatorSubView.swift; sourceTree = "<group>"; };
 		989697292A36000200EE3599 /* PlistEditorSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistEditorSubView.swift; sourceTree = "<group>"; };
 		9896972B2A36002E00EE3599 /* ImagePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePickerView.swift; sourceTree = "<group>"; };
+		98B177D62F93398C007265A0 /* ConfigManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigManager.swift; sourceTree = "<group>"; };
+		98BBE5F32F9244020072A3A5 /* FreezeScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreezeScrollView.swift; sourceTree = "<group>"; };
+		98BBE5F52F9244570072A3A5 /* ScOffsetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScOffsetView.swift; sourceTree = "<group>"; };
 		98C753722A35F14400648C02 /* PhotoLabel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoLabel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98C753752A35F14400648C02 /* PhotoLabelApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLabelApp.swift; sourceTree = "<group>"; };
 		98C753772A35F14400648C02 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -102,6 +108,8 @@
 				98C753772A35F14400648C02 /* ContentView.swift */,
 				98F15D562BE5AE50007E5783 /* AppVersionView.swift */,
 				989697192A35FEB700EE3599 /* CategorySelectorView.swift */,
+				98BBE5F32F9244020072A3A5 /* FreezeScrollView.swift */,
+				98BBE5F52F9244570072A3A5 /* ScOffsetView.swift */,
 				9896971F2A35FF5000EE3599 /* ImageStockerTabView.swift */,
 				989697212A35FF7200EE3599 /* EachTabView.swift */,
 				9896972B2A36002E00EE3599 /* ImagePickerView.swift */,
@@ -119,6 +127,7 @@
 				989697272A35FFDB00EE3599 /* PlistCreatorSubView.swift */,
 				989697292A36000200EE3599 /* PlistEditorSubView.swift */,
 				9830C6DA2A4EC844004971E5 /* ConfigView.swift */,
+				98B177D62F93398C007265A0 /* ConfigManager.swift */,
 				98C753792A35F14500648C02 /* Assets.xcassets */,
 				98C7537B2A35F14500648C02 /* Preview Content */,
 				98CAA7DA2F72A24000497D3E /* AlertCenter.swift */,
@@ -213,6 +222,7 @@
 			files = (
 				989697242A35FF9800EE3599 /* PlistCreatorView.swift in Sources */,
 				989697202A35FF5000EE3599 /* ImageStockerTabView.swift in Sources */,
+				98BBE5F62F9244570072A3A5 /* ScOffsetView.swift in Sources */,
 				98F15D572BE5AE50007E5783 /* AppVersionView.swift in Sources */,
 				9896971E2A35FF2300EE3599 /* ImageView.swift in Sources */,
 				9894BC542A6CF73F00A4B946 /* PhotoLibraryImagePickerView.swift in Sources */,
@@ -221,6 +231,7 @@
 				9869A71A2AB467290058ED73 /* PhotoCapture.swift in Sources */,
 				98DE84EE2B1B1076007FD173 /* CheckBoxView.swift in Sources */,
 				9896972C2A36002E00EE3599 /* ImagePickerView.swift in Sources */,
+				98B177D72F93398C007265A0 /* ConfigManager.swift in Sources */,
 				989697222A35FF7200EE3599 /* EachTabView.swift in Sources */,
 				9896971A2A35FEB700EE3599 /* CategorySelectorView.swift in Sources */,
 				989697262A35FFB500EE3599 /* PlistEditorView.swift in Sources */,
@@ -230,6 +241,7 @@
 				9869A71C2AB467870058ED73 /* MotionSensor.swift in Sources */,
 				98CAA7DB2F72A24000497D3E /* AlertCenter.swift in Sources */,
 				98C753782A35F14400648C02 /* ContentView.swift in Sources */,
+				98BBE5F42F9244020072A3A5 /* FreezeScrollView.swift in Sources */,
 				9830C6DB2A4EC844004971E5 /* ConfigView.swift in Sources */,
 				9869A7162AB466920058ED73 /* PhotoCaptureView.swift in Sources */,
 				98C753762A35F14400648C02 /* PhotoLabelApp.swift in Sources */,

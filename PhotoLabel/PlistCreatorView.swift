@@ -8,12 +8,21 @@
 import SwiftUI
 
 struct PlistCreatorView: View {
-    @State var mainCategory: [String] = Array(repeating: "", count: ConfigManager.maxNumberOfMainCategory)
-    @State var subCategoryStrings: [[String]] = Array(repeating: Array(repeating: "", count: ConfigManager.maxNumberOfSubCategory), count: ConfigManager.maxNumberOfMainCategory)
-    @State var plistName: String = ""
-    @State var isSaveError = false;
     @Binding var showPlistCreator: Bool
+    @ObservedObject var configManager = ConfigManager.shared
+    @State var mainCategory: [String]
+    @State var subCategoryStrings: [[String]]
+    @State var plistName: String = ""
+    @State var isSaveError = false
     @State var mainCategorys: [MainCategory] = []
+    
+    init(showPlistCreator: Binding<Bool>) {
+        self._showPlistCreator = showPlistCreator
+        let mCount = ConfigManager.shared.maxNumberOfMainCategory
+        let sCount = ConfigManager.shared.maxNumberOfSubCategory
+        self._mainCategory = State(initialValue: Array(repeating: "", count: mCount))
+        self._subCategoryStrings = State(initialValue: Array(repeating: Array(repeating: "", count: sCount), count: mCount))
+    }
 
     var body: some View {
         HStack {
@@ -74,7 +83,7 @@ struct PlistCreatorView: View {
         }
         List {
             Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
+                ForEach(0..<configManager.maxNumberOfMainCategory, id: \.self) { item in
                     HStack {
                         Text(String(item + 1))
                             .frame(width: 35)
@@ -87,7 +96,7 @@ struct PlistCreatorView: View {
         NavigationView {
             List {
                 Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                    ForEach(0..<ConfigManager.maxNumberOfMainCategory, id: \.self) { item in
+                    ForEach(0..<configManager.maxNumberOfMainCategory, id: \.self) { item in
                         NavigationLink(destination: PlistCreatorSubView(subCategoryStrings: $subCategoryStrings[item])) {
                             Text(mainCategory[item])
                         }

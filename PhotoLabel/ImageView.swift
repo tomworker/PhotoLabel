@@ -307,7 +307,7 @@ struct ImageView: View {
                                         do {
                                             try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
                                             if targetImageFileIndex != -1 {
-                                                downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                                downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = ImageManager.downSizeToFill(uiimage: uiimage2, targetSize: uiimage2.getDisplaySize(forHeight: 200))
                                             }
                                             do {
                                                 try ZipManager.saveZip(fileUrl: fileUrl)
@@ -335,7 +335,7 @@ struct ImageView: View {
                                         do {
                                             try uiimage2.jpegData(compressionQuality:100)?.write(to:URL(fileURLWithPath: imageFile))
                                             if targetImageFileIndex != -1 {
-                                                downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = uiimage2.resize(targetSize: CGSize(width: 200, height: 200))
+                                                downSizeImages[mainCategoryIndex][subCategoryIndex][targetImageFileIndex] = ImageManager.downSizeToFill(uiimage: uiimage2, targetSize: uiimage2.getDisplaySize(forHeight: 200))
                                             }
                                             do {
                                                 try ZipManager.saveZip(fileUrl: fileUrl)
