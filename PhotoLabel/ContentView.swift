@@ -528,20 +528,8 @@ class ImageManager {
             mainCategory.items.map { subCategoryItem in
                 subCategoryItem.images.map { imageFile in
                     let path = tempDirectoryUrl.path + "/" + imageFile.imageFile
-                    guard let uiImage = UIImage(contentsOfFile: path) else {
-                        return UIImage()
-                    }
-                    let w = uiImage.size.width
-                    let h = uiImage.size.height
-                    let targetSize: CGSize
-                    if w > h {
-                        targetSize = CGSize(width: imageHeight, height: imageHeight * 3 / 4)
-                    } else if h > w {
-                        targetSize = CGSize(width: imageHeight * 3 / 4, height: imageHeight)
-                    } else {
-                        targetSize = CGSize(width: imageHeight, height: imageHeight)
-                    }
-                    return downSizeToFill(uiimage: uiImage, targetSize: targetSize)
+                    guard let uiImage = UIImage(contentsOfFile: path) else { return UIImage() }
+                    return downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: imageHeight))
                 }
             }
         }
@@ -941,18 +929,7 @@ class ZipManager {
             ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
             guard let uiImage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + plistImageFile) else { return }
-            let w = uiImage.size.width
-            let h = uiImage.size.height
-            let imageHeight = 200
-            let targetSize: CGSize
-            if w > h {
-                targetSize = CGSize(width: imageHeight, height: imageHeight * 3 / 4)
-            } else if h > w {
-                targetSize = CGSize(width: imageHeight * 3 / 4, height: imageHeight)
-            } else {
-                targetSize = CGSize(width: imageHeight, height: imageHeight)
-            }
-            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: targetSize))
+            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
             workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
             print("Added to plist:\(plistImageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
@@ -962,18 +939,7 @@ class ZipManager {
         autoreleasepool {
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
             guard let uiImage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + imageFile) else { return }
-            let w = uiImage.size.width
-            let h = uiImage.size.height
-            let imageHeight = 200
-            let targetSize: CGSize
-            if w > h {
-                targetSize = CGSize(width: imageHeight, height: imageHeight * 3 / 4)
-            } else if h > w {
-                targetSize = CGSize(width: imageHeight * 3 / 4, height: imageHeight)
-            } else {
-                targetSize = CGSize(width: imageHeight, height: imageHeight)
-            }
-            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: targetSize))
+            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
             print("Added to plist:\(imageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
         }

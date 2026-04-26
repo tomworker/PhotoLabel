@@ -22,7 +22,7 @@ struct FinalReportView: View {
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     private var columns: [GridItem] {
         let count = UIDevice.current.userInterfaceIdiom == .pad ?
-        configManager.iPadImageColumnNumber : configManager.imageColumnNumber
+            configManager.iPadImageColumnNumber : configManager.imageColumnNumber
         return Array(repeating: GridItem(.flexible(), spacing: 10), count: count)
     }
 
