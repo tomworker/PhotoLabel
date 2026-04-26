@@ -11,7 +11,6 @@ import ZIPFoundation
 struct ContentView: View {
     @State var mainCategoryIds: [MainCategoryId] = []
     @State var workSpace: [WorkSpaceImageFile] = []
-    @State var duplicateSpace: [DuplicateImageFile] = []
     @State private var fileUrl: URL?
     @State var showPlistCreator = false
     @State var showPlistEditor: [Bool]
@@ -162,7 +161,7 @@ struct ContentView: View {
                                 .fullScreenCover(isPresented: $showCategorySelector[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
                                     let downSizeImages = ImageManager.generateDownSizeImages(mainCategoryIds: mainCategoryIds, tempDirectoryUrl: tempDirectoryUrl, imageHeight: 200)
-                                    CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
+                                    CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
                                 }
                                 .fullScreenCover(isPresented: $showPlistEditor[item]) {
                                     let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
@@ -356,7 +355,6 @@ struct ContentView: View {
         do {
             tempImageFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: tempDirectoryUrl.path)
             workSpace = []
-            duplicateSpace = []
             for i in 0..<tempImageFiles.count {
                 var isDir: ObjCBool = false
                 tempImageFile = tempDirectoryUrl.appendingPathComponent(tempImageFiles[i]).path
@@ -452,7 +450,6 @@ struct ContentView: View {
                         let afterRenameUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: subCategoryName)).appendingPathComponent(initialMainCategorys[i].items[j].images[k].imageFile)
                         ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
                     }
-                    duplicateSpace.append(DuplicateImageFile(imageFile: initialMainCategorys[i].items[j].images[k].imageFile, subFolderMode: initialMainCategorys[i].subFolderMode, mainCategoryName: mainCategoryName, subCategoryName: subCategoryName))
                 }
             }
         }
@@ -501,12 +498,6 @@ struct MainCategoryId: Identifiable {
 struct WorkSpaceImageFile: Equatable {
     let imageFile: String
     let subDirectory: String
-}
-struct DuplicateImageFile: Equatable {
-    let imageFile: String
-    let subFolderMode: Int
-    let mainCategoryName: String
-    let subCategoryName: String
 }
 class ImageManager {
     static func downSizeToFill(uiimage: UIImage, targetSize: CGSize) -> UIImage {
@@ -788,43 +779,6 @@ class CategoryManager {
             workSpace = workSpace2
         }
     }
-    static func reorderItems(imageKey: Int, indexs: [String], duplicateSpace: inout [DuplicateImageFile]) {
-        autoreleasepool {
-            let moveToIndex = imageKey
-            let targetIndex = Int(indexs.first!)!
-            let lastIndex = duplicateSpace.count - 1
-            var duplicateSpace2: [DuplicateImageFile] = []
-            if moveToIndex <= targetIndex {
-                if moveToIndex != 0 {
-                    duplicateSpace2 += duplicateSpace[0..<moveToIndex]
-                }
-                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-                if moveToIndex != targetIndex {
-                    duplicateSpace2 += duplicateSpace[moveToIndex..<targetIndex]
-                }
-                if targetIndex != lastIndex {
-                    duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
-                }
-            }
-            if moveToIndex > targetIndex {
-                if targetIndex != 0 {
-                    duplicateSpace2 += duplicateSpace[0..<targetIndex]
-                }
-                if moveToIndex != targetIndex + 1 {
-                    duplicateSpace2 += duplicateSpace[targetIndex + 1..<moveToIndex]
-                    duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-                    duplicateSpace2 += duplicateSpace[moveToIndex...lastIndex]
-                } else {
-                    duplicateSpace2 += duplicateSpace[targetIndex + 1...targetIndex + 1]
-                    duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-                    if moveToIndex < lastIndex {
-                        duplicateSpace2 += duplicateSpace[moveToIndex + 1...lastIndex]
-                    }
-                }
-            }
-            duplicateSpace = duplicateSpace2
-        }
-    }
     static func moveItemFromLastToFirst(imageKey: Int, imageSpace: inout [ImageFile], downSizeImages: inout [UIImage]) {
         autoreleasepool {
             let targetIndex = imageKey
@@ -860,21 +814,6 @@ class CategoryManager {
             }
         }
     }
-    static func moveItemFromLastToFirst(imageKey: Int, duplicateSpace: inout [DuplicateImageFile]) {
-        autoreleasepool {
-            let targetIndex = imageKey
-            let lastIndex = duplicateSpace.count - 1
-            var duplicateSpace2: [DuplicateImageFile] = []
-            if targetIndex > 0 {
-                duplicateSpace2 += duplicateSpace[targetIndex...targetIndex]
-                duplicateSpace2 += duplicateSpace[0...targetIndex - 1]
-                if targetIndex != lastIndex {
-                    duplicateSpace2 += duplicateSpace[targetIndex + 1...lastIndex]
-                }
-                duplicateSpace = duplicateSpace2
-            }
-        }
-    }
 }
 class ZipManager {
     static let fileManager = FileManager.default
@@ -889,7 +828,7 @@ class ZipManager {
             return replacedString != "" ? replacedString : "_"
         }
     }
-    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile], duplicateSpace: inout [DuplicateImageFile], downSizeImages: inout [UIImage]) {
+    static func moveImagesFromPlistToWorkSpace(images: [String], mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, workSpace: inout [WorkSpaceImageFile], downSizeImages: inout [UIImage]) {
         autoreleasepool {
             let targetImageFile = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[Int(images.first!)!].imageFile
             let workSpaceImageFile = "@\(targetImageFile)"
@@ -901,7 +840,6 @@ class ZipManager {
             ZipManager.rename(atFileUrl: beforeRenameUrl, toFileUrl: afterRenameUrl)
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.remove(at: Int(images.first!)!)
             downSizeImages.remove(at: Int(images.first!)!)
-            duplicateSpace.removeAll(where: {$0.imageFile == targetImageFile})
             workSpace.append(WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: ""))
             print("Removed from plist:\(targetImageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
@@ -932,15 +870,6 @@ class ZipManager {
             downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
             workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: workSpaceImageFile, subDirectory: "")})
             print("Added to plist:\(plistImageFile)")
-            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
-        }
-    }
-    static func moveImagesFromDuplicateSpaceToPlist(imageFile: String, mainCategoryIds: inout [MainCategoryId], mainCategoryIndex: Int, subCategoryIndex: Int, downSizeImages: inout [UIImage]) {
-        autoreleasepool {
-            mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: imageFile), at: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count)
-            guard let uiImage = UIImage(contentsOfFile: tempDirectoryUrl.path + "/" + imageFile) else { return }
-            downSizeImages.append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
-            print("Added to plist:\(imageFile)")
             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
         }
     }

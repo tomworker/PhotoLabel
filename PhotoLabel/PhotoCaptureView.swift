@@ -16,7 +16,6 @@ struct PhotoCaptureView: View {
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -336,7 +335,6 @@ private extension PhotoCaptureView {
             dateFormatter.dateFormat = "yyyyMMddHHmmssS"
             plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
             var plistJpgUrl = tempDirectoryUrl.appendingPathComponent(plistImageFileName)
-            let duplicateSpaceImageFileName = plistImageFileName
             let mainCat = mainCategoryIds[mainCategoryIndex]
             let subCat = mainCat.items[subCategoryIndex]
             do {
@@ -348,7 +346,6 @@ private extension PhotoCaptureView {
                     plistJpgUrl = folderUrl.appendingPathComponent(plistImageFileName)
                 }
                 try jpgImageData.write(to: plistJpgUrl, options: .atomic)
-                duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCat.subFolderMode, mainCategoryName: mainCat.mainCategory, subCategoryName: subCat.subCategory), at: duplicateSpace.count)
                 mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName, imageInfo: capturedQRData), at: subCat.images.count)
                 let thumb = ImageManager.downSizeToFill(uiimage: processedImage, targetSize: processedImage.getDisplaySize(forHeight: 200))
                 downSizeImages[mainCategoryIndex][subCategoryIndex].append(thumb)

@@ -16,7 +16,6 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -41,14 +40,12 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                         let jpgImageData = image.jpegData(compressionQuality: 0.5)
                         let plistImageFileName = "\(dateFormatter.string(from: Date()))\(String(i)).jpg"
                         var plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
-                        let duplicateSpaceImageFileName = plistImageFileName
                         do {
                             if self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode == 1 {
                                 ZipManager.create(directoryUrl: self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)))
                                 plistJpgUrl = self.parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
                             }
                             try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                            self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: self.parent.duplicateSpace.count)
                             self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.count)
                             guard let uiImage = UIImage(contentsOfFile: self.parent.tempDirectoryUrl.path + "/" + plistImageFileName) else { return }
                             self.parent.downSizeImages[self.parent.mainCategoryIndex][self.parent.subCategoryIndex].append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))

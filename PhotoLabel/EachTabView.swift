@@ -11,7 +11,6 @@ struct EachTabView: View {
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
@@ -35,7 +34,6 @@ struct EachTabView: View {
     @State var showImageView5 = false
     @State var isDeleteMode = false
     @State var isWorkSpaceMode = false
-    @State var isDuplicateMode = false
     @State var isSwapMode = false
     @State var isEditSubCategory = false
     @EnvironmentObject var alertCenter: AlertCenter
@@ -140,13 +138,13 @@ struct EachTabView: View {
                                 }
                                 .fullScreenCover(isPresented: $showPhotoCapture) {
                                     if  UIDevice.current.userInterfaceIdiom == .phone {
-                                        PhotoCaptureView(showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
+                                        PhotoCaptureView(showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
                                     } else {
-                                        ImagePickerView(sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
+                                        ImagePickerView(sourceType: .camera, showPhotoCapture: $showPhotoCapture, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
                                     }
                                 }
                                 .fullScreenCover(isPresented: $showPhotoLibrary2) {
-                                    PhotoLibraryImagePickerView(showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
+                                    PhotoLibraryImagePickerView(showImagePicker: $showPhotoLibrary2, mainCategoryIds: $mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: $workSpace, fileUrl: fileUrl, downSizeImages: $downSizeImages)
                                 }
                                 if let range = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.range(of: ":=") {
                                     let idx = mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory.index(range.lowerBound, offsetBy: -1)
@@ -194,7 +192,6 @@ struct EachTabView: View {
                                                             ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
                                                             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.remove(at: imageFileIndex)
                                                             downSizeImages[mainCategoryIndex][subCategoryIndex].remove(at: imageFileIndex)
-                                                            duplicateSpace.removeAll(where: {$0.imageFile == targetImageFile})
                                                             print("Removed from plist:\(targetImageFile)")
                                                             mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages -= 1
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
@@ -210,7 +207,7 @@ struct EachTabView: View {
                                                         Button {
                                                             var indexs1: [String] = []
                                                             indexs1.append(String(imageFileIndex))
-                                                            ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, duplicateSpace: &duplicateSpace, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
+                                                            ZipManager.moveImagesFromPlistToWorkSpace(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
                                                             ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                         } label: {
                                                             Image(systemName: "square.and.arrow.up")
@@ -264,13 +261,6 @@ struct EachTabView: View {
                                 }
                             }
                             VStack {
-                                Toggle(isOn: $isDuplicateMode) {
-                                    Text("Duplicate Mode")
-                                        .foregroundColor(isDuplicateMode ? .brown.opacity(0.8) : .gray.opacity(0.5))
-                                        .bold()
-                                }
-                                .fixedSize()
-                                .tint(.brown.opacity(0.8))
                                 HStack {
                                     Text("Move to Workspace/Stocker: ")
                                     Image(systemName: "square.and.arrow.up")
@@ -291,143 +281,66 @@ struct EachTabView: View {
                                 .background(LinearGradient(gradient: Gradient(colors: [.clear, .gray.opacity(0.5), .gray.opacity(0.5), .clear]), startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .foregroundColor(.white)
                             }
-                            if isDuplicateMode {
-                                LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
-                                    ForEach(duplicateSpace.indices, id: \.self) { duplicateSpaceImageFileIndex in
-                                        if let uiimage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path) {
-                                            ZStack {
-                                                Image(uiImage: ImageManager.downSizeToFill(uiimage: uiimage, targetSize: uiimage.getDisplaySize(forHeight: 200)))
-                                                    .resizable()
-                                                    .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
-                                                    .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
-                                                    .cornerRadius(10)
-                                                    .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted2, index: duplicateSpaceImageFileIndex, isTargetedIndex: isTargetedIndex2))
-                                                VStack {
-                                                    if let range = duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName.range(of: ":=") {
-                                                        let idx = duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName.index(range.lowerBound, offsetBy: -1)
-                                                        Text(duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName[...idx])
-                                                            .foregroundColor(.white.opacity(0.5))
-                                                            .background(.black.opacity(0.5))
-                                                    }
-                                                    if let range = duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName.range(of: ":=") {
-                                                        let idx = duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName.index(range.lowerBound, offsetBy: -1)
-                                                        Text(duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName[...idx])
-                                                            .foregroundColor(.white.opacity(0.5))
-                                                            .background(.black.opacity(0.5))
-                                                    }
-                                                    if isWorkSpaceMode == true {
-                                                        Button {
-                                                            if let originalImage = UIImage(contentsOfFile: duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 ? tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path : tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path) {
-                                                                let dateFormatter = DateFormatter()
-                                                                dateFormatter.dateFormat = "yyyyMMddHHmmss"
-                                                                let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
-                                                                let duplicateSpaceImageFileName = "\(dateFormatter.string(from: Date())).jpg"
-                                                                var duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(duplicateSpaceImageFileName)
-                                                                if mainCategoryIds[mainCategoryIndex].subFolderMode == 1 {
-                                                                    duplicateSpaceJpgUrl = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)).appendingPathComponent(duplicateSpaceImageFileName)
-                                                                    ZipManager.create(directoryUrl: tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory)))
-                                                                }
-                                                                do {
-                                                                    try jpgImageData!.write(to: duplicateSpaceJpgUrl, options: .atomic)
-                                                                    duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                                                                    ZipManager.moveImagesFromDuplicateSpaceToPlist(imageFile: duplicateSpaceImageFileName, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
-                                                                    ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                                } catch {
-                                                                    print("Writing Jpg file failed with error:\(error)")
-                                                                }
-                                                            }
-                                                        } label: {
-                                                            Image(systemName: "square.and.arrow.up")
-                                                                .frame(width: 30, height: 30)
-                                                                .background(.black.opacity(0.3))
-                                                                .foregroundColor(.white)
-                                                                .cornerRadius(10)
+                            LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
+                                ForEach(workSpace.indices, id: \.self) { workSpaceImageFileIndex in
+                                    if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path) {
+                                        ZStack {
+                                            Image(uiImage: ImageManager.downSizeToFill(uiimage: uiimage, targetSize: uiimage.getDisplaySize(forHeight: 200)))
+                                                .resizable()
+                                                .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
+                                                .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
+                                                .cornerRadius(10)
+                                                .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted2, index: workSpaceImageFileIndex, isTargetedIndex: isTargetedIndex2))
+                                            VStack {
+                                                Text(workSpace[workSpaceImageFileIndex].subDirectory)
+                                                    .foregroundColor(.white.opacity(0.5))
+                                                    .background(.black.opacity(0.5))
+                                            }
+                                            HStack {
+                                                if isDeleteMode == true {
+                                                    Button {
+                                                        let targetImageFile = workSpace[workSpaceImageFileIndex].imageFile
+                                                        ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
+                                                        workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: targetImageFile, subDirectory: "")})
+                                                        print("Removed from WorkSpace:\(targetImageFile)")
+                                                        do {
+                                                            try ZipManager.saveZip(fileUrl: fileUrl)
+                                                        } catch {
+                                                            alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
                                                         }
+                                                    } label: {
+                                                        Image(systemName: "trash")
+                                                            .frame(width: 30, height: 30)
+                                                            .background(.black.opacity(0.3))
+                                                            .foregroundColor(.white)
+                                                            .cornerRadius(10)
                                                     }
                                                 }
-                                            }
-                                            .onTapGesture(count: 2) {
-                                                CategoryManager.moveItemFromLastToFirst(imageKey: duplicateSpaceImageFileIndex, duplicateSpace: &duplicateSpace)
-                                            }
-                                            // Recovery code for onTapGesture problem
-                                            .onDataChange(of: showImageView4) { _ in }
-                                            // Above code goes well for some reason.
-                                            .onTapGesture(count: 1) {
-                                                showImageView4 = true
-                                                if duplicateSpace[duplicateSpaceImageFileIndex].subFolderMode == 1 {
-                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].mainCategoryName)).appendingPathComponent(ZipManager.replaceString(targetString: duplicateSpace[duplicateSpaceImageFileIndex].subCategoryName)).appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
-                                                } else {
-                                                    self.targetImageFile = tempDirectoryUrl.appendingPathComponent(duplicateSpace[duplicateSpaceImageFileIndex].imageFile).path
+                                                if isWorkSpaceMode == true {
+                                                    Button {
+                                                        var indexs1: [String] = []
+                                                        indexs1.append(String(workSpaceImageFileIndex))
+                                                        ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
+                                                        ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+                                                    } label: {
+                                                        Image(systemName: "square.and.arrow.up")
+                                                            .frame(width: 30, height: 30)
+                                                            .background(.black.opacity(0.3))
+                                                            .foregroundColor(.white)
+                                                            .cornerRadius(10)
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
-                            } else {
-                                LazyVGrid(columns: CategoryManager.getColumns(userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), spacing: 5) {
-                                    ForEach(workSpace.indices, id: \.self) { workSpaceImageFileIndex in
-                                        if let uiimage = UIImage(contentsOfFile: tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path) {
-                                            ZStack {
-                                                Image(uiImage: ImageManager.downSizeToFill(uiimage: uiimage, targetSize: uiimage.getDisplaySize(forHeight: 200)))
-                                                    .resizable()
-                                                    .aspectRatio(CategoryManager.getAspectRatio(width: uiimage.size.width, height: uiimage.size.height), contentMode: .fit)
-                                                    .frame(width: CategoryManager.getImageWidth(width: uiimage.size.width, height: uiimage.size.height, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
-                                                    .cornerRadius(10)
-                                                    .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted2, index: workSpaceImageFileIndex, isTargetedIndex: isTargetedIndex2))
-                                                VStack {
-                                                    Text(workSpace[workSpaceImageFileIndex].subDirectory)
-                                                        .foregroundColor(.white.opacity(0.5))
-                                                        .background(.black.opacity(0.5))
-                                                }
-                                                HStack {
-                                                    if isDeleteMode == true {
-                                                        Button {
-                                                            let targetImageFile = workSpace[workSpaceImageFileIndex].imageFile
-                                                            ZipManager.remove(fileUrl: tempDirectoryUrl.appendingPathComponent(targetImageFile))
-                                                            workSpace.removeAll(where: {$0 == WorkSpaceImageFile(imageFile: targetImageFile, subDirectory: "")})
-                                                            print("Removed from WorkSpace:\(targetImageFile)")
-                                                            do {
-                                                                try ZipManager.saveZip(fileUrl: fileUrl)
-                                                            } catch {
-                                                                alertCenter.show(title: "Zip update failed?", body: "一度カメラビューを開いて、撮影せずにCancelで閉じてみてください。\nZipファイルが更新されます。")
-                                                            }
-                                                        } label: {
-                                                            Image(systemName: "trash")
-                                                                .frame(width: 30, height: 30)
-                                                                .background(.black.opacity(0.3))
-                                                                .foregroundColor(.white)
-                                                                .cornerRadius(10)
-                                                        }
-                                                    }
-                                                    if isWorkSpaceMode == true {
-                                                        Button {
-                                                            var indexs1: [String] = []
-                                                            indexs1.append(String(workSpaceImageFileIndex))
-                                                            var duplicateSpaceImageFileName = workSpace[workSpaceImageFileIndex].imageFile
-                                                            duplicateSpaceImageFileName = duplicateSpaceImageFileName.replacingOccurrences(of: "@", with: "")
-                                                            duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCategoryIds[mainCategoryIndex].subFolderMode, mainCategoryName: mainCategoryIds[mainCategoryIndex].mainCategory, subCategoryName: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].subCategory), at: duplicateSpace.count)
-                                                            ZipManager.moveImagesFromWorkSpaceToPlist(images: indexs1, mainCategoryIds: &mainCategoryIds, mainCategoryIndex: mainCategoryIndex, subCategoryIndex: subCategoryIndex, workSpace: &workSpace, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
-                                                            ZipManager.savePlistAndZip(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
-                                                        } label: {
-                                                            Image(systemName: "square.and.arrow.up")
-                                                                .frame(width: 30, height: 30)
-                                                                .background(.black.opacity(0.3))
-                                                                .foregroundColor(.white)
-                                                                .cornerRadius(10)
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            .onTapGesture(count: 2) {
-                                                CategoryManager.moveItemFromLastToFirst(imageKey: workSpaceImageFileIndex, workSpace: &workSpace)
-                                            }
-                                            // Recovery code for onTapGesture problem
-                                            .onDataChange(of: showImageView5) { _ in }
-                                            // Above code goes well for some reason.
-                                            .onTapGesture(count: 1) {
-                                                showImageView5 = true
-                                                targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
-                                            }
+                                        .onTapGesture(count: 2) {
+                                            CategoryManager.moveItemFromLastToFirst(imageKey: workSpaceImageFileIndex, workSpace: &workSpace)
+                                        }
+                                        // Recovery code for onTapGesture problem
+                                        .onDataChange(of: showImageView5) { _ in }
+                                        // Above code goes well for some reason.
+                                        .onTapGesture(count: 1) {
+                                            showImageView5 = true
+                                            targetImageFile = tempDirectoryUrl.appendingPathComponent(workSpace[workSpaceImageFileIndex].imageFile).path
                                         }
                                     }
                                 }
