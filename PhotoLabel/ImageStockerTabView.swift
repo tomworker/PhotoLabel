@@ -11,7 +11,6 @@ struct ImageStockerTabView: View {
     @Binding var showImageStocker: Bool
     @Binding var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     @Binding var fileUrl: URL
     @Binding var plistCategoryName: String
     @Binding var targetSubCategoryIndex: [Int]
@@ -19,12 +18,11 @@ struct ImageStockerTabView: View {
     @EnvironmentObject var alertCenter: AlertCenter
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     
-    init(showImageStocker: Binding<Bool>, mainCategoryIds: Binding<[MainCategoryId]>, workSpace: Binding<[WorkSpaceImageFile]>, duplicateSpace: Binding<[DuplicateImageFile]>, fileUrl: Binding<URL>, plistCategoryName: Binding<String>, targetSubCategoryIndex: Binding<[Int]>, downSizeImages: Binding<[[[UIImage]]]>) {
+    init(showImageStocker: Binding<Bool>, mainCategoryIds: Binding<[MainCategoryId]>, workSpace: Binding<[WorkSpaceImageFile]>, fileUrl: Binding<URL>, plistCategoryName: Binding<String>, targetSubCategoryIndex: Binding<[Int]>, downSizeImages: Binding<[[[UIImage]]]>) {
         UIPageControl.appearance().isHidden = true
         self._showImageStocker = showImageStocker
         self._mainCategoryIds = mainCategoryIds
         self._workSpace = workSpace
-        self._duplicateSpace = duplicateSpace
         self._fileUrl = fileUrl
         self._plistCategoryName = plistCategoryName
         self._targetSubCategoryIndex = targetSubCategoryIndex
@@ -34,7 +32,7 @@ struct ImageStockerTabView: View {
     var body: some View {
         TabView(selection: $targetSubCategoryIndex[1]) {
             ForEach(mainCategoryIds[targetSubCategoryIndex[0]].items.indices, id: \.self) {subCategoryIndex in
-                EachTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, tabSubCategoryIndex: subCategoryIndex, downSizeImages: $downSizeImages).tag(subCategoryIndex)
+                EachTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, tabSubCategoryIndex: subCategoryIndex, downSizeImages: $downSizeImages).tag(subCategoryIndex)
                     .alert(alertCenter.message?.title ?? "",
                            isPresented: Binding(
                                 get: { alertCenter.message != nil },

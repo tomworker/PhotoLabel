@@ -14,7 +14,6 @@ struct ImagePickerView: UIViewControllerRepresentable {
     let mainCategoryIndex: Int
     let subCategoryIndex: Int
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     let fileUrl: URL
     @Binding var downSizeImages: [[[UIImage]]]
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -31,14 +30,12 @@ struct ImagePickerView: UIViewControllerRepresentable {
                 let jpgImageData = originalImage.jpegData(compressionQuality: 0.5)
                 let plistImageFileName = "\(dateFormatter.string(from: Date())).jpg"
                 var plistJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(plistImageFileName)
-                let duplicateSpaceImageFileName = plistImageFileName
                 do {
                     if parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode == 1 {
                         ZipManager.create(directoryUrl: parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory)))
                         plistJpgUrl = parent.tempDirectoryUrl.appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory)).appendingPathComponent(ZipManager.replaceString(targetString: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory)).appendingPathComponent(plistImageFileName)
                     }
                     try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
-                    parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: parent.duplicateSpace.count)
                     parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.count)
                     guard let uiImage = UIImage(contentsOfFile: parent.tempDirectoryUrl.path + "/" + plistImageFileName) else { return }
                     parent.downSizeImages[parent.mainCategoryIndex][parent.subCategoryIndex].append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))

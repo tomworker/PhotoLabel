@@ -11,7 +11,6 @@ struct CategorySelectorView: View {
     @Binding var showCategorySelector: Bool
     @State var mainCategoryIds: [MainCategoryId]
     @Binding var workSpace: [WorkSpaceImageFile]
-    @Binding var duplicateSpace: [DuplicateImageFile]
     @State var fileUrl: URL
     @State var plistCategoryName: String
     @State var downSizeImages: [[[UIImage]]]
@@ -36,7 +35,6 @@ struct CategorySelectorView: View {
     @State var targetSubCategoryIndex: [Int] = [-1, -1]
     @State var targetImageFile = ""
     @State var showImageView = false
-    @State var isDuplicateMode = false
     @State var isMainScrollViewEnabled = false
     @State var isSubScrollViewEnabled = false
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
@@ -74,13 +72,13 @@ struct CategorySelectorView: View {
             subScrollColumns2 = Array(repeating: GridItem(.fixed((UIScreen.main.bounds.width - (CGFloat(iPsColNo) - 1) * 5) / CGFloat(iPsColNo)), spacing: 5), count: iPsColNo)
         }
         .fullScreenCover(isPresented: $showCheckBox) {
-            CheckBoxView(workSpace: $workSpace, duplicateSpace: $duplicateSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox, downSizeImages: $downSizeImages)
+            CheckBoxView(workSpace: $workSpace, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, fileUrl: $fileUrl, targetMainCategoryIndex: $targetMainCategoryIndex, showCheckBox: $showCheckBox, downSizeImages: $downSizeImages)
         }
         .fullScreenCover(isPresented: $showFinalReport) {
             FinalReportView(fileUrl: $fileUrl, showFinalReport: $showFinalReport, plistCategoryName: $plistCategoryName, mainCategoryIds: $mainCategoryIds, downSizeImages: $downSizeImages)
         }
         .fullScreenCover(isPresented: $showImageStocker) {
-            ImageStockerTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, duplicateSpace: $duplicateSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
+            ImageStockerTabView(showImageStocker: $showImageStocker, mainCategoryIds: $mainCategoryIds, workSpace: $workSpace, fileUrl: $fileUrl, plistCategoryName: $plistCategoryName, targetSubCategoryIndex: $targetSubCategoryIndex, downSizeImages: $downSizeImages)
         }
     }
 }
