@@ -50,7 +50,8 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
                             try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                             self.parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].subFolderMode, mainCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].mainCategory, subCategoryName: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].subCategory), at: self.parent.duplicateSpace.count)
                             self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].images.count)
-                            self.parent.downSizeImages[self.parent.mainCategoryIndex][self.parent.subCategoryIndex].append(UIImage(contentsOfFile: self.parent.tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
+                            guard let uiImage = UIImage(contentsOfFile: self.parent.tempDirectoryUrl.path + "/" + plistImageFileName) else { return }
+                            self.parent.downSizeImages[self.parent.mainCategoryIndex][self.parent.subCategoryIndex].append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
                             self.parent.mainCategoryIds[self.parent.mainCategoryIndex].items[self.parent.subCategoryIndex].countStoredImages += 1
                         } catch {
                             print("Writing Jpg file failed with error:\(error)")
@@ -69,11 +70,11 @@ struct PhotoLibraryImagePickerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration()
         configuration.filter = .images
-        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages >= ConfigManager.maxNumberOfImageFile {
+        if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages >= ConfigManager.shared.maxNumberOfImageFile {
             configuration.selectionLimit = 0
             presentationMode.wrappedValue.dismiss()
         } else {
-            configuration.selectionLimit = ConfigManager.maxNumberOfImageFile - mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages
+            configuration.selectionLimit = ConfigManager.shared.maxNumberOfImageFile - mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages
         }
         let picker = PHPickerViewController(configuration: configuration)
         picker.delegate = context.coordinator

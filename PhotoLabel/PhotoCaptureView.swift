@@ -350,7 +350,7 @@ private extension PhotoCaptureView {
                 try jpgImageData.write(to: plistJpgUrl, options: .atomic)
                 duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: mainCat.subFolderMode, mainCategoryName: mainCat.mainCategory, subCategoryName: subCat.subCategory), at: duplicateSpace.count)
                 mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName, imageInfo: capturedQRData), at: subCat.images.count)
-                let thumb = processedImage.resize(targetSize: CGSize(width: 200, height: 200))
+                let thumb = ImageManager.downSizeToFill(uiimage: processedImage, targetSize: processedImage.getDisplaySize(forHeight: 200))
                 downSizeImages[mainCategoryIndex][subCategoryIndex].append(thumb)
                 mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].countStoredImages += 1
                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)

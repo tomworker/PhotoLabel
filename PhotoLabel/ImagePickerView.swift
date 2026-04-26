@@ -40,7 +40,8 @@ struct ImagePickerView: UIViewControllerRepresentable {
                     try jpgImageData!.write(to: plistJpgUrl, options: .atomic)
                     parent.duplicateSpace.insert(DuplicateImageFile(imageFile: duplicateSpaceImageFileName, subFolderMode: parent.mainCategoryIds[parent.mainCategoryIndex].subFolderMode, mainCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].mainCategory, subCategoryName: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].subCategory), at: parent.duplicateSpace.count)
                     parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.insert(ImageFile(imageFile: plistImageFileName), at: parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].images.count)
-                    parent.downSizeImages[parent.mainCategoryIndex][parent.subCategoryIndex].append(UIImage(contentsOfFile: parent.tempDirectoryUrl.path + "/" + plistImageFileName)!.resize(targetSize: CGSize(width: 200, height: 200)))
+                    guard let uiImage = UIImage(contentsOfFile: parent.tempDirectoryUrl.path + "/" + plistImageFileName) else { return }
+                    parent.downSizeImages[parent.mainCategoryIndex][parent.subCategoryIndex].append(ImageManager.downSizeToFill(uiimage: uiImage, targetSize: uiImage.getDisplaySize(forHeight: 200)))
                     parent.mainCategoryIds[parent.mainCategoryIndex].items[parent.subCategoryIndex].countStoredImages += 1
                     ZipManager.savePlistAndZip(fileUrl: parent.fileUrl, mainCategoryIds: parent.mainCategoryIds)
                 } catch {
