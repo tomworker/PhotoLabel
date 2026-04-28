@@ -47,22 +47,22 @@ class ConfigManager: ObservableObject {
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("config.json")
         if FileManager.default.fileExists(atPath: url.path) {
             let config = JsonManager.load(fileUrl: url)
-            self.iPadMainColumnNumber = config.iPadMaxColCatBtn
-            self.iPadSubColumnNumber = config.iPadMaxColDetBtn
-            self.iPadImageColumnNumber = config.iPadMaxColPhoto
-            self.mainColumnNumber = config.maxColCatBtn
-            self.subColumnNumber = config.maxColDetBtn
-            self.imageColumnNumber = config.maxColPhoto
-            self.iPadMainRowNumber = config.iPadMaxRowCatBtn
-            self.iPadSubRowNumber = config.iPadMaxRowDetBtn
-            self.mainRowNumber = config.maxRowCatBtn
-            self.subRowNumber = config.maxRowDetBtn
-            self.maxNumberOfMainCategory = config.maxEntCat
-            self.maxNumberOfSubCategory = config.maxEntDet
-            self.maxNumberOfImageFile = config.maxEntPhoto
-            self.iPadCheckBoxMatrixColumnWidth = config.iPadChkBoxMtxColWidth
-            self.checkBoxMatrixColumnWidth = config.chkBoxMtxColWidth
-            self.maxColumnsCheckBoxMatrix = config.maxColChkBoxMtx
+            iPadMainColumnNumber = config.iPadMaxColCatBtn
+            iPadSubColumnNumber = config.iPadMaxColDetBtn
+            iPadImageColumnNumber = config.iPadMaxColPhoto
+            mainColumnNumber = config.maxColCatBtn
+            subColumnNumber = config.maxColDetBtn
+            imageColumnNumber = config.maxColPhoto
+            iPadMainRowNumber = config.iPadMaxRowCatBtn
+            iPadSubRowNumber = config.iPadMaxRowDetBtn
+            mainRowNumber = config.maxRowCatBtn
+            subRowNumber = config.maxRowDetBtn
+            maxNumberOfMainCategory = config.maxEntCat
+            maxNumberOfSubCategory = config.maxEntDet
+            maxNumberOfImageFile = config.maxEntPhoto
+            iPadCheckBoxMatrixColumnWidth = config.iPadChkBoxMtxColWidth
+            checkBoxMatrixColumnWidth = config.chkBoxMtxColWidth
+            maxColumnsCheckBoxMatrix = config.maxColChkBoxMtx
         }
     }
 }

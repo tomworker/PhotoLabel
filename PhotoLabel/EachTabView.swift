@@ -229,24 +229,25 @@ struct EachTabView: View {
                                                     CategoryManager.reorderItems(imageKey: imageFileIndex, index: isTargetedIndex1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
                                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                     isSwapMode = false
-                                                    self.isTargeted1 = false
+                                                    isTargeted1 = false
                                                 } else {
                                                     showImageView2 = true
-                                                    self.targetImageFileIndex = imageFileIndex
+                                                    targetImageFileIndex = imageFileIndex
                                                 }
                                             }
                                             .onLongPressGesture {
                                                 isSwapMode = true
-                                                self.isTargeted1 = true
-                                                self.isTargetedIndex1 = imageFileIndex
+                                                isTargeted1 = true
+                                                isTargetedIndex1 = imageFileIndex
                                             }
                                         }
                                     }
                                     ZStack{
-                                        Text("Take photo\n        or\nMove here")
+                                        let hasImage = !mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.isEmpty
+                                        Text(hasImage ? "" : "Tap \(Image(systemName: "camera")) above to take photos")
                                             .frame(width: CategoryManager.getImageWidth(width: 1.0, height: 0.75, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom), height: CategoryManager.getImageWidth(width: 0.75, height: 1.0, userInterfaceIdiom: UIDevice.current.userInterfaceIdiom))
-                                            .foregroundColor(.white)
-                                            .background(.gray.opacity((0.3)))
+                                            .foregroundStyle(.secondary)
+                                            .background(Color(.systemBackground))
                                             .cornerRadius(10)
                                             .border(.indigo, width: CategoryManager.getBorderWidth(isTargeted: isTargeted3, index: 0, isTargetedIndex: 0))
                                             .onTapGesture(count: 1) {
@@ -254,7 +255,7 @@ struct EachTabView: View {
                                                     CategoryManager.reorderItems(imageKey: mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images.count, index: isTargetedIndex1, imageSpace: &mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images, downSizeImages: &downSizeImages[mainCategoryIndex][subCategoryIndex])
                                                     ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
                                                     isSwapMode = false
-                                                    self.isTargeted1 = false
+                                                    isTargeted1 = false
                                                 }
                                             }
                                     }

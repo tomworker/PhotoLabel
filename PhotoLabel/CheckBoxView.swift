@@ -16,8 +16,9 @@ struct CheckBoxView: View {
     @Binding var showCheckBox: Bool
     @Binding var downSizeImages: [[[UIImage]]]
     @ObservedObject var configManager = ConfigManager.shared
-    @State var mainCategoryArray: [String] = [""]
-    @State var mainCategoryArray2: [[String]] = []
+    @State var mainCategory2: [[String]] = []
+    @State var mainCategory3: [[String]] = []
+    @State var mainCategory4: [[String]] = []
     @State var subCategory2: [[[String]]] = []
     @State var subCategory3: [[[String]]] = []
     @State var subCategory4: [[[String]]] = []
@@ -61,7 +62,7 @@ struct CheckBoxView: View {
                         anchorView(rowRange: rowRange)
                     },
                     col: { _, idx in
-                        colView(index: idx, colCount: columnCount, fileUrl: fileUrl, mCatIds: $mainCategoryIds, mCatArr: $mainCategoryArray, mCatArr2: $mainCategoryArray2, isEditCheckItem: $isEditCheckItem)
+                        colView(index: idx)
                     },
                     row: { _, idx in
                         rowView(index: idx, mCatIds: mainCategoryIds)
@@ -94,36 +95,40 @@ struct CheckBoxView: View {
     }
     private func rebuildArrays() {
         let mainCount = mainCategoryIds.count
-        var fullTitles = Array(repeating: "", count: mainCount)
-        var fullMain2 = Array(repeating: [String](), count: mainCount)
+        let totalRowCount = mainCategoryIds.reduce(0) { $0 + $1.items.count }
+        let totalColCount = configManager.maxColumnsCheckBoxMatrix
+        var fullMain2 = Array(repeating: [String](), count: totalColCount)
+        var fullMain3 = Array(repeating: [String](), count: totalColCount)
+        var fullMain4 = Array(repeating: [String](), count: totalColCount)
         var fullSub2 = Array(repeating: [[String]](), count: mainCount)
         var fullSub3 = Array(repeating: [[String]](), count: mainCount)
         var fullSub4 = Array(repeating: [[String]](), count: mainCount)
-        let totalRowCount = mainCategoryIds.reduce(0) { $0 + $1.items.count }
-        let totalColCount = configManager.maxColumnsCheckBoxMatrix
         /* Note: The 0th MainCategory is designated as the primary container for
                check sheet column headers. Headers in subsequent MainCategories
                (index 1+) are not utilized in the current spreadsheet layout.
         */
         for mIdx in 0..<mainCount {
             let parsed = parseCategoryData(at: mIdx)
-            fullTitles[mIdx] = parsed.mainTitle
-            fullMain2[mIdx] = parsed.mainRow
+            fullMain2[mIdx] = parsed.main2
+            fullMain3[mIdx] = parsed.main3
+            fullMain4[mIdx] = parsed.main4
             fullSub2[mIdx] = parsed.sub2
             fullSub3[mIdx] = parsed.sub3
             fullSub4[mIdx] = parsed.sub4
         }
-        self.mainCategoryArray = fullTitles
-        self.mainCategoryArray2 = fullMain2
-        self.subCategory2 = fullSub2
-        self.subCategory3 = fullSub3
-        self.subCategory4 = fullSub4
-        self.isEditCheckItem = Array(repeating: false, count: configManager.maxColumnsCheckBoxMatrix)
-        self.isEditCheckInfo = Array(repeating: Array(repeating: false, count: totalColCount), count: totalRowCount)
+        mainCategory2 = fullMain2
+        mainCategory3 = fullMain3
+        mainCategory4 = fullMain4
+        subCategory2 = fullSub2
+        subCategory3 = fullSub3
+        subCategory4 = fullSub4
+        isEditCheckItem = Array(repeating: false, count: totalColCount)
+        isEditCheckInfo = Array(repeating: Array(repeating: false, count: totalColCount), count: totalRowCount)
     }
     struct ParsedData {
-        let mainTitle: String
-        let mainRow: [String]
+        let main2: [String]
+        let main3: [String]
+        let main4: [String]
         let sub2: [[String]]
         let sub3: [[String]]
         let sub4: [[String]]
@@ -131,17 +136,28 @@ struct CheckBoxView: View {
     private func parseCategoryData(at mIdx: Int) -> ParsedData {
         let targetCount = configManager.maxColumnsCheckBoxMatrix
         let maxSubRows = configManager.maxNumberOfSubCategory
+        var newMain2 = Array(repeating: "", count: targetCount)
+        var newMain3 = newMain2
+        var newMain4 = newMain2
         let rawMain = mainCategoryIds[mIdx].mainCategory
-        var parsedMainTitle = ""
-        var mainCSV = ""
+        let mainCSV: String
         if let range = rawMain.range(of: ":=") {
-            parsedMainTitle = String(rawMain[..<range.lowerBound])
             mainCSV = String(rawMain[range.upperBound...])
         } else {
-            parsedMainTitle = rawMain
             mainCSV = ""
         }
-        let mainElements = adjustElements(mainCSV.components(separatedBy: ","), to: targetCount)
+        let mainElements = adjustElements(mainCSV.components(separatedBy: ","), to: targetCount, paddingWith: "-")
+        for cIdx in 0..<targetCount {
+            let val = mainElements[cIdx]
+            newMain2[cIdx] = val
+            if !val.isEmpty {
+                newMain3[cIdx] = String(val.prefix(1))
+                newMain4[cIdx] = String(val.dropFirst())
+            } else {
+                newMain3[cIdx] = "-"
+                newMain4[cIdx] = ""
+            }
+        }
         var newSub2 = Array(repeating: Array(repeating: "", count: targetCount), count: maxSubRows)
         var newSub3 = newSub2
         var newSub4 = newSub2
@@ -166,7 +182,7 @@ struct CheckBoxView: View {
                 }
             }
         }
-        return ParsedData(mainTitle: parsedMainTitle, mainRow: mainElements, sub2: newSub2, sub3: newSub3, sub4: newSub4)
+        return ParsedData(main2: newMain2, main3: newMain3, main4: newMain4, sub2: newSub2, sub3: newSub3, sub4: newSub4)
     }
     private func adjustElements(_ elements: [String], to count: Int, paddingWith paddingValue: String = "") -> [String] {
         var result = elements
@@ -256,62 +272,61 @@ struct CheckBoxView: View {
         .background(Color(.systemBackground))
         return AnyView(rawContent)
     }
-    private func colView(index: Int, colCount: Int, fileUrl: URL, mCatIds: Binding<[MainCategoryId]>, mCatArr: Binding<[String]>, mCatArr2: Binding<[[String]]>, isEditCheckItem: Binding<[Bool]>) -> some View {
-        let isPresented = Binding(
-            get: {
-                if isEditCheckItem.indices.contains(index) {
-                    return isEditCheckItem.wrappedValue[index]
-                } else { return false }
-            },
-            set: { newValue in
-                if isEditCheckItem.indices.contains(index) {
-                    isEditCheckItem.wrappedValue[index] = newValue
-                }
-            }
-        )
+    private func colView(index: Int) -> some View {
         /* Note: We intentionally reference index [0] here because the column headers
                for the entire spreadsheet are globally managed by the first MainCategory
                in the current data structure.
         */
-        let textBinding = Binding(
-            get: {
-                if mCatArr2.wrappedValue[0].indices.contains(index) {
-                    return mCatArr2.wrappedValue[0][index]
-                } else { return "" }
-            },
-            set: { newValue in
-                if mCatArr2.wrappedValue[0].indices.contains(index) {
-                    mCatArr2.wrappedValue[0][index] = newValue
+        guard mainCategory3.indices.contains(0),
+              mainCategory3[0].indices.contains(index),
+              mainCategory4.indices.contains(0),
+              mainCategory4[0].indices.contains(index) else {
+            return AnyView(EmptyView())
+        }
+        let value = mainCategory4[0][index]
+        let displayText: String = value.isEmpty ? "CHK" + String(index + 1) : value
+        let headersBinding = Binding(
+            get: { mainCategory4[0][index] },
+            set: { mainCategory4[0][index] = $0 }
+        )
+        let lockStatus = mainCategory3[0][index]
+        let currentHeaders = mainCategory4[0][index]
+        return AnyView(ZStack {
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Image(systemName: lockStatus == "*"  ? "lock.fill" : "lock.open.fill")
+                        .foregroundStyle(.white)
+                        .opacity(0.5)
                 }
             }
-        )
-        let displayText: String = {
-            if mCatArr2.wrappedValue.indices.contains(0) && mCatArr2.wrappedValue[0].indices.contains(index) {
-                let value = mCatArr2.wrappedValue[0][index]
-                return value.isEmpty ? "CHK" + String(index + 1) : value
-            }
-            return "CHK" + String(index + 1)
-        }()
-        return Text(displayText)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(index % 2 == 0 ? Color(UIColor.systemGray3) : Color(UIColor.systemGray5))
-            .onLongPressGesture {
-                isEditCheckItem.wrappedValue[index] = true
+            Text(displayText)
             }
-            .alert("", isPresented: isPresented, actions: {
-                let initialValue = textBinding.wrappedValue
-                TextField("CheckItem", text: textBinding)
-                Button("Edit") {
-                    let colLabels = (0..<min(colCount, mCatArr2.wrappedValue[0].count)).map { mCatArr2.wrappedValue[0][$0] }.joined(separator: ",")
-                    mCatIds.wrappedValue[0].mainCategory = mCatArr.wrappedValue[0] + ":=" + colLabels
-                   ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mCatIds.wrappedValue)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onTapGesture(count: 2) {
+                toggleLock(colIdx: index)
+            }
+            .onLongPressGesture {
+                if lockStatus != "*" {
+                    isEditCheckItem[index] = true
+                }
+            }
+            .alert("Edit Column headers", isPresented: $isEditCheckItem[index]) {
+                let initialValue = currentHeaders
+                TextField("CheckItem", text: headersBinding)
+                Button("Update") {
+                    updateHeaders(colIdx: index)
                 }
                 Button("Cancel", role: .cancel) {
-                    mCatArr2.wrappedValue[0][index] = initialValue
+                    mainCategory4[0][index] = initialValue
                 }
-            }, message: {
-                
-            })
+            } message: {
+                Text("Enter column header for this item.")
+            }
+
+        )
     }
     private func rowView(index: Int, mCatIds: [MainCategoryId]) -> some View {
         guard let rt = findNestedIndex(from: index, in: mCatIds) else {
@@ -334,21 +349,21 @@ struct CheckBoxView: View {
                 HStack(spacing: 0) {
                     if sCatItem.countStoredImages == 0 {
                         VStack(alignment: .center, spacing: 0) {
-                            Image(systemName: "camera")
-                            Text("Take photo").font(.system(size: 8))
-                            Text("Long press").font(.system(size: 8))
+                            Text("Long press")
+                            Text("to move to")
+                            Text("Photos")
                         }
                         .frame(width: imageWidth, height: imageHeight)
-                        .foregroundColor(.white)
-                        .background(.gray.opacity((0.3)))
+                        .foregroundStyle(.secondary)
+                        .background(Color(.secondarySystemBackground))
                         .cornerRadius(10)
                         // Recovery code for onLongPressGesture problem
                         .onDataChange(of: showImageStocker) { _ in }
                         // Above code goes well for some reason.
                         .onTapGesture { }
                         .onLongPressGesture {
-                            self.showImageStocker = true
-                            self.targetSubCategoryIndex = [mIdx, sIdx]
+                            showImageStocker = true
+                            targetSubCategoryIndex = [mIdx, sIdx]
                         }
                     } else {
                         ForEach(sCatItem.images.indices, id: \.self) { imgIdx in
@@ -364,16 +379,16 @@ struct CheckBoxView: View {
                                     .onDataChange(of: showImageView) { _ in  }
                                     // Above code goes well for some reason.
                                     .onTapGesture(count: 1) {
-                                        self.showImageView = true
-                                        self.targetSubCategoryIndex = [mIdx, sIdx]
-                                        self.targetImageFileIndex = imgIdx
+                                        showImageView = true
+                                        targetSubCategoryIndex = [mIdx, sIdx]
+                                        targetImageFileIndex = imgIdx
                                     }
                                     // Recovery code for onLongPressGesture problem
                                     .onDataChange(of: showImageStocker) { _ in  }
                                     // Above code goes well for some reason.
                                     .onLongPressGesture {
-                                        self.showImageStocker = true
-                                        self.targetSubCategoryIndex = [mIdx, sIdx]
+                                        showImageStocker = true
+                                        targetSubCategoryIndex = [mIdx, sIdx]
                                     }
                             }
                         }
@@ -409,23 +424,26 @@ struct CheckBoxView: View {
                 return AnyView(EmptyView())
             }
             let remarksBinding = Binding(
-                get: { self.subCategory4[mIdx][sIdx][colIdx] },
-                set: { self.subCategory4[mIdx][sIdx][colIdx] = $0 }
+                get: { subCategory4[mIdx][sIdx][colIdx] },
+                set: { subCategory4[mIdx][sIdx][colIdx] = $0 }
             )
             let currentRemarks = subCategory4[mIdx][sIdx][colIdx]
+            let lockStatus = mainCategory3[0][colIdx]
             return AnyView(
                 VStack(spacing: 0) {
                     let checkStatus = subCategory3[mIdx][sIdx][colIdx]
                     ZStack {
                         Image(systemName: checkStatus == "*" ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(.blue)
+                            .foregroundColor(lockStatus == "*" ? .gray : .blue)
                             .offset(y: 8)
                         Circle()
                             .foregroundColor(.gray.opacity(0.1))
                             .frame(width: 35, height: 35)
                             .offset(y: 8)
                             .onTapGesture {
-                                toggleCheckBox(mIdx: mIdx, sIdx: sIdx, colIdx: colIdx)
+                                if lockStatus != "*" {
+                                    toggleCheckBox(mIdx: mIdx, sIdx: sIdx, colIdx: colIdx)
+                                }
                             }
                     }
                     .frame(maxWidth: .infinity, maxHeight: 45)
@@ -443,7 +461,9 @@ struct CheckBoxView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .contentShape(Rectangle())
                     .onLongPressGesture {
-                        isEditCheckInfo[rowIdx][colIdx] = true
+                        if lockStatus != "*" {
+                            isEditCheckInfo[rowIdx][colIdx] = true
+                        }
                     }
                 }
                 .background((rowIdx + colIdx) % 2 == 0 ? Color(UIColor.systemGray5) : Color(UIColor.systemGray3))
@@ -454,12 +474,25 @@ struct CheckBoxView: View {
                         updateRemarks(mIdx: mIdx, sIdx: sIdx, colIdx: colIdx)
                     }
                     Button("Cancel", role: .cancel) {
-                        self.subCategory4[mIdx][sIdx][colIdx] = initialValue
+                        subCategory4[mIdx][sIdx][colIdx] = initialValue
                     }
                 } message: {
                     Text("Enter notes for this item.")
                 }
             )
+        }
+    }
+    private func updateHeaders(colIdx: Int) {
+        autoreleasepool {
+            let status = mainCategory3[0][colIdx]
+            let text = mainCategory4[0][colIdx]
+            mainCategory2[0][colIdx] = status + text
+            if let range = mainCategoryIds[0].mainCategory.range(of: ":=") {
+                let titlePart = mainCategoryIds[0].mainCategory[..<range.lowerBound]
+                let csvString = mainCategory2[0].joined(separator: ",")
+                mainCategoryIds[0].mainCategory = titlePart + ":=" + csvString
+                ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
+            }
         }
     }
     private func updateRemarks(mIdx: Int, sIdx: Int, colIdx: Int) {
@@ -473,6 +506,23 @@ struct CheckBoxView: View {
                 mainCategoryIds[mIdx].items[sIdx].subCategory = titlePart + ":=" + csvString
                 ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
             }
+        }
+    }
+    private func toggleLock(colIdx: Int) {
+        autoreleasepool {
+            let checkStatus = mainCategory3[0][colIdx]
+            if checkStatus == "-" {
+                mainCategory3[0][colIdx] = "*"
+            } else if checkStatus == "*" {
+                mainCategory3[0][colIdx] = "-"
+            }
+            mainCategory2[0][colIdx] = mainCategory3[0][colIdx] + mainCategory4[0][colIdx]
+            if let range = mainCategoryIds[0].mainCategory.range(of: ":=") {
+                let titlePart = mainCategoryIds[0].mainCategory[..<range.lowerBound]
+                let csvString = mainCategory2[0].joined(separator: ",")
+                mainCategoryIds[0].mainCategory = titlePart + ":=" + csvString
+            }
+            ZipManager.savePlist(fileUrl: fileUrl, mainCategoryIds: mainCategoryIds)
         }
     }
     private func toggleCheckBox(mIdx: Int, sIdx: Int, colIdx: Int) {
