@@ -988,7 +988,7 @@ class ZipManager {
             }
             let macosxUrl = directoryUrl.appendingPathComponent("__MACOSX")
             if fileManager.fileExists(atPath: macosxUrl.path) {
-                self.remove(fileUrl: macosxUrl)
+                remove(fileUrl: macosxUrl)
             }
         }
     }

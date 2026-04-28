@@ -69,9 +69,9 @@ struct FinalReportView: View {
                                         // Above code goes well for some reason.
                                         .onTapGesture(count: 1) {
                                             showImageView = true
-                                            self.targetMainCategoryIndex = mainCategoryIndex
-                                            self.targetSubCategoryIndex = subCategoryIndex
-                                            self.targetImageFileIndex = imageFileIndex
+                                            targetMainCategoryIndex = mainCategoryIndex
+                                            targetSubCategoryIndex = subCategoryIndex
+                                            targetImageFileIndex = imageFileIndex
                                         }
                                     if mainCategoryIds[mainCategoryIndex].items[subCategoryIndex].images[imageFileIndex].imageInfo != "" {
                                         Text("with image info")
