@@ -15,6 +15,7 @@ struct PlistCreatorView: View {
     @State var plistName: String = ""
     @State var isSaveError = false
     @State var mainCategorys: [MainCategory] = []
+    @State private var path = NavigationPath()
     
     init(showPlistCreator: Binding<Bool>) {
         self._showPlistCreator = showPlistCreator
@@ -25,6 +26,33 @@ struct PlistCreatorView: View {
     }
 
     var body: some View {
+        NavigationStack(path: $path) {
+            VStack {
+                headerView
+                List {
+                    Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
+                        ForEach(mainCategory.indices, id: \.self) { i in
+                            CategoryRowCreatorView(
+                                item: i,
+                                categoryText: $mainCategory[i],
+                                onDetailsTap: {
+                                    path.append(i)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            .alert(isPresented: $isSaveError) {
+                Alert(title: Text("Save Error"), message: Text("Zip file already exists!"))
+            }
+            .navigationDestination(for: Int.self) { index in
+                PlistCreatorSubView(subCategoryStrings: $subCategoryStrings[index])
+                .navigationTitle(mainCategory[index])
+            }
+        }
+    }
+    private var headerView: some View {
         HStack {
             Spacer()
             HStack {
@@ -36,39 +64,12 @@ struct PlistCreatorView: View {
                     .multilineTextAlignment(.leading)
                     .frame(width: 40)
             }
-            Button {
-                if plistName != "" {
-                    plistName = ZipManager.replaceString(targetString: plistName)
-                    let zipUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".zip")
-                    if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
-                        isSaveError = true;
-                    } else {
-                        let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
-                        var tempSubCategorys: [SubCategory] = []
-                        for i in 0..<mainCategory.count {
-                            if mainCategory[i] != "" {
-                                tempSubCategorys = []
-                                for j in 0..<subCategoryStrings[i].count {
-                                    if subCategoryStrings[i][j] != "" {
-                                        tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + ":=-,-,-", countStoredImages: 0, images: []))
-                                    }
-                                }
-                                mainCategorys.append(MainCategory(mainCategory: mainCategory[i] + ":=,,", items: tempSubCategorys, subFolderMode: 0))
-                            }
-                        }
-                        CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
-                        showPlistCreator = false
-                    }
-                }
-            } label : {
+            Button(action: saveAction) {
                 Text("Save")
                     .frame(width: 50, height: 30)
                     .background(LinearGradient(gradient: Gradient(colors: [.indigo, .purple, .red, .orange]), startPoint: .topLeading, endPoint: .bottomTrailing))
                     .foregroundColor(.white)
                     .cornerRadius(10)
-            }
-            .alert(isPresented: $isSaveError) {
-                Alert(title: Text("Save Error"), message: Text("Zip file already exists!"))
             }
             Button {
                 showPlistCreator = false
@@ -81,29 +82,49 @@ struct PlistCreatorView: View {
                     .padding(.trailing)
             }
         }
-        List {
-            Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                ForEach(0..<configManager.maxNumberOfMainCategory, id: \.self) { item in
-                    HStack {
-                        Text(String(item + 1))
-                            .frame(width: 35)
-                        TextField("Category", text: $mainCategory[item])
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-        }
-        NavigationView {
-            List {
-                Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                    ForEach(0..<configManager.maxNumberOfMainCategory, id: \.self) { item in
-                        NavigationLink(destination: PlistCreatorSubView(subCategoryStrings: $subCategoryStrings[item])) {
-                            Text(mainCategory[item])
+    }
+    private func saveAction() {
+        guard !plistName.isEmpty else { return }
+        plistName = ZipManager.replaceString(targetString: plistName)
+        let zipUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".zip")
+        if ZipManager.fileManager.fileExists(atPath: zipUrl.path) {
+            isSaveError = true
+        } else {
+            let fileUrl = CategoryManager.documentDirectoryUrl.appendingPathComponent(plistName + ".plist")
+            var tempSubCategorys: [SubCategory] = []
+            for i in 0..<mainCategory.count {
+                if mainCategory[i] != "" {
+                    tempSubCategorys = []
+                    let suffix = ":=\(Array(repeating: "-", count: configManager.maxColumnsCheckBoxMatrix).joined(separator: ","))"
+                    for j in 0..<subCategoryStrings[i].count {
+                        if subCategoryStrings[i][j] != "" {
+                            tempSubCategorys.append(SubCategory(subCategory: subCategoryStrings[i][j] + suffix, countStoredImages: 0, images: []))
                         }
                     }
+                    mainCategorys.append(MainCategory(mainCategory: mainCategory[i] + suffix, items: tempSubCategorys, subFolderMode: 0))
                 }
             }
-            .listStyle(.grouped)
+            CategoryManager.write(fileUrl: fileUrl, mainCategorys: mainCategorys)
+            showPlistCreator = false
+        }
+    }
+}
+struct CategoryRowCreatorView: View {
+    let item: Int
+    @Binding var categoryText: String
+    var onDetailsTap: () -> Void
+    
+    var body: some View {
+        HStack {
+            Text(String(item + 1))
+                .frame(width: 35)
+            TextField("Category", text: $categoryText)
+                .frame(maxWidth: .infinity)
+            Button(action: onDetailsTap) {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+            }
+            .buttonStyle(.plain)
         }
     }
 }

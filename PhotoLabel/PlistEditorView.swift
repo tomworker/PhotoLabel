@@ -29,128 +29,127 @@ struct PlistEditorView: View {
     @State var isMaxNumberSubError = false
     @State var isMaxNumberImageError = false
     @State var selectedIndex: [Int] = [-1, -1]
+    @State private var path = NavigationPath()
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
 
     var body: some View {
-        VStack {
-            EditorHeaderView(
-                plistName: $plistName,
-                initialPlistName: initialPlistName,
-                isRename: $isRename,
-                showPlistEditor: $showPlistEditor,
-                onSave: {
-                    if plistName == initialPlistName { savePlist(isRename: false, isCopy: false) }
-                    else { isRename = true }
-                }
-            )
-            EditorActionBar(
-                selectedIndex: $selectedIndex,
-                subFolderModes: $subFolderModes,
-                onInsert: insertBlankPlist,
-                onChangePlace: changePlacePlist,
-                onCopy: copyPlist,
-                onToggleMode: subFolderMode
-            )
-            List {
-                Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
-                    ForEach(mainCategoryStrings.indices, id: \.self) { item in
-                        CategoryRowView(
-                            item: item,
-                            selectedIndex: $selectedIndex,
-                            subFolderMode: $subFolderModes[item],
-                            categoryText: $mainCategoryStrings[item]
-                        )
+        NavigationStack(path: $path) {
+            VStack {
+                EditorHeaderView(
+                    plistName: $plistName,
+                    initialPlistName: initialPlistName,
+                    isRename: $isRename,
+                    showPlistEditor: $showPlistEditor,
+                    onSave: {
+                        if plistName == initialPlistName { savePlist(isRename: false, isCopy: false) }
+                        else { isRename = true }
                     }
-                }
-            }
-            NavigationView {
+                )
+                EditorActionBar(
+                    selectedIndex: $selectedIndex,
+                    subFolderModes: $subFolderModes,
+                    onInsert: insertBlankPlist,
+                    onChangePlace: changePlacePlist,
+                    onCopy: copyPlist,
+                    onToggleMode: subFolderMode
+                )
                 List {
-                    Section(header: Text("Photo Label ") + Text("Category").font(.title) + Text(" - Topics, etc.")) {
-                        ForEach(mainCategoryStrings.indices, id: \.self) { item in
-                            SubCategoryRowView(
-                                subCategoryText: $mainCategoryStrings[item],
-                                subCategoryStrings: $subCategoryStrings[item],
-                                countStoredImages: $countStoredImages[item],
-                                imageFiles: $imageFiles[item],
-                                imageInfos: $imageInfos[item]
+                    Section(header: Text("Input Photo Label ") + Text("Category").font(.title)) {
+                        ForEach(mainCategoryStrings.indices, id: \.self) { i in
+                            CategoryRowEditorView(
+                                item: i,
+                                selectedIndex: $selectedIndex,
+                                subFolderMode: $subFolderModes[i],
+                                categoryText: $mainCategoryStrings[i],
+                                onDetailsTap: {
+                                    path.append(i)
+                                }
                             )
                         }
                     }
                 }
-                .listStyle(.grouped)
             }
-        }
-        .alert("Canceled", isPresented: $isMaxNumberMainError) {
-            Button("OK") { showPlistEditor = false }
-        } message: {
-            Text("Category max number exceeded the limit of \(configManager.maxNumberOfMainCategory).")
-        }
-        .alert("Canceled", isPresented: $isMaxNumberSubError) {
-            Button("OK") { showPlistEditor = false }
-        } message: {
-            Text("Details max number exceeded the limit of \(configManager.maxNumberOfSubCategory).")
-        }
-        .alert("Canceled", isPresented: $isMaxNumberImageError) {
-            Button("OK") { showPlistEditor = false }
-        } message: {
-            Text("Image file max number exceeded the limit of \(configManager.maxNumberOfImageFile).")
-        }
-        .onAppear {
-            let mCount = ConfigManager.shared.maxNumberOfMainCategory
-            let sCount = ConfigManager.shared.maxNumberOfSubCategory
-            let iCount = ConfigManager.shared.maxNumberOfImageFile
-            mainCategoryStrings = Array(repeating: "", count: mCount)
-            mainCategoryStrings2 = Array(repeating: "", count: mCount)
-            subFolderModes = Array(repeating: 0, count: mCount)
-            subCategoryStrings = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
-            subCategoryStrings2 = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
-            countStoredImages = Array(repeating: Array(repeating: 0, count: sCount), count: mCount)
-            imageFiles = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
-            imageInfos = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
-            initialPlistName = plistName
-            mainCategorys = CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds)
-            var array: [String] = ["", ""]
-            for i in 0..<mainCategorys.count {
-                if mainCategorys.count > configManager.maxNumberOfMainCategory {
-                    isMaxNumberMainError = true
-                    break
-                }
-                if let range = mainCategorys[i].mainCategory.range(of: ":=") {
-                    let idx = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: -1)
-                    let idx2 = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: 1)
-                    array[0] = String(mainCategorys[i].mainCategory[...idx])
-                    array[1] = String(mainCategorys[i].mainCategory[idx2...])
-                } else {
-                    array[0] = mainCategorys[i].mainCategory
-                    array[1] = "=,,"
-                }
-                mainCategoryStrings[i] = array[0]
-                mainCategoryStrings2[i] = array[1]
-                subFolderModes[i] = mainCategorys[i].subFolderMode
-                for j in 0..<mainCategorys[i].items.count {
-                    if mainCategorys[i].items.count > configManager.maxNumberOfSubCategory {
-                        isMaxNumberSubError = true
+            .navigationDestination(for: Int.self) { index in
+                PlistEditorSubView(
+                    subCategoryStrings: $subCategoryStrings[index],
+                    countStoredImages: $countStoredImages[index],
+                    imageFiles: $imageFiles[index],
+                    imageInfos: $imageInfos[index]
+                )
+                .navigationTitle(mainCategoryStrings[index])
+            }
+            .alert("Canceled", isPresented: $isMaxNumberMainError) {
+                Button("OK") { showPlistEditor = false }
+            } message: {
+                Text("Category max number exceeded the limit of \(configManager.maxNumberOfMainCategory).")
+            }
+            .alert("Canceled", isPresented: $isMaxNumberSubError) {
+                Button("OK") { showPlistEditor = false }
+            } message: {
+                Text("Details max number exceeded the limit of \(configManager.maxNumberOfSubCategory).")
+            }
+            .alert("Canceled", isPresented: $isMaxNumberImageError) {
+                Button("OK") { showPlistEditor = false }
+            } message: {
+                Text("Image file max number exceeded the limit of \(configManager.maxNumberOfImageFile).")
+            }
+            .onAppear {
+                let mCount = ConfigManager.shared.maxNumberOfMainCategory
+                let sCount = ConfigManager.shared.maxNumberOfSubCategory
+                let iCount = ConfigManager.shared.maxNumberOfImageFile
+                mainCategoryStrings = Array(repeating: "", count: mCount)
+                mainCategoryStrings2 = Array(repeating: "", count: mCount)
+                subFolderModes = Array(repeating: 0, count: mCount)
+                subCategoryStrings = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
+                subCategoryStrings2 = Array(repeating: Array(repeating: "", count: sCount), count: mCount)
+                countStoredImages = Array(repeating: Array(repeating: 0, count: sCount), count: mCount)
+                imageFiles = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
+                imageInfos = Array(repeating: Array(repeating: Array(repeating: "", count: iCount), count: sCount), count: mCount)
+                initialPlistName = plistName
+                mainCategorys = CategoryManager.convertNoIdentifiable(mainCategoryIds: mainCategoryIds)
+                var array: [String] = ["", ""]
+                for i in 0..<mainCategorys.count {
+                    if mainCategorys.count > configManager.maxNumberOfMainCategory {
+                        isMaxNumberMainError = true
                         break
                     }
-                    if let range = mainCategorys[i].items[j].subCategory.range(of: ":=") {
-                        let idx = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: -1)
-                        let idx2 = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: 1)
-                        array[0] = String(mainCategorys[i].items[j].subCategory[...idx])
-                        array[1] = String(mainCategorys[i].items[j].subCategory[idx2...])
+                    if let range = mainCategorys[i].mainCategory.range(of: ":=") {
+                        let idx = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: -1)
+                        let idx2 = mainCategorys[i].mainCategory.index(range.lowerBound, offsetBy: 1)
+                        array[0] = String(mainCategorys[i].mainCategory[...idx])
+                        array[1] = String(mainCategorys[i].mainCategory[idx2...])
                     } else {
-                        array[0] = mainCategorys[i].items[j].subCategory
-                        array[1] = "=-,-,-"
+                        array[0] = mainCategorys[i].mainCategory
+                        array[1] = "=,,"
                     }
-                    subCategoryStrings[i][j] = array[0]
-                    subCategoryStrings2[i][j] = array[1]
-                    countStoredImages[i][j] = mainCategorys[i].items[j].countStoredImages
-                    for k in 0..<mainCategorys[i].items[j].countStoredImages{
-                        if mainCategorys[i].items[j].countStoredImages > configManager.maxNumberOfImageFile {
-                            isMaxNumberImageError = true
+                    mainCategoryStrings[i] = array[0]
+                    mainCategoryStrings2[i] = array[1]
+                    subFolderModes[i] = mainCategorys[i].subFolderMode
+                    for j in 0..<mainCategorys[i].items.count {
+                        if mainCategorys[i].items.count > configManager.maxNumberOfSubCategory {
+                            isMaxNumberSubError = true
                             break
                         }
-                        imageFiles[i][j][k] = mainCategorys[i].items[j].images[k].imageFile
-                        imageInfos[i][j][k] = mainCategorys[i].items[j].images[k].imageInfo
+                        if let range = mainCategorys[i].items[j].subCategory.range(of: ":=") {
+                            let idx = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: -1)
+                            let idx2 = mainCategorys[i].items[j].subCategory.index(range.lowerBound, offsetBy: 1)
+                            array[0] = String(mainCategorys[i].items[j].subCategory[...idx])
+                            array[1] = String(mainCategorys[i].items[j].subCategory[idx2...])
+                        } else {
+                            array[0] = mainCategorys[i].items[j].subCategory
+                            array[1] = "=-,-,-"
+                        }
+                        subCategoryStrings[i][j] = array[0]
+                        subCategoryStrings2[i][j] = array[1]
+                        countStoredImages[i][j] = mainCategorys[i].items[j].countStoredImages
+                        for k in 0..<mainCategorys[i].items[j].countStoredImages{
+                            if mainCategorys[i].items[j].countStoredImages > configManager.maxNumberOfImageFile {
+                                isMaxNumberImageError = true
+                                break
+                            }
+                            imageFiles[i][j][k] = mainCategorys[i].items[j].images[k].imageFile
+                            imageInfos[i][j][k] = mainCategorys[i].items[j].images[k].imageInfo
+                        }
                     }
                 }
             }
@@ -391,11 +390,12 @@ struct ActionButton: View {
         }
     }
 }
-struct CategoryRowView: View {
+struct CategoryRowEditorView: View {
     let item: Int
     @Binding var selectedIndex: [Int]
     @Binding var subFolderMode: Int
     @Binding var categoryText: String
+    var onDetailsTap: () -> Void
 
     var body: some View {
         HStack {
@@ -412,6 +412,11 @@ struct CategoryRowView: View {
             Text(String(item + 1))
                 .frame(width: 32)
             TextField("Category", text: $categoryText)
+            Button(action: onDetailsTap) {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.gray)
+            }
+            .buttonStyle(.plain)
         }
     }
     private var isSelected: Bool {
@@ -439,24 +444,6 @@ struct CategoryRowView: View {
             } else if selectedIndex[1] == -1 {
                 selectedIndex[1] = item
             }
-        }
-    }
-}
-struct SubCategoryRowView: View {
-    @Binding var subCategoryText: String
-    @Binding var subCategoryStrings: [String]
-    @Binding var countStoredImages: [Int]
-    @Binding var imageFiles: [[String]]
-    @Binding var imageInfos: [[String]]
-
-    var body: some View {
-        NavigationLink(destination: PlistEditorSubView(
-            subCategoryStrings: $subCategoryStrings,
-            countStoredImages: $countStoredImages,
-            imageFiles: $imageFiles,
-            imageInfos: $imageInfos
-        )) {
-            Text(subCategoryText)
         }
     }
 }
