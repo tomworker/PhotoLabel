@@ -130,7 +130,7 @@ struct ContentView: View {
                                         Text(dFile.name)
                                     }
                                 }
-                               .swipeActions {
+                                .swipeActions {
                                     Button(role: .destructive) {
                                         isRemove[item] = true
                                     } label : {
