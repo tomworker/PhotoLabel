@@ -13,7 +13,8 @@ struct ContentView: View {
     @State var workSpace: [WorkSpaceImageFile] = []
     @State private var fileUrl: URL?
     @State var showPlistCreator = false
-    @State var showPlistEditor: [Bool]
+    @State private var editingContext: PlistEditContext? = nil
+    @State private var selectedFileForEditor: DataFile? = nil
     @State private var showDocumentPicker = false
     @State var showCategorySelector: [Bool]
     @State var showConfig = false
@@ -23,10 +24,9 @@ struct ContentView: View {
     @State var cancelLoadMessage = ""
     let tempDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("temp", isDirectory: true)
     let documentDirectoryUrl = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    @State var documentDirectoryFiles: [String] = []
+    @State var documentDirectoryFiles: [DataFile] = []
     @State var isChangeFlag = false
     @State var isRenameFlag = false
-    @State var plistName = ""
     @State var targetRenameFile = ""
     @State var afterRenameFile = ""
     @State var isPresentedProgressView = false
@@ -94,9 +94,10 @@ struct ContentView: View {
         VStack {
             List {
                 Section(header: Text("Photo Label").font(.title) + Text(" Plist (XML File)")) {
-                    ForEach(documentDirectoryFiles.indices, id:\.self) { item in
-                        if documentDirectoryFiles[item].suffix(6) == ".plist" {
-                            let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(documentDirectoryFiles[item])
+                    ForEach(documentDirectoryFiles) { dFile in
+                        let item = documentDirectoryFiles.firstIndex(where: { $0.id == dFile.id }) ?? 0
+                        if dFile.name.suffix(6) == ".plist" {
+                            let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(dFile.name)
                             ZStack {
                                 Button {
                                     isPresentedProgressView = true
@@ -108,44 +109,55 @@ struct ContentView: View {
                                         }
                                     }
                                 } label: {
-                                    if documentDirectoryFiles[item].range(of: "InOutMgr") != nil || documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
-                                        if getIsToday(target: documentDirectoryFiles[item]) == true {
-                                            if documentDirectoryFiles[item].range(of: "EqpMgr") != nil {
+                                    if dFile.name.range(of: "InOutMgr") != nil || dFile.name.range(of: "EqpMgr") != nil {
+                                        if getIsToday(target: dFile.name) == true {
+                                            if dFile.name.range(of: "EqpMgr") != nil {
                                                 HStack(spacing: 0) {
                                                     Text("Eqp").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
-                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "Eqp", with: ""))
+                                                    Text(dFile.name.replacingOccurrences(of: "Eqp", with: ""))
                                                 }
                                             } else {
                                                 HStack(spacing: 0) {
                                                     Text("InOut").background(colorScheme == .dark ? .white : .black).foregroundColor(colorScheme == .dark ? .black : .white)
-                                                    Text(documentDirectoryFiles[item].replacingOccurrences(of: "InOut", with: ""))
+                                                    Text(dFile.name.replacingOccurrences(of: "InOut", with: ""))
                                                 }
                                             }
                                         } else {
-                                            Text(documentDirectoryFiles[item])
+                                            Text(dFile.name)
                                                 .foregroundColor(.red)
                                         }
                                     } else {
-                                        Text(documentDirectoryFiles[item])
+                                        Text(dFile.name)
                                     }
                                 }
-                                .onDataChange(of: showPlistEditor[item]) { _ in
-                                    showPlistListEdit()
-                                }
-                                .swipeActions {
+                               .swipeActions {
                                     Button(role: .destructive) {
-                                        isRemove[item] = true;
+                                        isRemove[item] = true
                                     } label : {
                                         Label("Remove", systemImage: "trash")
                                     }
                                     Button {
-                                        showPlistEditor[item] = true
-                                        plistName = documentDirectoryFiles[item]
-                                        plistName = plistName.replacingOccurrences(of: ".plist", with: "")
+                                        guard editingContext == nil else { return }
+                                        let targetPlistUrl = documentDirectoryUrl.appendingPathComponent(dFile.name)
+                                        let loadedData = CategoryManager.convertIdentifiable(
+                                            mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl)
+                                        )
+                                        self.editingContext = PlistEditContext(
+                                            id: dFile.name,
+                                            name: dFile.name,
+                                            mainCategoryIds: loadedData
+                                        )
                                     } label : {
                                         Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
                                     }
                                     .tint(.blue)
+                                    .onDataChange(of: editingContext) { newValue in
+                                        if newValue == nil {
+                                            DispatchQueue.main.async {
+                                                showPlistList()
+                                            }
+                                        }
+                                    }
                                 }
                                 .alert(isPresented: $isRemove[item]) {
                                     Alert(title: Text("Really remove it?"),
@@ -163,10 +175,6 @@ struct ContentView: View {
                                     let downSizeImages = ImageManager.generateDownSizeImages(mainCategoryIds: mainCategoryIds, tempDirectoryUrl: tempDirectoryUrl, imageHeight: 200)
                                     CategorySelectorView(showCategorySelector: $showCategorySelector[item], mainCategoryIds: mainCategoryIds, workSpace: $workSpace, fileUrl: targetPlistUrl, plistCategoryName: targetPlistUrl.deletingPathExtension().lastPathComponent, downSizeImages: downSizeImages, isPresentedProgressView: $isPresentedProgressView)
                                 }
-                                .fullScreenCover(isPresented: $showPlistEditor[item]) {
-                                    let mainCategoryIds: [MainCategoryId] = CategoryManager.convertIdentifiable(mainCategorys: CategoryManager.load(fileUrl: targetPlistUrl))
-                                    PlistEditorView(showPlistEditor: $showPlistEditor[item], plistName: plistName, mainCategoryIds: mainCategoryIds)
-                                }
                                 if isPresentedProgressView, item == targetItem {
                                     ProgressView()
                                 }
@@ -177,6 +185,16 @@ struct ContentView: View {
             }
             .listStyle(.sidebar)
             Spacer()
+        }
+        .fullScreenCover(item: $editingContext) { context in
+            PlistEditorView(
+                showPlistEditor: Binding(
+                    get: { editingContext != nil },
+                    set: { if !$0 { editingContext = nil } }
+                ),
+                edittingPlistName: context.name.replacingOccurrences(of: ".plist", with: ""),
+                mainCategoryIds: context.mainCategoryIds
+            )
         }
     }
     private var appLogoView: some View {
@@ -318,24 +336,15 @@ struct ContentView: View {
     private func showPlistList() {
         ZipManager.create(directoryUrl: tempDirectoryUrl)
         do {
-            documentDirectoryFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: documentDirectoryUrl.path)
-            showPlistEditor = Array(repeating: false, count: documentDirectoryFiles.count)
+            let fileNames = try ZipManager.fileManager.contentsOfDirectory(atPath: documentDirectoryUrl.path)
+            let newFiles = fileNames.map { DataFile(name: $0) }
+                .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            self.documentDirectoryFiles = newFiles
             showCategorySelector = Array(repeating: false, count: documentDirectoryFiles.count)
             isRemove = Array(repeating: false, count: documentDirectoryFiles.count)
         } catch {
             print(error)
         }
-        documentDirectoryFiles.sort { $0.description < $1.description}
-    }
-    private func showPlistListEdit() {
-        ZipManager.create(directoryUrl: tempDirectoryUrl)
-        do {
-            documentDirectoryFiles = try ZipManager.fileManager.contentsOfDirectory(atPath: documentDirectoryUrl.path)
-            showCategorySelector = Array(repeating: false, count: documentDirectoryFiles.count)
-        } catch {
-            print(error)
-        }
-        documentDirectoryFiles.sort { $0.description < $1.description}
     }
     private func loadPlist(fileUrl: URL, showCategorySelector: inout Bool) {
         showCategorySelector = true
@@ -455,6 +464,15 @@ struct ContentView: View {
         }
     }
 }
+struct PlistEditContext: Identifiable, Equatable {
+    let id: String
+    let name: String
+    let mainCategoryIds: [MainCategoryId]
+}
+struct DataFile: Identifiable, Equatable {
+    var id: String { name }
+    let name: String
+}
 struct ImageFile: Decodable, Encodable, Equatable {
     let imageFile: String
     var imageInfo: String = ""
@@ -482,14 +500,14 @@ struct OldMainCategory: Decodable, Encodable {
     let items: [OldSubCategory]
     let subFolderMode: Int
 }
-struct SubCategoryId: Identifiable {
+struct SubCategoryId: Identifiable, Equatable {
     var id: Int
     var subCategory: String
     var countStoredImages: Int
     var images: [ImageFile]
     var isTargeted: Bool
 }
-struct MainCategoryId: Identifiable {
+struct MainCategoryId: Identifiable, Equatable {
     var id: Int
     var mainCategory: String
     var items: [SubCategoryId]

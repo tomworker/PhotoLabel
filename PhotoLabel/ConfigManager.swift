@@ -42,7 +42,9 @@ class ConfigManager: ObservableObject {
     static let initialIPadCheckBoxMatrixColumnWidth = 90
     static let initialCheckBoxMatrixColumnWidth = 60
     static let initialMaxColumnsCheckBoxMatrix = 5
-    
+    var defaultSuffix: String {
+        Array(repeating: "-", count: maxColumnsCheckBoxMatrix).joined(separator: ",")
+    }
     func loadFromLocalConfig() {
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("config.json")
         if FileManager.default.fileExists(atPath: url.path) {

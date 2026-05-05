@@ -13,7 +13,7 @@ struct PhotoLabelApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(workSpace: [], showPlistEditor: [], showCategorySelector: [], isRemove: [])
+            ContentView(workSpace: [], showCategorySelector: [], isRemove: [])
                 .environmentObject(alertCenter)
         }
     }
