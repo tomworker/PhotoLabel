@@ -139,13 +139,13 @@ class ScOffset: NSObject, ObservableObject {
         if deltaPosition.x < 0 {
             deltaPosition.x = 0
         } else if maxValue.x != 0 {
-            let limitX = (maxValue.x > viewSize.width) ? maxValue.x - minValue.x + freezeSize.width - viewSize.width : 0
+            let limitX = (freezeSize.width + maxValue.x - minValue.x > viewSize.width) ? maxValue.x - minValue.x + freezeSize.width - viewSize.width : 0
             if deltaPosition.x > limitX { deltaPosition.x = limitX }
         }
         if deltaPosition.y < 0 {
             deltaPosition.y = 0
         } else if maxValue.y != 0 {
-            let limitY = (maxValue.y > viewSize.height) ? maxValue.y - minValue.y + freezeSize.height - viewSize.height : 0
+            let limitY = (freezeSize.height + maxValue.y - minValue.y > viewSize.height) ? maxValue.y - minValue.y + freezeSize.height - viewSize.height : 0
             if deltaPosition.y > limitY { deltaPosition.y = limitY }
         }
         
@@ -169,7 +169,7 @@ class ScOffset: NSObject, ObservableObject {
         if nextX < 0 {
             deltaPosition.x = 0
         } else if isInitialized {
-            let limitX = (maxValue.x > viewSize.width) ? maxValue.x - minValue.x + freezeSize.width - viewSize.width : 0
+            let limitX = (freezeSize.width + maxValue.x - minValue.x > viewSize.width) ? maxValue.x - minValue.x + freezeSize.width - viewSize.width : 0
             if nextX > limitX {
                 deltaPosition.x = limitX
                 velocity.x = 0
@@ -186,7 +186,7 @@ class ScOffset: NSObject, ObservableObject {
         if nextY < 0 {
             deltaPosition.y = 0
         } else if isInitialized {
-            let limitY = (maxValue.y > viewSize.height) ? maxValue.y - minValue.y + freezeSize.height - viewSize.height : 0
+            let limitY = (freezeSize.height + maxValue.y - minValue.y > viewSize.height) ? maxValue.y - minValue.y + freezeSize.height - viewSize.height : 0
             if nextY > limitY {
                 deltaPosition.y = limitY
                 velocity.y = 0
