@@ -97,9 +97,9 @@ struct CheckBoxView: View {
         let mainCount = mainCategoryIds.count
         let totalRowCount = mainCategoryIds.reduce(0) { $0 + $1.items.count }
         let totalColCount = configManager.maxColumnsCheckBoxMatrix
-        var fullMain2 = Array(repeating: [String](), count: totalColCount)
-        var fullMain3 = Array(repeating: [String](), count: totalColCount)
-        var fullMain4 = Array(repeating: [String](), count: totalColCount)
+        var fullMain2 = Array(repeating: [String](), count: mainCount)
+        var fullMain3 = Array(repeating: [String](), count: mainCount)
+        var fullMain4 = Array(repeating: [String](), count: mainCount)
         var fullSub2 = Array(repeating: [[String]](), count: mainCount)
         var fullSub3 = Array(repeating: [[String]](), count: mainCount)
         var fullSub4 = Array(repeating: [[String]](), count: mainCount)
