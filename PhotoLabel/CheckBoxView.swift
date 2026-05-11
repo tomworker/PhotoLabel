@@ -46,11 +46,12 @@ struct CheckBoxView: View {
     private var freezeSize: CGSize {
         CGSize(width: UIDevice.current.userInterfaceIdiom == .pad ? initialOriginx * 2.4 : initialOriginx * 1.4, height: 60)
     }
-    let initialScroll: CGPoint = .zero
+    @State private var initialScroll: CGPoint = .zero
 
     var body: some View {
         VStack(spacing: 0) {
             headerView
+            categoryJumpBar
             if subCategory2.count > 1 || (subCategory2.count == 1 && !subCategory2[0].isEmpty) {
                 FreezeScrollView(
                     rowCount: rowCount,
@@ -71,6 +72,7 @@ struct CheckBoxView: View {
                         cellView(rowIdx: idx1, colIdx: idx2)
                     }
                 )
+                .id("\(initialScroll.x)-\(initialScroll.y)")
                 .clipped()
             } else {
                 ProgressView()
@@ -237,6 +239,31 @@ struct CheckBoxView: View {
                 targetMainCategoryIndex = 0
             }
         }
+    }
+    private var categoryJumpBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(mainCategoryIds) { mCat in
+                    Button {
+                        if let idx = mainCategoryIds.firstIndex(where: { $0.id == mCat.id }) {
+                            if idx == 0 {
+                                initialScroll = .zero
+                            } else if let flatIndex = findFlatIndex(main: idx, sub: 0, in: mainCategoryIds) {
+                                initialScroll = CGPoint(x: 0, y: CGFloat(flatIndex) * CGFloat(imageHeight + 25))
+                            }
+                        }
+                    } label: {
+                        if let range = mCat.mainCategory.range(of: ":=") {
+                            Text(" \(String(mCat.mainCategory[..<range.lowerBound])) >")
+                        } else {
+                            Text(" \(String(mCat.mainCategory)) >")
+                        }
+                    }
+                }
+                Spacer()
+            }
+        }
+        .padding(.vertical, 8)
     }
     private func clearCheckBox() {
         let columnCount = configManager.maxColumnsCheckBoxMatrix
@@ -408,6 +435,13 @@ struct CheckBoxView: View {
         }
         return nil
     }
+    func findFlatIndex(main: Int, sub: Int, in mainArray: [MainCategoryId]) -> Int? {
+        guard main >= 0 && main < mainArray.count else { return nil }
+        guard sub >= 0 && sub < mainArray[main].items.count else { return nil }
+        let previousElementsCount = mainArray.prefix(main).reduce(0) { $0 + $1.items.count }
+        return previousElementsCount + sub
+    }
+    
     private func cellView(rowIdx: Int, colIdx: Int) -> some View {
         Group {
             guard let rt = findNestedIndex(from: rowIdx, in: mainCategoryIds) else {
