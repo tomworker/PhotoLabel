@@ -363,11 +363,19 @@ private extension PhotoCaptureView {
     func cancelView(jpgFileName: String) {
         isNoAnimation = true
         showPhotoCapture = false
+        let session = photoCapture.captureSession
+        DispatchQueue.global(qos: .userInitiated).async {
+            if session.isRunning {
+                session.stopRunning()
+            }
+        }
         photoCapture.image = nil
         if camera?.position == .front {
             photoCapture.flipCameraDevice()
         }
-        photoCapture.reset(zoomReset: true)
+        DispatchQueue.main.async {
+            photoCapture.reset(zoomReset: true)
+        }
         let plistNoExtensionName = fileUrl.deletingPathExtension().lastPathComponent
         let targetZipUrl = fileUrl.deletingLastPathComponent().appendingPathComponent(plistNoExtensionName + ".zip")
         let targetPlistUrl = fileUrl
@@ -387,9 +395,6 @@ private extension PhotoCaptureView {
                     }
                 }
             }
-        }
-        if let window = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first?.windows.filter({ $0.isKeyWindow }).first {
-            window.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
         }
     }
 }
