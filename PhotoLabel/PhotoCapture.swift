@@ -40,7 +40,8 @@ class PhotoCapture: NSObject, ObservableObject {
     @Published var isDetectQR: [Bool] = []
     var onPhotoCaptured: ((UIImage) -> Void)?
     @Published var lockStatusText: String = ""
-
+    private let sessionQueue = DispatchQueue(label: "com.yourapp.photoCapture.sessionQueue")
+    
     override init() {
         super.init()
         setupCaptureSession(withPosition: .back)
@@ -154,21 +155,25 @@ class PhotoCapture: NSObject, ObservableObject {
         }
     }
     func flipCameraDevice() {
-        captureSession.stopRunning()
-        captureSession.beginConfiguration()
-        captureSession.inputs.forEach { input in
-            captureSession.removeInput(input)
+        sessionQueue.async {
+            if self.captureSession.isRunning {
+                self.captureSession.stopRunning()
+            }
+            self.captureSession.beginConfiguration()
+            self.captureSession.inputs.forEach {
+                self.captureSession.removeInput($0)
+            }
+            self.captureSession.outputs.forEach {
+                self.captureSession.removeOutput($0)
+            }
+            self.captureSession.commitConfiguration()
+            let newCameraPosition: AVCaptureDevice.Position = self.device?.position == .front ? .back : .front
+            self.isFlipCameraDevice = true
+            self.setupCaptureSession(withPosition: newCameraPosition)
+            DispatchQueue.main.async {
+                self.reset(zoomReset: true)
+            }
         }
-        captureSession.outputs.forEach { output in
-            captureSession.removeOutput(output)
-        }
-        captureSession.commitConfiguration()
-        let newCameraPosition: AVCaptureDevice.Position = device?.position == .front ? .back : .front
-        captureSession = AVCaptureSession()
-        dataOutput = AVCapturePhotoOutput()
-        isFlipCameraDevice = true
-        setupCaptureSession(withPosition: newCameraPosition)
-        reset(zoomReset: true)
     }
     func selectDevice(zoomFactor: CGFloat) {
         do {
